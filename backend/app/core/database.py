@@ -173,3 +173,38 @@ async def init_db():
             ))
         except Exception:
             pass
+
+async def seed_demo_users() -> None:
+    """Create the login-page demo accounts when a fresh database is started."""
+    from sqlalchemy import select
+    from app.core.security import hash_password
+    from app.models.user import User
+
+    async with AsyncSessionLocal() as session:
+        existing_user = (await session.execute(select(User.id).limit(1))).scalar_one_or_none()
+        if existing_user:
+            return
+
+        session.add_all([
+            User(
+                name="Rajesh Kumar Verma",
+                email="admin@packcheck.gov.in",
+                phone="+919876543210",
+                password_hash=hash_password("admin123"),
+                role="admin",
+                department="Central Legal Metrology Division",
+                region="National HQ",
+                is_active=True,
+            ),
+            User(
+                name="Inspector Vikram Sharma",
+                email="inspector.sharma@packcheck.gov.in",
+                phone="+919876543212",
+                password_hash=hash_password("inspector123"),
+                role="inspector",
+                department="Field Inspection Squad - Delhi North",
+                region="Delhi NCR",
+                is_active=True,
+            ),
+        ])
+        await session.commit()

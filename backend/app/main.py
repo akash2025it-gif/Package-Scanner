@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.api.v1 import api_router
 from app.core.config import settings
-from app.core.database import init_db
+from app.core.database import init_db, seed_demo_users
 from app.core.exceptions import PackCheckException, packcheck_exception_handler
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -18,6 +18,7 @@ STATIC_DIR = os.path.join(BASE_DIR, "static")
 async def lifespan(app: FastAPI):
     # Initialize database tables
     await init_db()
+    await seed_demo_users()
     
     # Ensure upload, static & reports directories exist
     os.makedirs(settings.LOCAL_STORAGE_DIR, exist_ok=True)
