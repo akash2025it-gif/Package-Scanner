@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>PackCheck - Manage Team</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0051d5",
+                        "primary-container": "#276afa",
+                        "secondary": "#006b5c",
+                        "secondary-container": "#65fade",
+                        "background": "#f8f9ff",
+                        "surface": "#ffffff",
+                        "on-surface": "#181c21"
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-[#f8f9ff] font-['Inter'] text-[#181c21] min-h-screen flex">
+    <!-- Left Navigation Rail -->
+    <aside class="w-64 bg-[#0051d5] text-white flex flex-col justify-between p-5 shadow-xl hidden md:flex shrink-0">
+        <div>
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[#65fade] text-2xl">verified_user</span>
+                </div>
+                <div>
+                    <h2 class="font-['Hanken_Grotesk'] font-bold text-lg leading-tight">PackCheck</h2>
+                    <span class="text-xs text-[#65fade] tracking-wider uppercase font-semibold">LMPC Enforcement</span>
+                </div>
+            </div>
+
+            <nav class="space-y-1.5 text-sm font-medium">
+                <a href="/dashboard" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white/90 rounded-xl transition-all">
+                    <span class="material-symbols-outlined">dashboard</span> Dashboard
+                </a>
+                <a href="/scan/new" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white/90 rounded-xl transition-all">
+                    <span class="material-symbols-outlined">add_photo_alternate</span> New Scan
+                </a>
+                <a href="/products-ui" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white/90 rounded-xl transition-all">
+                    <span class="material-symbols-outlined">inventory_2</span> Product Catalog
+                </a>
+                <a href="/enforcement" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white/90 rounded-xl transition-all">
+                    <span class="material-symbols-outlined">map</span> Regional Heatmap
+                </a>
+                <a href="/team" class="flex items-center gap-3 px-4 py-3 bg-white/20 text-white rounded-xl font-semibold transition-all">
+                    <span class="material-symbols-outlined">group</span> Manage Team
+                </a>
+            </nav>
+        </div>
+
+        <div class="pt-4 border-t border-white/10">
+            <a href="/" onclick="PackCheck.clearAuth()" class="flex items-center gap-2 text-xs text-white/80 hover:text-white">
+                <span class="material-symbols-outlined text-sm">logout</span> Sign Out
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+        <header class="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sticky top-0 z-20">
+            <div>
+                <h1 class="font-['Hanken_Grotesk'] font-bold text-lg sm:text-xl text-gray-900">Enforcement Officers & Team</h1>
+                <p class="text-[11px] sm:text-xs text-gray-500">Manage user credentials, RBAC authority levels and jurisdiction regions</p>
+            </div>
+            <button onclick="alert('Creating new users is available through Admin POST /api/v1/users')" class="self-start sm:self-auto px-4 py-2 bg-primary hover:bg-primary-container text-white rounded-full text-xs font-semibold shadow-md flex items-center gap-1.5 shrink-0">
+                <span class="material-symbols-outlined text-sm">person_add</span> Add Officer
+            </button>
+        </header>
+
+        <div class="p-3 sm:p-6 max-w-7xl mx-auto w-full space-y-6">
+            <!-- Compliance Automation Policy & Threshold Settings Card (Admin Only) -->
+            <div id="automationPolicyCard" class="hidden bg-white rounded-2xl border border-gray-200 p-5 shadow-xs space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-3">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-xl bg-blue-50 border border-blue-200 text-primary flex items-center justify-center font-bold">
+                            <span class="material-symbols-outlined text-lg">tune</span>
+                        </div>
+                        <div>
+                            <h2 class="font-['Hanken_Grotesk'] font-bold text-sm sm:text-base text-gray-900">Mandatory Declarations Audit — Automation Threshold</h2>
+                            <p class="text-[11px] text-gray-500">Configure the automatic confirmation threshold for automated workflow confirmation</p>
+                        </div>
+                    </div>
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-purple-100 text-purple-800 border border-purple-200 self-start sm:self-auto">
+                        Admin Restricted
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                    <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                        <span class="text-[10px] font-bold uppercase text-gray-500 block">Current Active Threshold</span>
+                        <div class="flex items-baseline gap-1 mt-0.5">
+                            <span id="displayCurrentThreshold" class="text-xl font-extrabold text-primary">80.0</span>
+                            <span class="font-bold text-gray-500">%</span>
+                        </div>
+                        <span class="text-[10px] text-gray-400 block mt-1">Rule: &ge; Threshold &rarr; AUTO_CONFIRMED</span>
+                    </div>
+
+                    <div class="sm:col-span-2 space-y-3 bg-blue-50/40 p-3.5 rounded-xl border border-blue-100/60">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-700 uppercase mb-1">New Threshold (%) <span class="text-red-500">*</span></label>
+                                <div class="flex items-center gap-2">
+                                    <input id="teamThresholdInput" type="number" min="0" max="100" step="1" class="w-full text-xs rounded-xl border-gray-300 p-2 font-bold focus:ring-primary focus:border-primary" placeholder="80"/>
+                                    <span class="font-bold text-gray-600">%</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-700 uppercase mb-1">Audit Reason / Policy Reference</label>
+                                <input id="teamThresholdNotes" type="text" class="w-full text-xs rounded-xl border-gray-300 p-2 focus:ring-primary focus:border-primary" placeholder="e.g. Updated for Q3 compliance inspection guidelines"/>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between gap-2 pt-1 border-t border-blue-100/50">
+                            <p class="text-[10px] text-gray-500 italic">
+                                Note: Changing this threshold affects subsequent AI audit evaluations across all jurisdictions.
+                            </p>
+                            <button id="btnSaveTeamThreshold" onclick="saveTeamThreshold()" type="button" class="px-4 py-1.5 bg-primary hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5 shrink-0">
+                                <span class="material-symbols-outlined text-xs">save</span> Save Threshold
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Officer Roster Table -->
+            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-gray-50 text-gray-600 uppercase font-semibold border-b border-gray-200">
+                            <tr>
+                                <th class="p-3.5">Officer Name</th>
+                                <th class="p-3.5">Email Address</th>
+                                <th class="p-3.5">Role</th>
+                                <th class="p-3.5">Jurisdiction / Region</th>
+                                <th class="p-3.5">Status</th>
+                                <th class="p-3.5">Created Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teamTbody" class="divide-y divide-gray-100 font-medium text-gray-700">
+                            <tr>
+                                <td colspan="6" class="p-8 text-center text-gray-400">Loading user roster...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/static/app.js"></script>
+    <script>
+        async function loadTeamRoster() {
+            PackCheck.syncNavigation('/team');
+            const tbody = document.getElementById('teamTbody');
+
+            // Client-side immediate RBAC guard
+            if (!PackCheck.canManageTeam()) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="p-12 text-center">
+                            <div class="max-w-md mx-auto flex flex-col items-center justify-center text-center space-y-3">
+                                <div class="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 mb-1">
+                                    <span class="material-symbols-outlined text-2xl">lock</span>
+                                </div>
+                                <h3 class="font-['Hanken_Grotesk'] font-bold text-base text-gray-900">Administrator Access Required</h3>
+                                <p class="text-xs text-gray-500 leading-relaxed">
+                                    The officer roster and user management directory is restricted to System Administrators per RBAC compliance policy.
+                                </p>
+                                <div class="pt-2 flex items-center justify-center gap-3">
+                                    <button id="switchAdminBtn" onclick="switchToAdminDemo()" type="button" class="px-4 py-2 bg-primary hover:bg-primary-container text-white rounded-full text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5 active:scale-95">
+                                        <span class="material-symbols-outlined text-sm">shield_person</span> Switch to Admin Demo
+                                    </button>
+                                    <a href="/dashboard" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-xs font-semibold transition-all">
+                                        Return to Dashboard
+                                    </a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-gray-400">Loading user roster...</td></tr>';
+
+            try {
+                const res = await PackCheck.request('/users');
+                
+                if (res.success && res.data?.items) {
+                    if (res.data.items.length === 0) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="6" class="p-12 text-center text-gray-400">
+                                    <div class="flex flex-col items-center justify-center space-y-2">
+                                        <span class="material-symbols-outlined text-3xl text-gray-300">group_off</span>
+                                        <p class="font-medium text-xs text-gray-500">No team members found in the roster.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                        return;
+                    }
+
+                    tbody.innerHTML = res.data.items.map(u => {
+                        let rolePill = '';
+                        if (u.role === 'admin') rolePill = '<span class="px-2 py-0.5 rounded bg-purple-100 text-purple-800 font-bold uppercase text-[10px]">Admin</span>';
+                        else if (u.role === 'inspector') rolePill = '<span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold uppercase text-[10px]">Inspector</span>';
+                        else rolePill = `<span class="px-2 py-0.5 rounded bg-gray-100 text-gray-800 font-bold uppercase text-[10px]">${u.role || 'Legacy'}</span>`;
+
+                        const statusBadge = u.is_active !== false
+                            ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700">Active</span>'
+                            : '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-50 text-red-700">Inactive</span>';
+
+                        const createdDate = u.created_at ? new Date(u.created_at).toLocaleDateString() : 'N/A';
+
+                        return `
+                            <tr class="hover:bg-blue-50/30 transition-colors">
+                                <td class="p-3.5 font-bold text-gray-900">${u.name}</td>
+                                <td class="p-3.5 text-gray-600">${u.email}</td>
+                                <td class="p-3.5">${rolePill}</td>
+                                <td class="p-3.5 font-semibold text-gray-700">${u.region || 'National HQ'}</td>
+                                <td class="p-3.5">${statusBadge}</td>
+                                <td class="p-3.5 text-gray-500">${createdDate}</td>
+                            </tr>
+                        `;
+                    }).join('');
+                } else if (res.error?.code === 'FORBIDDEN' || res.error?.code === 'HTTP_403' || res.error?.message?.toLowerCase().includes('admin') || res.error?.message?.toLowerCase().includes('permission') || res.error?.message?.toLowerCase().includes('access denied')) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="p-12 text-center">
+                                <div class="max-w-md mx-auto flex flex-col items-center justify-center text-center space-y-3">
+                                    <div class="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 mb-1">
+                                        <span class="material-symbols-outlined text-2xl">lock</span>
+                                    </div>
+                                    <h3 class="font-['Hanken_Grotesk'] font-bold text-base text-gray-900">Administrator Access Required</h3>
+                                    <p class="text-xs text-gray-500 leading-relaxed">
+                                        The officer roster and user management directory is restricted to System Administrators per RBAC compliance policy.
+                                    </p>
+                                    <div class="pt-2 flex items-center justify-center gap-3">
+                                        <button id="switchAdminBtn" onclick="switchToAdminDemo()" type="button" class="px-4 py-2 bg-primary hover:bg-primary-container text-white rounded-full text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5 active:scale-95">
+                                            <span class="material-symbols-outlined text-sm">shield_person</span> Switch to Admin Demo
+                                        </button>
+                                        <a href="/dashboard" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-xs font-semibold transition-all">
+                                            Return to Dashboard
+                                        </a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="p-12 text-center">
+                                <div class="max-w-md mx-auto flex flex-col items-center justify-center text-center space-y-2">
+                                    <div class="w-10 h-10 rounded-xl bg-red-50 border border-red-200 flex items-center justify-center text-red-600 mb-1">
+                                        <span class="material-symbols-outlined text-xl">error_outline</span>
+                                    </div>
+                                    <h3 class="font-['Hanken_Grotesk'] font-bold text-sm text-gray-900">Unable to Load Team Roster</h3>
+                                    <p class="text-xs text-gray-500">The server encountered an issue while retrieving user records.</p>
+                                    <button onclick="loadTeamRoster()" type="button" class="mt-2 px-4 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-xs font-semibold transition-all flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-sm">refresh</span> Try Again
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
+            } catch (err) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="p-12 text-center">
+                            <div class="max-w-md mx-auto flex flex-col items-center justify-center text-center space-y-2">
+                                <div class="w-10 h-10 rounded-xl bg-red-50 border border-red-200 flex items-center justify-center text-red-600 mb-1">
+                                    <span class="material-symbols-outlined text-xl">wifi_off</span>
+                                </div>
+                                <h3 class="font-['Hanken_Grotesk'] font-bold text-sm text-gray-900">Network Communication Error</h3>
+                                <p class="text-xs text-gray-500">Failed to connect to the backend service. Please check your network connection.</p>
+                                <button onclick="loadTeamRoster()" type="button" class="mt-2 px-4 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-xs font-semibold transition-all flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm">refresh</span> Try Again
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        async function switchToAdminDemo() {
+            const btn = document.getElementById('switchAdminBtn');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">refresh</span> Switching...';
+            }
+            try {
+                const res = await fetch('/api/v1/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: 'admin@packcheck.gov.in', password: 'admin123' })
+                });
+                const data = await res.json();
+                if (data.success && data.data?.access_token) {
+                    PackCheck.setToken(data.data.access_token);
+                    PackCheck.setUser(data.data.user);
+                    await loadTeamRoster();
+                } else {
+                    alert('Failed to switch to Admin account: ' + (data.error?.message || 'Authentication error'));
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = '<span class="material-symbols-outlined text-sm">shield_person</span> Switch to Admin Demo';
+                    }
+                }
+            } catch (err) {
+                alert('Network error while switching account: ' + err.message);
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<span class="material-symbols-outlined text-sm">shield_person</span> Switch to Admin Demo';
+                }
+            }
+        }
+
+        async function loadAutomationConfig() {
+            const card = document.getElementById('automationPolicyCard');
+            if (!PackCheck.isAdmin()) {
+                card.classList.add('hidden');
+                return;
+            }
+            card.classList.remove('hidden');
+
+            const res = await PackCheck.request('/config/automation');
+            if (res.success && res.data) {
+                const currentThresh = res.data.auto_confirm_threshold_percent;
+                document.getElementById('displayCurrentThreshold').textContent = Number(currentThresh).toFixed(1);
+                document.getElementById('teamThresholdInput').value = currentThresh;
+            }
+        }
+
+        async function saveTeamThreshold() {
+            const val = parseFloat(document.getElementById('teamThresholdInput').value);
+            const notes = document.getElementById('teamThresholdNotes').value.trim();
+            if (isNaN(val) || val < 0 || val > 100) {
+                alert('Please enter a valid threshold percentage between 0.0% and 100.0%.');
+                return;
+            }
+
+            const btn = document.getElementById('btnSaveTeamThreshold');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="material-symbols-outlined text-xs animate-spin">refresh</span> Saving...';
+
+            const res = await PackCheck.request('/config/automation', {
+                method: 'PATCH',
+                body: JSON.stringify({
+                    auto_confirm_threshold_percent: val,
+                    notes: notes || 'Updated via Team Administration page'
+                })
+            });
+
+            btn.disabled = false;
+            btn.innerHTML = '<span class="material-symbols-outlined text-xs">save</span> Save Threshold';
+
+            if (res.success) {
+                alert(`Automatic confirmation threshold successfully updated to ${val}%!`);
+                await loadAutomationConfig();
+            } else {
+                alert('Failed to update threshold: ' + (res.error?.message || 'Permission denied'));
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadTeamRoster();
+            await loadAutomationConfig();
+        });
+    </script>
+</body>
+</html>

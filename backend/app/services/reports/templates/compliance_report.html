@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PackCheck Legal Metrology Compliance Report</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 18mm 14mm 18mm 14mm;
+            @bottom-right {
+                content: "Page " counter(page) " of " counter(pages);
+                font-family: 'Inter', sans-serif;
+                font-size: 8pt;
+                color: #737687;
+            }
+            @bottom-left {
+                content: "PackCheck • Legal Metrology (Packaged Commodities) Rules, 2011";
+                font-family: 'Inter', sans-serif;
+                font-size: 8pt;
+                color: #737687;
+            }
+        }
+
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            color: #181c21;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+            font-size: 9.5pt;
+            line-height: 1.4;
+        }
+
+        .header-container {
+            border-bottom: 2px solid #0051d5;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .header-table td {
+            vertical-align: middle;
+        }
+
+        .govt-title {
+            font-size: 15pt;
+            font-weight: 800;
+            color: #0051d5;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: -0.01em;
+        }
+
+        .govt-subtitle {
+            font-size: 8.5pt;
+            color: #424655;
+            margin: 2px 0 0 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .report-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 9999px;
+            font-weight: 700;
+            font-size: 9pt;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .badge-compliant {
+            background-color: #e0f8f2;
+            color: #006b5c;
+            border: 1px solid #65fade;
+        }
+
+        .badge-non-compliant {
+            background-color: #ffdad6;
+            color: #ba1a1a;
+            border: 1px solid #ffb4ab;
+        }
+
+        .badge-needs-review {
+            background-color: #fff1d6;
+            color: #b25e00;
+            border: 1px solid #ffd599;
+        }
+
+        .section-title {
+            font-size: 11pt;
+            font-weight: 700;
+            color: #0051d5;
+            margin-top: 16px;
+            margin-bottom: 6px;
+            border-bottom: 1px solid #e0e2e9;
+            padding-bottom: 3px;
+        }
+
+        .meta-grid {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 12px;
+            background-color: #f8f9ff;
+            border-radius: 6px;
+            border: 1px solid #e6e8ef;
+        }
+
+        .meta-grid td {
+            padding: 6px 10px;
+            border-bottom: 1px solid #e6e8ef;
+            font-size: 8.5pt;
+        }
+
+        .meta-label {
+            font-weight: 600;
+            color: #424655;
+            width: 22%;
+            text-transform: uppercase;
+            font-size: 7.5pt;
+        }
+
+        .meta-val {
+            color: #181c21;
+            font-weight: 500;
+        }
+
+        table.declaration-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+            margin-bottom: 16px;
+        }
+
+        table.declaration-table th {
+            background-color: #0051d5;
+            color: #ffffff;
+            font-weight: 600;
+            text-align: left;
+            padding: 7px 8px;
+            font-size: 8pt;
+            text-transform: uppercase;
+        }
+
+        table.declaration-table td {
+            padding: 7px 8px;
+            border-bottom: 1px solid #e0e2e9;
+            font-size: 8pt;
+            vertical-align: top;
+        }
+
+        table.declaration-table tr:nth-child(even) {
+            background-color: #f8f9ff;
+        }
+
+        .status-pill {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 7pt;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .pill-pass {
+            background-color: #e0f8f2;
+            color: #006b5c;
+        }
+
+        .pill-fail {
+            background-color: #ffdad6;
+            color: #ba1a1a;
+        }
+
+        .pill-review {
+            background-color: #fff1d6;
+            color: #b25e00;
+        }
+
+        .pill-override {
+            background-color: #f1f3fa;
+            color: #555869;
+            border: 1px solid #dcdfe8;
+        }
+
+        .conf-badge {
+            display: inline-block;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 6.5pt;
+            font-weight: 700;
+        }
+
+        .conf-high {
+            background-color: #e2f8eb;
+            color: #0f7b3c;
+        }
+
+        .conf-med {
+            background-color: #fef4e5;
+            color: #b45309;
+        }
+
+        .conf-low {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .notes-box {
+            background-color: #f1f3fa;
+            border-left: 3px solid #0051d5;
+            padding: 9px 12px;
+            font-size: 8.5pt;
+            margin-top: 12px;
+            border-radius: 0 5px 5px 0;
+            line-height: 1.4;
+        }
+
+        .signature-section {
+            margin-top: 30px;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .signature-box {
+            width: 45%;
+            border-top: 1px solid #737687;
+            padding-top: 5px;
+            font-size: 8pt;
+            color: #424655;
+            text-align: center;
+        }
+
+        .citation-text {
+            font-size: 7.5pt;
+            color: #555869;
+            font-weight: 600;
+        }
+
+        .evidence-subtext {
+            font-size: 7pt;
+            color: #737687;
+            margin-top: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <table class="header-table">
+            <tr>
+                <td>
+                    <h1 class="govt-title">PackCheck Compliance Verification Report</h1>
+                    <div class="govt-subtitle">Department of Legal Metrology • Packaged Commodities Rules, 2011</div>
+                </td>
+                <td style="text-align: right;">
+                    {% if overall_status == 'compliant' %}
+                        <div class="report-badge badge-compliant">VERIFIED COMPLIANT</div>
+                    {% elif overall_status == 'needs_review' %}
+                        <div class="report-badge badge-needs-review">NEEDS MANUAL REVIEW</div>
+                    {% else %}
+                        <div class="report-badge badge-non-compliant">NON-COMPLIANT (VIOLATION)</div>
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <table class="meta-grid">
+        <tr>
+            <td class="meta-label">Report ID:</td>
+            <td class="meta-val">{{ report_id }}</td>
+            <td class="meta-label">Scan ID:</td>
+            <td class="meta-val">{{ scan_id }}</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Inspection Date:</td>
+            <td class="meta-val">{{ generated_at }}</td>
+            <td class="meta-label">Enforcement Officer:</td>
+            <td class="meta-val">{{ inspector_name }} ({{ inspector_role }})</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Product Name:</td>
+            <td class="meta-val"><strong>{{ product_name }}</strong></td>
+            <td class="meta-label">Brand & Category:</td>
+            <td class="meta-val">{{ product_brand }} ({{ product_category }})</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Manufacturer / Packer:</td>
+            <td class="meta-val" colspan="3">{{ manufacturer_name }} - {{ manufacturer_address }}</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Inspection Location:</td>
+            <td class="meta-val">{{ location_name or 'Retail Store / Inspection Point' }}</td>
+            <td class="meta-label">Origin Country:</td>
+            <td class="meta-val">{{ country_of_origin or 'India' }}</td>
+        </tr>
+        {% if batch_number %}
+        <tr>
+            <td class="meta-label">Batch / Lot Number:</td>
+            <td class="meta-val"><strong>{{ batch_number }}</strong> (Source: {{ batch_number_source | capitalize or 'Manual' }})</td>
+            <td class="meta-label">Batch Investigation Status:</td>
+            <td class="meta-val">
+                <span class="status-pill {% if batch_status == 'normal' %}pill-pass{% elif batch_status == 'resolved' %}pill-override{% else %}pill-fail{% endif %}">
+                    {{ batch_status | replace('_', ' ') | upper }}
+                </span>
+                {% if related_batch_inspections %}
+                    <span style="font-size: 7.5pt; color: #555869; margin-left: 4px;">({{ related_batch_inspections }} recorded / {{ batch_inspections_requiring_attention }} attention)</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endif %}
+    </table>
+
+    {% if batch_number %}
+    <div class="notes-box" style="margin-top: -6px; margin-bottom: 12px; background-color: #f1f5fd; border-left: 3px solid #0051d5; font-size: 8pt; color: #374151;">
+        <strong>Batch Traceability & Investigation Notice:</strong> {{ batch_legal_note }}
+    </div>
+    {% endif %}
+
+    <div class="section-title">Mandatory Declaration Findings (LMPC Rules, 2011)</div>
+    <table class="declaration-table">
+        <thead>
+            <tr>
+                <th style="width: 17%;">Declaration Field</th>
+                <th style="width: 27%;">Extracted Value & Evidence</th>
+                <th style="width: 16%;">Detection Rate & Threshold</th>
+                <th style="width: 16%;">Workflow & Decision</th>
+                <th style="width: 24%;">Rule Citation & Reason</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for decl in declarations %}
+            <tr>
+                <td>
+                    <strong>{{ decl.field_name or decl.field_type | replace('_', ' ') | title }}</strong>
+                    {% if decl.reviewer_override %}
+                        <br><span class="status-pill pill-override">Inspector Override</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if decl.extracted_text %}
+                        "<strong>{{ decl.extracted_text }}</strong>"
+                        {% if decl.font_size_display %}
+                            <br><span style="font-size: 7pt; color: #424655;">{{ decl.font_size_display }}</span>
+                        {% endif %}
+                        {% if decl.evidence %}
+                            <div class="evidence-subtext">{{ decl.evidence }}</div>
+                        {% endif %}
+                    {% else %}
+                        <span style="color: #ba1a1a; font-style: italic;">[Field Absent on Package]</span>
+                        {% if decl.evidence %}
+                            <div class="evidence-subtext">{{ decl.evidence }}</div>
+                        {% endif %}
+                    {% endif %}
+                </td>
+                <td>
+                    {% set rate_val = decl.violation_detection_rate or ((decl.confidence_score * 100) | int if decl.confidence_score is not none else none) %}
+                    {% if rate_val is not none %}
+                        <strong style="color: #181c21;">{{ rate_val }}%</strong>
+                        <div style="font-size: 7pt; color: #555869;">Threshold: {{ decl.auto_confirm_threshold or auto_confirm_threshold or 80.0 }}%</div>
+                        <div class="evidence-subtext">{{ decl.verification_method or 'System Auto-Confirmation' }}</div>
+                    {% else %}
+                        <span style="font-size: 7.5pt; color: #ba1a1a; font-style: italic;">Rate Unavailable</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if decl.status_label == 'COMPLIANT' %}
+                        <span class="status-pill pill-pass">COMPLIANT</span>
+                    {% elif decl.workflow_decision == 'AUTO_CONFIRMED' %}
+                        <span class="status-pill pill-pass" style="background-color: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;">AUTO-CONFIRMED</span>
+                        <br><span style="font-size: 6.5pt; color: #0284c7; font-weight: 700;">WORKFLOW PASS</span>
+                    {% elif decl.status_label == 'NEEDS MANUAL REVIEW' or decl.workflow_decision == 'MANUAL_REVIEW_REQUIRED' %}
+                        <span class="status-pill pill-review">MANUAL REVIEW</span>
+                        <br><span style="font-size: 6.5pt; color: #b25e00; font-weight: 600;">INSPECTOR REQ.</span>
+                    {% else %}
+                        <span class="status-pill pill-fail">VIOLATION</span>
+                        <br><span style="font-size: 6.5pt; color: #ba1a1a; font-weight: 600;">{{ decl.severity | upper }}</span>
+                    {% endif %}
+
+                    {% if decl.human_decision and decl.human_decision != 'AUTO-ANALYZED' %}
+                        <br><span style="font-size: 6.5pt; color: #4338ca; font-weight: 700;">FINAL: {{ decl.human_decision }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="citation-text">{{ decl.rule_reference }}</div>
+                    {% if decl.reason %}
+                        <div style="font-size: 7.5pt; margin-top: 2px; color: #181c21;">{{ decl.reason }}</div>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="notes-box" style="margin-top: -6px; margin-bottom: 12px; background-color: #f8fafc; border-left: 3px solid #0051d5; font-size: 7.5pt; color: #475569;">
+        <strong>Compliance Workflow Notice:</strong> {{ workflow_disclaimer }}
+    </div>
+
+    <div class="section-title">Overall Statutory Inspection Result & Verification Basis</div>
+    <table class="meta-grid">
+        <tr>
+            <td class="meta-label">Overall Result:</td>
+            <td class="meta-val">
+                <strong style="color: {% if overall_status == 'compliant' %}#006b5c{% elif overall_status == 'needs_review' %}#b25e00{% else %}#ba1a1a{% endif %};">
+                    {{ overall_label }}
+                </strong>
+                <span style="font-size: 7.5pt; color: #555869; display: block; margin-top: 2px;">Derived from Verified Individual Declaration Findings</span>
+            </td>
+            <td class="meta-label">Decision Basis:</td>
+            <td class="meta-val">
+                <strong>{{ decision_basis }}</strong>
+                <div style="font-size: 7pt; color: #555869; margin-top: 2px;">
+                    Auto-Confirmed: <strong>{{ auto_confirmed_count }}</strong> | 
+                    Inspector Reviewed: <strong>{{ inspector_resolved_count }}</strong> | 
+                    Unresolved: <strong>{{ manual_review_count }}</strong>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td class="meta-label">Finalized By:</td>
+            <td class="meta-val">
+                {{ finalized_by or inspector_name }} ({{ inspector_role }})
+            </td>
+            <td class="meta-label">Finalized Date:</td>
+            <td class="meta-val">
+                {{ finalized_at }}
+            </td>
+        </tr>
+        {% if final_remarks or custom_notes %}
+        <tr>
+            <td class="meta-label">Officer Remarks:</td>
+            <td class="meta-val" colspan="3">{{ final_remarks or custom_notes }}</td>
+        </tr>
+        {% endif %}
+    </table>
+
+    <div class="notes-box">
+        <strong>Statutory Assessment:</strong> {{ statutory_assessment }}
+    </div>
+
+    {% if audit_trail and audit_trail | length > 0 %}
+    <div class="section-title">Inspection Audit Trail & Manual Reviews</div>
+    <table class="declaration-table" style="margin-bottom: 8px;">
+        <thead>
+            <tr>
+                <th style="width: 22%;">Timestamp</th>
+                <th style="width: 24%;">Officer / Authority</th>
+                <th style="width: 22%;">Action / Decision</th>
+                <th style="width: 32%;">Notes / Explanation</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in audit_trail %}
+            <tr>
+                <td style="font-size: 7.5pt;">{{ entry.timestamp }}</td>
+                <td style="font-size: 7.5pt;"><strong>{{ entry.user_name }}</strong> ({{ entry.user_role }})</td>
+                <td style="font-size: 7.5pt;"><span class="status-pill pill-override">{{ entry.action }}</span></td>
+                <td style="font-size: 7.5pt; color: #424655;">{{ entry.notes }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    <table class="signature-section">
+        <tr>
+            <td class="signature-box" style="float: left;">
+                <br><br>
+                <strong>{{ finalized_by or inspector_name }}</strong><br>
+                Enforcement Inspector / Legal Metrology Officer<br>
+                Department of Legal Metrology
+            </td>
+            <td style="width: 10%;"></td>
+            <td class="signature-box" style="float: right;">
+                <br><br>
+                <strong>Authorized Controller of Legal Metrology</strong><br>
+                Digital Verification Seal<br>
+                Date: {{ generated_at }}
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

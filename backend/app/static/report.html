@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>PackCheck - Statutory Compliance Report</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+</head>
+<body class="bg-[#f8f9ff] font-['Inter'] text-[#181c21] min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-[#0051d5] text-white px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
+        <div class="flex items-center gap-3 sm:gap-4">
+            <a href="/dashboard" class="text-white/80 hover:text-white flex items-center gap-1 text-xs font-semibold shrink-0">
+                <span class="material-symbols-outlined text-sm">arrow_back</span> Dashboard
+            </a>
+            <div class="h-5 w-px bg-white/20"></div>
+            <div class="min-w-0">
+                <h1 class="font-['Hanken_Grotesk'] font-bold text-base sm:text-lg leading-tight truncate">Statutory Compliance Audit Report</h1>
+                <p class="text-[11px] sm:text-xs text-[#65fade]">Legal Metrology (Packaged Commodities) Rules, 2011</p>
+            </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+            <a id="btnPdf" href="#" target="_blank" class="px-3.5 sm:px-4 py-2 bg-white text-primary hover:bg-gray-100 rounded-full font-bold text-xs shadow-md transition-all flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-sm text-red-600">picture_as_pdf</span> Download PDF
+            </a>
+            <a id="btnDocx" href="#" target="_blank" class="px-3.5 sm:px-4 py-2 bg-[#65fade] text-[#005045] hover:bg-teal-200 rounded-full font-bold text-xs shadow-md transition-all flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-sm">description</span> Download DOCX
+            </a>
+        </div>
+    </header>
+
+    <!-- Report Preview Paper -->
+    <main class="flex-1 p-3 sm:p-6 flex justify-center overflow-y-auto">
+        <div class="bg-white max-w-4xl w-full p-4 sm:p-8 md:p-12 rounded-2xl shadow-xl border border-gray-200 space-y-5 sm:space-y-6">
+            <!-- Government Header Block -->
+            <div class="border-b-2 border-primary pb-4 flex flex-col sm:flex-row justify-between items-start gap-3">
+                <div>
+                    <h2 class="text-lg sm:text-xl font-extrabold text-primary uppercase font-['Hanken_Grotesk']">PackCheck Compliance Verification Report</h2>
+                    <p class="text-[11px] sm:text-xs text-gray-500 uppercase tracking-wider font-semibold">Department of Legal Metrology • Statutory Inspection Record</p>
+                </div>
+                <div id="statusBadge" class="self-start sm:self-auto px-3 sm:px-4 py-1.5 rounded-full font-extrabold text-[11px] sm:text-xs tracking-wider uppercase bg-emerald-100 text-emerald-800 border border-emerald-300">
+                    VERIFIED COMPLIANT
+                </div>
+            </div>
+
+            <!-- Metadata Table -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 bg-gray-50 p-3 sm:p-4 rounded-xl text-xs border border-gray-200">
+                <div>
+                    <span class="text-gray-400 block uppercase font-bold text-[10px]">Report ID</span>
+                    <span id="repId" class="font-mono font-bold text-gray-900">...</span>
+                </div>
+                <div>
+                    <span class="text-gray-400 block uppercase font-bold text-[10px]">Inspection Date</span>
+                    <span id="repDate" class="font-bold text-gray-900">...</span>
+                </div>
+                <div>
+                    <span class="text-gray-400 block uppercase font-bold text-[10px]">Product</span>
+                    <span id="repProduct" class="font-bold text-gray-900">...</span>
+                </div>
+                <div>
+                    <span class="text-gray-400 block uppercase font-bold text-[10px]">Inspector</span>
+                    <span id="repOfficer" class="font-bold text-gray-900">...</span>
+                </div>
+            </div>
+
+            <!-- Batch Traceability & Investigation Card -->
+            <div id="repBatchCard" class="hidden p-4 bg-blue-50/50 rounded-xl border border-blue-200 text-xs space-y-2">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-blue-100 pb-2">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-base">batch_prediction</span>
+                        <strong class="font-bold text-gray-900 uppercase text-xs">Production Batch Traceability: <span id="repBatchNumber" class="font-mono text-primary">...</span></strong>
+                    </div>
+                    <span id="repBatchStatusBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-700 self-start sm:self-auto">
+                        NORMAL
+                    </span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-gray-700">
+                    <div><strong>Related Batch Inspections:</strong> <span id="repBatchRelatedCount">0</span> recorded</div>
+                    <div><strong>Inspections Requiring Attention:</strong> <span id="repBatchAttentionCount" class="font-bold text-red-600">0</span></div>
+                </div>
+                <p id="repBatchDisclaimer" class="text-[10px] text-gray-500 italic leading-relaxed pt-1 border-t border-blue-100/60">
+                    Batch-level information is provided to support inspection and investigation. Presence of an issue in one inspected package does not by itself establish that all products in the batch are non-compliant. Further verification is subject to the competent authority's procedures.
+                </p>
+            </div>
+
+            <!-- Automation & Violation Detection Rate Threshold Card -->
+            <div id="repAutomationCard" class="p-4 bg-gray-50/80 rounded-2xl border border-gray-200 text-xs space-y-3">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-200 pb-2">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-base">rule_settings</span>
+                        <strong class="font-bold text-gray-900 uppercase text-xs">Mandatory Declarations Audit — Automation Assessment</strong>
+                    </div>
+                    <span id="repAutoBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-700 self-start sm:self-auto border border-gray-200">
+                        EVALUATING
+                    </span>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+                    <div class="p-2 bg-white rounded-lg border border-gray-200">
+                        <span class="text-[9px] font-bold uppercase text-gray-400 block">Auto-Confirmed</span>
+                        <span id="repAutoConfirmedCount" class="text-sm font-bold text-emerald-700">-</span>
+                    </div>
+                    <div class="p-2 bg-white rounded-lg border border-gray-200">
+                        <span class="text-[9px] font-bold uppercase text-gray-400 block">Manual Review Required</span>
+                        <span id="repManualReviewCount" class="text-sm font-bold text-amber-800">-</span>
+                    </div>
+                    <div class="p-2 bg-white rounded-lg border border-gray-200">
+                        <span class="text-[9px] font-bold uppercase text-gray-400 block">Configured Threshold</span>
+                        <span id="repThreshold" class="text-sm font-bold text-primary">80%</span>
+                    </div>
+                    <div class="p-2 bg-white rounded-lg border border-gray-200">
+                        <span class="text-[9px] font-bold uppercase text-gray-400 block">Workflow Status</span>
+                        <span id="repSystemAssessment" class="text-xs font-bold text-gray-800 mt-0.5 block">Pending</span>
+                    </div>
+                </div>
+                <p id="repWorkflowDisclaimer" class="text-[10px] text-gray-500 italic leading-relaxed pt-1 border-t border-gray-200">
+                    <strong>Compliance Workflow Notice:</strong> Automated confirmation is a workflow routing mechanism based on the configured automatic-confirmation threshold. Final statutory compliance determinations, violation citations, and legal enforcement actions remain exclusively under the jurisdiction of authorized Legal Metrology officers.
+                </p>
+            </div>
+
+            <!-- Mandatory Findings -->
+            <div class="space-y-3">
+                <h3 class="font-['Hanken_Grotesk'] font-bold text-sm text-primary uppercase border-b border-gray-200 pb-1">Mandatory Declarations Audit (LMPC 2011)</h3>
+                <div id="reportFindings" class="space-y-2.5">
+                    <p class="text-xs text-gray-400 text-center py-6">Loading report findings...</p>
+                </div>
+            </div>
+
+            <!-- Overall Statutory Inspection Result & Verification Basis -->
+            <div class="p-4 bg-gray-50 rounded-xl border border-gray-200 text-xs space-y-3">
+                <h3 class="font-['Hanken_Grotesk'] font-bold text-sm text-primary uppercase">Overall Statutory Inspection Result & Verification Basis</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="bg-white p-2.5 rounded-lg border border-gray-200">
+                        <span class="text-gray-400 block uppercase font-bold text-[9px]">Overall Inspection Result</span>
+                        <span id="repOverallResult" class="font-bold text-gray-900 block mt-0.5">...</span>
+                        <span class="text-[10px] text-gray-500 block mt-0.5">Derived from Verified Declaration Findings</span>
+                    </div>
+                    <div class="bg-white p-2.5 rounded-lg border border-gray-200">
+                        <span class="text-gray-400 block uppercase font-bold text-[9px]">Decision Basis</span>
+                        <span id="repDecisionBasis" class="font-bold text-gray-900 block mt-0.5">...</span>
+                        <span id="repResolutionBreakdown" class="text-[10px] text-gray-500 block mt-0.5">...</span>
+                    </div>
+                </div>
+                <div id="repRemarksBox" class="bg-white p-2.5 rounded-lg border border-gray-200 hidden">
+                    <span class="text-gray-400 block uppercase font-bold text-[9px]">Officer Remarks</span>
+                    <p id="repRemarksText" class="text-gray-800 italic font-medium mt-0.5"></p>
+                </div>
+            </div>
+
+            <!-- Legal Determination -->
+            <div class="p-4 bg-blue-50/60 rounded-xl border-l-4 border-primary text-xs space-y-1">
+                <p class="font-bold text-primary">Statutory Assessment & Enforcement Decision:</p>
+                <p id="legalText" class="text-gray-700 leading-relaxed">Evaluating statutory parameters per Legal Metrology (Packaged Commodities) Rules, 2011.</p>
+            </div>
+
+            <!-- Audit Trail Section -->
+            <div id="repAuditSection" class="space-y-2 hidden">
+                <h3 class="font-['Hanken_Grotesk'] font-bold text-xs text-gray-700 uppercase border-b border-gray-200 pb-1">Inspection Audit Trail & Officer Verification History</h3>
+                <div id="repAuditList" class="space-y-1.5 text-xs"></div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="/static/app.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const reportId = urlParams.get('id');
+
+        const FIELD_TITLES = {
+            "common_name": "Generic or Common Name",
+            "manufacturer_details": "Manufacturer / Packer Details",
+            "country_of_origin": "Country of Origin",
+            "net_quantity": "Net Quantity & Units",
+            "mfg_date": "Date of Manufacture / Packing",
+            "mrp": "Maximum Retail Price (MRP)",
+            "unit_sale_price": "Unit Sale Price (USP)",
+            "consumer_care": "Consumer Care Redressal"
+        };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            let activeId = reportId;
+            if (!activeId) {
+                const scans = await PackCheck.request('/scans?page_size=1');
+                if (scans.success && scans.data?.items?.length > 0) {
+                    const scanId = scans.data.items[0].id;
+                    const repRes = await PackCheck.request(`/scans/${scanId}/report`, { method: 'POST' });
+                    if (repRes.success && repRes.data) activeId = repRes.data.id;
+                }
+            }
+
+            if (activeId) {
+                document.getElementById('btnPdf').href = `/api/v1/reports/${activeId}/pdf`;
+                document.getElementById('btnDocx').href = `/api/v1/reports/${activeId}/docx`;
+
+                const repRes = await PackCheck.request(`/reports/${activeId}`);
+                if (repRes.success && repRes.data) {
+                    const r = repRes.data;
+                    document.getElementById('repId').textContent = r.id.substring(0,8);
+                    document.getElementById('repDate').textContent = new Date(r.generated_at).toLocaleDateString();
+
+                    const summary = r.summary_data || {};
+                    document.getElementById('repProduct').textContent = summary.product_name || 'Commodity';
+                    document.getElementById('repOfficer').textContent = summary.inspector_name || 'Inspector';
+
+                    // Populate Batch Information
+                    if (summary.batch_number) {
+                        const batchCard = document.getElementById('repBatchCard');
+                        batchCard.classList.remove('hidden');
+                        document.getElementById('repBatchNumber').textContent = summary.batch_number;
+                        const bStatus = summary.batch_status || 'normal';
+                        const badgeEl = document.getElementById('repBatchStatusBadge');
+                        badgeEl.textContent = bStatus.replace(/_/g, ' ').toUpperCase();
+                        if (bStatus === 'normal') {
+                            badgeEl.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300';
+                        } else if (bStatus === 'resolved') {
+                            badgeEl.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-700 border border-gray-300';
+                        } else {
+                            badgeEl.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-100 text-red-800 border border-red-300';
+                        }
+                        document.getElementById('repBatchRelatedCount').textContent = summary.related_batch_inspections || '1';
+                        document.getElementById('repBatchAttentionCount').textContent = summary.batch_inspections_requiring_attention || '0';
+                        if (summary.batch_legal_note) {
+                            document.getElementById('repBatchDisclaimer').textContent = summary.batch_legal_note;
+                        }
+                    }
+
+                    const badge = document.getElementById('statusBadge');
+                    const st = r.overall_status || 'compliant';
+                    if (st === 'compliant') {
+                        badge.textContent = 'VERIFIED COMPLIANT';
+                        badge.className = 'px-4 py-1.5 rounded-full font-extrabold text-xs tracking-wider uppercase bg-emerald-100 text-emerald-800 border border-emerald-300';
+                        document.getElementById('legalText').textContent = 'All mandatory declarations specified under the Legal Metrology (Packaged Commodities) Rules, 2011 are duly present, legibly displayed, and meet statutory requirements based on automated verification.';
+                    } else if (st === 'needs_review') {
+                        badge.textContent = 'NEEDS MANUAL REVIEW';
+                        badge.className = 'px-4 py-1.5 rounded-full font-extrabold text-xs tracking-wider uppercase bg-amber-100 text-amber-800 border border-amber-300';
+                        document.getElementById('legalText').textContent = 'Inspection findings require manual review and verification by the authorized Legal Metrology officer before any statutory determination.';
+                    } else {
+                        badge.textContent = 'NON-COMPLIANT (VIOLATION)';
+                        badge.className = 'px-4 py-1.5 rounded-full font-extrabold text-xs tracking-wider uppercase bg-red-100 text-red-800 border border-red-300';
+                        document.getElementById('legalText').textContent = 'Potential non-compliance identified. Final enforcement action is subject to verification and decision by the competent Legal Metrology authority.';
+                    }
+
+                    // Deduplicate declarations
+                    const rawDecls = summary.declarations || [];
+                    const seen = new Set();
+                    const decls = [];
+                    for (const d of rawDecls) {
+                        const k = (d.field_type || '').toLowerCase();
+                        if (!seen.has(k)) {
+                            seen.add(k);
+                            decls.push(d);
+                        }
+                    }
+
+                    // Populate Automation Threshold Summary Card
+                    const threshVal = summary.auto_confirm_threshold ?? (decls.find(d => d.auto_confirm_threshold != null)?.auto_confirm_threshold ?? 80.0);
+                    const isDeclOfficerDecided = (d) => !!d.human_decision && d.human_decision !== 'NONE' && d.human_decision !== 'AUTO-ANALYZED';
+                    const isDeclAuto = (d) => {
+                        if (isDeclOfficerDecided(d)) return false;
+                        const dRate = (d.violation_detection_rate != null) ? d.violation_detection_rate : ((d.confidence_score || 0) * 100);
+                        const dThresh = (d.auto_confirm_threshold != null) ? d.auto_confirm_threshold : threshVal;
+                        return d.workflow_decision === 'AUTO_CONFIRMED' || d.workflow_decision === 'AUTOMATICALLY_CONFIRMED' || d.verification_status === 'AUTO_CONFIRMED' || (!d.workflow_decision && dRate >= dThresh && d.severity !== 'needs_review');
+                    };
+
+                    const autoConfirmedDecls = decls.filter(d => isDeclAuto(d));
+                    const manualReviewDecls = decls.filter(d => !isDeclOfficerDecided(d) && !isDeclAuto(d));
+
+                    const autoCountEl = document.getElementById('repAutoConfirmedCount');
+                    const manualCountEl = document.getElementById('repManualReviewCount');
+                    const threshEl = document.getElementById('repThreshold');
+                    if (autoCountEl) autoCountEl.textContent = `${autoConfirmedDecls.length} / ${decls.length}`;
+                    if (manualCountEl) manualCountEl.textContent = `${manualReviewDecls.length} / ${decls.length}`;
+                    if (threshEl) threshEl.textContent = `${Math.round(threshVal)}%`;
+
+                    const repAutoBadge = document.getElementById('repAutoBadge');
+                    const repSystemAssessment = document.getElementById('repSystemAssessment');
+                    if (manualReviewDecls.length === 0) {
+                        if (repAutoBadge) {
+                            repAutoBadge.textContent = 'ALL AUTO-CONFIRMED / RESOLVED';
+                            repAutoBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300';
+                        }
+                        if (repSystemAssessment) {
+                            repSystemAssessment.textContent = 'Auto-Confirmed / Finalized';
+                            repSystemAssessment.className = 'text-xs font-bold text-emerald-700 mt-0.5 block';
+                        }
+                    } else {
+                        if (repAutoBadge) {
+                            repAutoBadge.textContent = `${manualReviewDecls.length} MANUAL REVIEW REQUIRED`;
+                            repAutoBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300';
+                        }
+                        if (repSystemAssessment) {
+                            repSystemAssessment.textContent = `${manualReviewDecls.length} Item(s) Require Review`;
+                            repSystemAssessment.className = 'text-xs font-bold text-amber-800 mt-0.5 block';
+                        }
+                    }
+
+                    // Populate Overall Result and Decision Basis block
+                    const overallLbl = summary.overall_label || (st === 'compliant' ? 'VERIFIED COMPLIANT' : (st === 'needs_review' ? 'NEEDS MANUAL REVIEW' : 'NON-COMPLIANT (STATUTORY VIOLATION)'));
+                    const repResultEl = document.getElementById('repOverallResult');
+                    repResultEl.textContent = overallLbl;
+                    repResultEl.className = st === 'compliant' ? 'font-bold text-emerald-700 block mt-0.5' : (st === 'needs_review' ? 'font-bold text-amber-700 block mt-0.5' : 'font-bold text-red-600 block mt-0.5');
+
+                    const decBasis = summary.decision_basis || `${decls.length}/${decls.length} declarations resolved (${autoConfirmedDecls.length} Auto-Confirmed, ${humanDecidedDecls.length} Inspector Reviewed)`;
+                    document.getElementById('repDecisionBasis').textContent = decBasis;
+                    document.getElementById('repResolutionBreakdown').textContent = `Auto-Confirmed: ${autoConfirmedDecls.length} | Inspector Reviewed: ${humanDecidedDecls.length} | Unresolved: ${manualReviewDecls.length}`;
+
+                    const remarks = summary.final_remarks || summary.custom_notes;
+                    if (remarks) {
+                        document.getElementById('repRemarksBox').classList.remove('hidden');
+                        document.getElementById('repRemarksText').textContent = `"${remarks}"`;
+                    }
+
+                    // Populate Audit Trail
+                    const auditTrail = summary.audit_trail || [];
+                    if (auditTrail.length > 0) {
+                        document.getElementById('repAuditSection').classList.remove('hidden');
+                        document.getElementById('repAuditList').innerHTML = auditTrail.map(entry => `
+                            <div class="p-2 bg-gray-50 rounded border border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px]">
+                                <div>
+                                    <strong class="text-gray-900">${entry.user_name}</strong> <span class="text-gray-500">(${entry.user_role})</span>: 
+                                    <span class="text-primary font-semibold">${entry.action}</span>
+                                    <span class="text-gray-600 block sm:inline sm:ml-2 italic">"${entry.notes}"</span>
+                                </div>
+                                <span class="text-gray-400 font-mono text-[10px] shrink-0">${entry.timestamp}</span>
+                            </div>
+                        `).join('');
+                    }
+
+                    document.getElementById('reportFindings').innerHTML = decls.map(d => {
+                        const isPass = d.is_compliant;
+                        const conf = d.confidence_score || 0;
+                        const confLvl = d.confidence_level || (conf >= 0.90 ? 'HIGH' : (conf >= 0.70 ? 'MEDIUM' : 'LOW'));
+                        const title = d.field_name || FIELD_TITLES[d.field_type] || d.field_type.replace(/_/g, ' ').toUpperCase();
+                        
+                        let statusPill = '';
+                        if (d.status_label === 'COMPLIANT' || (isPass && d.status_label !== 'NEEDS MANUAL REVIEW')) {
+                            statusPill = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">COMPLIANT</span>';
+                        } else if (d.status_label === 'NEEDS MANUAL REVIEW' || d.severity === 'needs_review' || (conf > 0 && conf < 0.70)) {
+                            statusPill = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">NEEDS REVIEW</span>';
+                        } else {
+                            statusPill = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800">VIOLATION</span>';
+                        }
+
+                        // Workflow decision badge
+                        let wfTag = '';
+                        const dRate = (d.violation_detection_rate != null) ? Math.round(d.violation_detection_rate) : Math.round(conf * 100);
+                        const dThresh = (d.auto_confirm_threshold != null) ? Math.round(d.auto_confirm_threshold) : Math.round(threshVal);
+                        const isOfficer = isDeclOfficerDecided(d);
+                        const isAuto = isDeclAuto(d);
+                        const isManual = !isOfficer && !isAuto;
+
+                        if (isAuto) {
+                            wfTag = `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 uppercase">Auto-Confirmed (${dRate}% &ge; ${dThresh}%)</span>`;
+                        } else if (isManual) {
+                            wfTag = `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-900 border border-amber-300 uppercase">Manual Review (${dRate}% &lt; ${dThresh}%)</span>`;
+                        } else if (isOfficer) {
+                            wfTag = `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-100 text-blue-800 border border-blue-300 uppercase">Officer Decided (${d.human_decision.toUpperCase()})</span>`;
+                        }
+
+                        let humanTag = '';
+                        if (isOfficer) {
+                            humanTag = `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-100 text-purple-800 uppercase">${d.human_decision}</span>`;
+                        }
+
+                        const confBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${confLvl === 'HIGH' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : (confLvl === 'MEDIUM' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200')}">${dRate}% ${confLvl}</span>`;
+
+                        const fontNote = d.font_size_display ? `<span class="text-gray-500 font-medium block mt-0.5 text-[10px]">${d.font_size_display}</span>` : '';
+                        const reasonText = d.reason || d.reviewer_notes || (isPass ? 'Statutory requirement verified.' : (d.decision_reason || 'Statutory requirement violation detected.'));
+
+                        let verifDetail = '';
+                        if (isAuto) {
+                            verifDetail = `<div class="text-[10px] text-emerald-700 font-medium">Verification Method: System Auto-Confirmation (${dRate}% &ge; ${dThresh}% threshold)</div>`;
+                        } else if (isOfficer) {
+                            verifDetail = `<div class="text-[10px] text-blue-700 font-medium">Verification Method: Officer Determination (${d.human_decision.toUpperCase()})</div>`;
+                        } else {
+                            verifDetail = `<div class="text-[10px] text-amber-800 font-medium">Verification Method: Inspector Review Required (${dRate}% &lt; ${dThresh}% threshold)</div>`;
+                        }
+
+                        return `
+                            <div class="p-3.5 rounded-xl border border-gray-200 bg-gray-50/60 text-xs space-y-1.5">
+                                <div class="flex flex-wrap items-center justify-between gap-2">
+                                    <div class="flex flex-wrap items-center gap-1.5">
+                                        <span class="font-bold text-gray-900">${title}</span>
+                                        ${statusPill}
+                                        ${wfTag}
+                                        ${humanTag}
+                                        ${confBadge}
+                                    </div>
+                                    <span class="text-[11px] text-gray-500 font-medium">${d.rule_reference || 'Rule 6 of LMPC Rules 2011'}</span>
+                                </div>
+                                <div class="bg-white p-2 rounded border border-gray-100 text-[11px]">
+                                    <span class="text-gray-700 font-mono italic">"${d.extracted_text || 'Field absent on package'}"</span>
+                                    ${fontNote}
+                                </div>
+                                <p class="text-[11px] text-gray-600">
+                                    <strong>Assessment / Reason:</strong> ${reasonText}
+                                </p>
+                                ${verifDetail}
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

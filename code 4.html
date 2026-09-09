@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PackCheck - Product Repository</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&amp;family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "outline-variant": "#c3c6d8",
+                      "error": "#ba1a1a",
+                      "surface-bright": "#f8f9ff",
+                      "on-secondary-fixed-variant": "#005045",
+                      "on-primary-fixed-variant": "#003ea7",
+                      "surface-container-low": "#f1f3fa",
+                      "on-surface": "#181c21",
+                      "primary": "#0051d5",
+                      "secondary-container": "#65fade",
+                      "surface-dim": "#d8dae1",
+                      "on-primary-container": "#fefcff",
+                      "background": "#f8f9ff",
+                      "tertiary-fixed": "#ffdad2",
+                      "on-tertiary-container": "#fffbff",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-variant": "#e0e2e9",
+                      "on-error": "#ffffff",
+                      "on-tertiary-fixed-variant": "#8c1900",
+                      "on-tertiary-fixed": "#3d0600",
+                      "tertiary-container": "#cd4729",
+                      "surface-container-high": "#e6e8ef",
+                      "on-surface-variant": "#424655",
+                      "primary-container": "#276afa",
+                      "on-error-container": "#93000a",
+                      "primary-fixed": "#dbe1ff",
+                      "on-primary": "#ffffff",
+                      "surface-container": "#eceef5",
+                      "secondary": "#006b5c",
+                      "on-tertiary": "#ffffff",
+                      "on-primary-fixed": "#00174b",
+                      "on-secondary-fixed": "#00201b",
+                      "inverse-primary": "#b4c5ff",
+                      "secondary-fixed": "#65fade",
+                      "on-secondary": "#ffffff",
+                      "tertiary-fixed-dim": "#ffb4a3",
+                      "surface-tint": "#0053da",
+                      "inverse-on-surface": "#eef1f7",
+                      "error-container": "#ffdad6",
+                      "secondary-fixed-dim": "#41ddc2",
+                      "on-background": "#181c21",
+                      "primary-fixed-dim": "#b4c5ff",
+                      "outline": "#737687",
+                      "tertiary": "#aa2f13",
+                      "inverse-surface": "#2d3136",
+                      "surface": "#f8f9ff",
+                      "surface-container-highest": "#e0e2e9",
+                      "on-secondary-container": "#007262"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-mobile": "16px",
+                      "xs": "4px",
+                      "md": "24px",
+                      "base": "8px",
+                      "xl": "64px",
+                      "gutter": "16px",
+                      "margin-desktop": "32px",
+                      "lg": "40px",
+                      "max-width": "1280px",
+                      "sm": "12px"
+              },
+              "fontFamily": {
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Hanken Grotesk"
+                      ],
+                      "headline-lg-mobile": [
+                              "Hanken Grotesk"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Hanken Grotesk"
+                      ],
+                      "caption": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Hanken Grotesk"
+                      ]
+              },
+              "fontSize": {
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "36px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "caption": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col md:flex-row">
+<!-- TopAppBar (Mobile) -->
+<header class="flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16 w-full z-40 bg-surface dark:bg-inverse-surface border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none md:hidden">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim" data-weight="fill" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-inverse-primary">PackCheck</span>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest overflow-hidden">
+<img alt="Legal Metrology Officer Profile" class="w-full h-full object-cover" data-alt="Professional headshot portrait of a legal metrology officer in uniform, brightly lit against a neutral grey studio backdrop. High-contrast modern style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPOPhjNHs3kFByI2WbfFEslh4Jh8qrC_xqciJxLUOKuCTcb7mOt93EDeLdM1K7E3SaRB8XmTn51xv7SGispSF8naFnFWSN0fHzEUVLakT9tJwewSDzFqXfYR_pvXPZISMVRTBd1M0LW6uBFV0HVkhmza3K3fgVep4w_MXuEovO0OREjGR_Jd7hpbPWv1hnHJmIKDuaWss9GIIYHhX-73JXlTHzXUN7b1sl1h8KDpm3uHTGUYwku7Y"/>
+</div>
+</header>
+<!-- NavigationDrawer (Desktop) -->
+<nav class="hidden md:flex flex-col h-screen fixed left-0 top-0 z-50 py-base w-72 rounded-r-xl bg-surface dark:bg-inverse-surface shadow-md">
+<div class="px-md mb-8 flex flex-col items-start">
+<div class="w-12 h-12 rounded-full overflow-hidden mb-4 bg-surface-container-highest">
+<img alt="Officer Avatar" class="w-full h-full object-cover" data-alt="Professional headshot portrait of a legal metrology officer in uniform, brightly lit against a neutral grey studio backdrop. High-contrast modern style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrlGdBv5JImy6j5IRGLsTQXG1dDRZxCDh0abAGXmynIXKwEKEBC1bC5kE8yHsiB1VDGq4YmtilMHOaFf2bhsVw_d-srvXCbcJYvglqGJhU-iur4ixwz5yO5mhZULBLIf9ZXjEAolJ5HI8uU_ZCrxIXaHjc1kx9e_0d7ioWc_Uob28OVMDXRPrC2sp55exJh7zz7ZzJnrCsyICsFBKgbsJtr10TXeDmhgzpfj1vRZH1BPvdkeAVoro"/>
+</div>
+<h2 class="font-headline-md text-headline-md text-primary dark:text-inverse-primary">PackCheck AI</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Compliance Officer</p>
+<span class="font-caption text-caption text-outline mt-1">v2.1.0</span>
+</div>
+<ul class="flex-1 overflow-y-auto flex flex-col gap-1 px-2">
+<li>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container-high rounded-full mx-2 transition-all duration-300 ease-in-out font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                    Dashboard
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container-high rounded-full mx-2 transition-all duration-300 ease-in-out font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">barcode_scanner</span>
+                    New Scan
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container-high rounded-full mx-2 transition-all duration-300 ease-in-out font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">description</span>
+                    Reports
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 bg-primary-container text-on-primary-container font-bold rounded-full mx-2 transition-all duration-300 ease-in-out font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+                    Repository
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container-high rounded-full mx-2 transition-all duration-300 ease-in-out font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">insights</span>
+                    Analytics
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container-high rounded-full mx-2 transition-all duration-300 ease-in-out font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">group</span>
+                    Users
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container-high rounded-full mx-2 transition-all duration-300 ease-in-out font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">settings</span>
+                    Settings
+                </a>
+</li>
+</ul>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-72 flex flex-col min-h-screen pb-24 md:pb-0">
+<!-- Search & Filter Area -->
+<section class="sticky top-0 z-30 bg-surface/90 backdrop-blur-md pt-4 pb-2 px-margin-mobile md:px-margin-desktop border-b border-outline-variant/30">
+<div class="max-w-max-width mx-auto">
+<div class="flex items-center gap-3 mb-4">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full h-14 pl-12 pr-4 rounded-xl border border-outline-variant bg-surface-container-lowest focus:ring-2 focus:ring-primary focus:border-primary transition-shadow font-body-lg text-body-lg text-on-surface placeholder:text-on-surface-variant shadow-sm" placeholder="Search repository..." type="text"/>
+</div>
+<button class="h-14 w-14 flex items-center justify-center rounded-xl bg-surface-container-high text-on-surface hover:bg-surface-variant transition-colors border border-outline-variant/50 shadow-sm">
+<span class="material-symbols-outlined">tune</span>
+</button>
+</div>
+<!-- Scrollable Filter Chips -->
+<div class="flex overflow-x-auto pb-2 gap-2 snap-x hide-scrollbar">
+<style>
+                        .hide-scrollbar::-webkit-scrollbar {
+                            display: none;
+                        }
+                        .hide-scrollbar {
+                            -ms-overflow-style: none;
+                            scrollbar-width: none;
+                        }
+                    </style>
+<button class="snap-start shrink-0 px-4 py-2 rounded-full border border-primary bg-primary-container text-on-primary-container font-label-md text-label-md transition-colors whitespace-nowrap">
+                        All
+                    </button>
+<button class="snap-start shrink-0 px-4 py-2 rounded-full border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container-low transition-colors font-label-md text-label-md whitespace-nowrap">
+                        Compliant
+                    </button>
+<button class="snap-start shrink-0 px-4 py-2 rounded-full border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container-low transition-colors font-label-md text-label-md whitespace-nowrap">
+                        Violation
+                    </button>
+<button class="snap-start shrink-0 px-4 py-2 rounded-full border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container-low transition-colors font-label-md text-label-md whitespace-nowrap">
+                        Food &amp; Beverage
+                    </button>
+<button class="snap-start shrink-0 px-4 py-2 rounded-full border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container-low transition-colors font-label-md text-label-md whitespace-nowrap">
+                        Electronics
+                    </button>
+<button class="snap-start shrink-0 px-4 py-2 rounded-full border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container-low transition-colors font-label-md text-label-md whitespace-nowrap">
+                        This Week
+                    </button>
+</div>
+</div>
+</section>
+<!-- Product Grid -->
+<section class="flex-1 p-margin-mobile md:p-margin-desktop overflow-y-auto">
+<div class="max-w-max-width mx-auto">
+<div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+<!-- Card 1 (Compliant) -->
+<article class="bg-surface-container-lowest rounded-xl shadow-sm hover:shadow-md transition-shadow border border-outline-variant/30 overflow-hidden flex flex-col cursor-pointer">
+<div class="h-32 bg-surface-container-low relative">
+<img class="w-full h-full object-cover" data-alt="High quality studio shot of a modern cereal box packaging, brightly lit on a clean white background. High-contrast modern style, focus on the nutrition label area." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDHW1f1rnpLP35UcCi5XScNuz9sKvaIwGv2Qg5ChDht-Cqj3XgYoG95-4cwWpdbRm-fMQ16tBoYotTXnUyPpWvhiOua6MEOtECQ3eLEaILlbfAPebnljKoJIRJhxcVt98Pnw7Ru_A2tjJzRr0pfYPPh8nTQ-a0Hv9dJQFBuTvMGBqySdPzlNHNiRny6xxyFML0selYUo2QdVZTSosLzLGQ9VcDFJhEuxHEDmRr4uvd-iV21oNkO2Y"/>
+<div class="absolute top-2 left-2 bg-secondary-container/90 backdrop-blur-sm text-on-secondary-container px-2 py-1 rounded-md flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+<span class="font-caption text-caption font-bold uppercase tracking-wider">Compliant</span>
+</div>
+</div>
+<div class="p-3 flex flex-col flex-1">
+<h3 class="font-label-md text-label-md text-on-surface line-clamp-2 mb-1">Organic Oat Crunch Cereal 500g</h3>
+<div class="mt-auto flex justify-between items-center text-on-surface-variant">
+<span class="font-caption text-caption">Batch: #A92-B</span>
+<span class="font-caption text-caption">2h ago</span>
+</div>
+</div>
+</article>
+<!-- Card 2 (Violation) -->
+<article class="bg-surface-container-lowest rounded-xl shadow-sm hover:shadow-md transition-shadow border border-outline-variant/30 overflow-hidden flex flex-col cursor-pointer ring-1 ring-error/20">
+<div class="h-32 bg-surface-container-low relative">
+<img class="w-full h-full object-cover" data-alt="High quality studio shot of a generic electronic gadget box packaging, brightly lit on a clean white background. High-contrast modern style, slight blur on the text." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVwlJX1ecxSazMEH6sQFKKupFtZgCLAvQ12Q70taU4RstZS_-XyED53rtvxjSfjle5xTvl4xpPCLXroSUy0pdkKWJcuI3OOhNmrs1zsoV-44ILJX0508Qh7Tls4p7Cz_hqJu1xHoJCHOpjo6vV_ReGQBiRmRQzPW-xNqGEZOJj9oyZo7U4_lU2iEWdLft1W8bnXZzZ86f0PhdWXMZKer6HAWiY9lq2ZOCW23NFU53Lm-1P8dcG_7Q"/>
+<div class="absolute top-2 left-2 bg-error-container/90 backdrop-blur-sm text-on-error-container px-2 py-1 rounded-md flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[14px]">warning</span>
+<span class="font-caption text-caption font-bold uppercase tracking-wider">Violation</span>
+</div>
+</div>
+<div class="p-3 flex flex-col flex-1">
+<h3 class="font-label-md text-label-md text-on-surface line-clamp-2 mb-1">Smart Home Hub Lite</h3>
+<div class="mt-auto flex justify-between items-center text-on-surface-variant">
+<span class="font-caption text-caption text-error">Missing CE Mark</span>
+<span class="font-caption text-caption">5h ago</span>
+</div>
+</div>
+</article>
+<!-- Card 3 (Compliant) -->
+<article class="bg-surface-container-lowest rounded-xl shadow-sm hover:shadow-md transition-shadow border border-outline-variant/30 overflow-hidden flex flex-col cursor-pointer">
+<div class="h-32 bg-surface-container-low relative">
+<img class="w-full h-full object-cover" data-alt="High quality studio shot of a premium bottled water packaging, brightly lit on a clean white background. High-contrast modern style, clear label." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-zGAl1ueAOruE04WFdraipJYUFZlPRXnNQS-WAl0b0Rcr0ndko9SKHizORTb48V319Rnlb0gKKeP6n3Nz1Nh9gyQrA7bjtA1BRcynm7wdQZLpVjJXu2dk_wfofL2zA25bpM5W1eA4_F8YKekV_wNXEOKJmmpV4ThxMZjXovM610V4hF92K77xbwAPtWMGwHsg7POpYIzLFt7KfiO84U56lGk0P5gZJQGkTpKP9iP8FWbjTu4xOqs"/>
+<div class="absolute top-2 left-2 bg-secondary-container/90 backdrop-blur-sm text-on-secondary-container px-2 py-1 rounded-md flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+<span class="font-caption text-caption font-bold uppercase tracking-wider">Compliant</span>
+</div>
+</div>
+<div class="p-3 flex flex-col flex-1">
+<h3 class="font-label-md text-label-md text-on-surface line-clamp-2 mb-1">Alpine Spring Water 1L</h3>
+<div class="mt-auto flex justify-between items-center text-on-surface-variant">
+<span class="font-caption text-caption">Batch: #W11-X</span>
+<span class="font-caption text-caption">1d ago</span>
+</div>
+</div>
+</article>
+<!-- Card 4 (Compliant) -->
+<article class="bg-surface-container-lowest rounded-xl shadow-sm hover:shadow-md transition-shadow border border-outline-variant/30 overflow-hidden flex flex-col cursor-pointer">
+<div class="h-32 bg-surface-container-low relative">
+<img class="w-full h-full object-cover" data-alt="High quality studio shot of a craft beer can packaging, brightly lit on a clean white background. High-contrast modern style, vibrant colors." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-ALgnYZTwAUHQi4nHy2bZx5hE6BE0AgpMYMFpkPkYN6gwPUj97i8RJDd8ZNEhgwroohwwhffvpM9rhjkDkuzMF9aq0Rom3zP-SZq3p7RBffT3w9_zSDI5QBgbcmjdJJ5lhSma6x4Frd7GIRwKUoZ1-R95oa7CWfUVxCp8yRkER2LQp1R4ksEiQQlgLYUHGyMf5SQu1tRP8ehlPQ-SRObg5MdFN9udeEeGzKAHA222rUHFJLI-g4E"/>
+<div class="absolute top-2 left-2 bg-secondary-container/90 backdrop-blur-sm text-on-secondary-container px-2 py-1 rounded-md flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+<span class="font-caption text-caption font-bold uppercase tracking-wider">Compliant</span>
+</div>
+</div>
+<div class="p-3 flex flex-col flex-1">
+<h3 class="font-label-md text-label-md text-on-surface line-clamp-2 mb-1">Hazy IPA Craft Beer 330ml</h3>
+<div class="mt-auto flex justify-between items-center text-on-surface-variant">
+<span class="font-caption text-caption">Batch: #B44-Y</span>
+<span class="font-caption text-caption">2d ago</span>
+</div>
+</div>
+</article>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 pb-safe bg-surface/80 backdrop-blur-md dark:bg-inverse-surface/80 shadow-lg border-t border-outline-variant rounded-t-xl">
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-highest rounded-lg p-2 transition-colors">
+<span class="material-symbols-outlined mb-1">home</span>
+<span class="font-label-md text-[10px] leading-tight">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-highest rounded-lg p-2 transition-colors">
+<span class="material-symbols-outlined mb-1">add_circle</span>
+<span class="font-label-md text-[10px] leading-tight">Scan</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-highest rounded-lg p-2 transition-colors">
+<span class="material-symbols-outlined mb-1">assessment</span>
+<span class="font-label-md text-[10px] leading-tight">Reports</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 active:scale-90 transition-transform duration-200">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">database</span>
+<span class="font-label-md text-[10px] leading-tight">Store</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-highest rounded-lg p-2 transition-colors">
+<span class="material-symbols-outlined mb-1">more_horiz</span>
+<span class="font-label-md text-[10px] leading-tight">More</span>
+</button>
+</nav>
+</body></html>

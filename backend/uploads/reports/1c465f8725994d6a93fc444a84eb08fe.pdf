@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PackCheck Legal Metrology Compliance Report</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm 15mm 20mm 15mm;
+            @bottom-right {
+                content: "Page " counter(page) " of " counter(pages);
+                font-family: 'Inter', sans-serif;
+                font-size: 8pt;
+                color: #737687;
+            }
+            @bottom-left {
+                content: "PackCheck • Legal Metrology (Packaged Commodities) Rules, 2011";
+                font-family: 'Inter', sans-serif;
+                font-size: 8pt;
+                color: #737687;
+            }
+        }
+
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            color: #181c21;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+            font-size: 10pt;
+            line-height: 1.4;
+        }
+
+        .header-container {
+            border-bottom: 2px solid #0051d5;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .header-table td {
+            vertical-align: middle;
+        }
+
+        .govt-title {
+            font-size: 16pt;
+            font-weight: 800;
+            color: #0051d5;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: -0.01em;
+        }
+
+        .govt-subtitle {
+            font-size: 9pt;
+            color: #424655;
+            margin: 3px 0 0 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .report-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-weight: 700;
+            font-size: 10pt;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .badge-compliant {
+            background-color: #e0f8f2;
+            color: #006b5c;
+            border: 1px solid #65fade;
+        }
+
+        .badge-non-compliant {
+            background-color: #ffdad6;
+            color: #ba1a1a;
+            border: 1px solid #ffb4ab;
+        }
+
+        .badge-partially-compliant {
+            background-color: #fff1d6;
+            color: #aa2f13;
+            border: 1px solid #ffdad2;
+        }
+
+        .section-title {
+            font-size: 12pt;
+            font-weight: 700;
+            color: #0051d5;
+            margin-top: 20px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #e0e2e9;
+            padding-bottom: 4px;
+        }
+
+        .meta-grid {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            background-color: #f8f9ff;
+            border-radius: 8px;
+            border: 1px solid #e6e8ef;
+        }
+
+        .meta-grid td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e6e8ef;
+            font-size: 9pt;
+        }
+
+        .meta-label {
+            font-weight: 600;
+            color: #424655;
+            width: 25%;
+            text-transform: uppercase;
+            font-size: 8pt;
+        }
+
+        .meta-val {
+            color: #181c21;
+            font-weight: 500;
+        }
+
+        table.declaration-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        table.declaration-table th {
+            background-color: #0051d5;
+            color: #ffffff;
+            font-weight: 600;
+            text-align: left;
+            padding: 8px 10px;
+            font-size: 8.5pt;
+            text-transform: uppercase;
+        }
+
+        table.declaration-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #e0e2e9;
+            font-size: 8.5pt;
+            vertical-align: top;
+        }
+
+        table.declaration-table tr:nth-child(even) {
+            background-color: #f8f9ff;
+        }
+
+        .status-pill {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 7.5pt;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .pill-pass {
+            background-color: #e0f8f2;
+            color: #006b5c;
+        }
+
+        .pill-fail {
+            background-color: #ffdad6;
+            color: #ba1a1a;
+        }
+
+        .pill-override {
+            background-color: #fff1d6;
+            color: #aa2f13;
+        }
+
+        .notes-box {
+            background-color: #f1f3fa;
+            border-left: 3px solid #0051d5;
+            padding: 10px 14px;
+            font-size: 9pt;
+            margin-top: 15px;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .signature-section {
+            margin-top: 35px;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .signature-box {
+            width: 45%;
+            border-top: 1px solid #737687;
+            padding-top: 6px;
+            font-size: 8.5pt;
+            color: #424655;
+            text-align: center;
+        }
+
+        .citation-text {
+            font-size: 7.5pt;
+            color: #737687;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <table class="header-table">
+            <tr>
+                <td>
+                    <h1 class="govt-title">PackCheck Compliance Report</h1>
+                    <div class="govt-subtitle">Department of Legal Metrology • Statutory Verification Audit</div>
+                </td>
+                <td style="text-align: right;">
+                    
+                        <div class="report-badge badge-compliant">VERIFIED COMPLIANT</div>
+                    
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <table class="meta-grid">
+        <tr>
+            <td class="meta-label">Report ID:</td>
+            <td class="meta-val">53e046e2-f773-4aaf-946f-ba9b57079958</td>
+            <td class="meta-label">Scan ID:</td>
+            <td class="meta-val">351760d6-16ff-4e62-b3d0-4547050a8040</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Inspection Date:</td>
+            <td class="meta-val">2026-09-03 06:20:19 UTC</td>
+            <td class="meta-label">Enforcement Officer:</td>
+            <td class="meta-val">Rajesh Kumar Verma (Admin)</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Product Name:</td>
+            <td class="meta-val"><strong>Aashirvaad Superior MP Whole Wheat Atta</strong></td>
+            <td class="meta-label">Brand & Category:</td>
+            <td class="meta-val">Aashirvaad (Food Grains &amp; Flours)</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Manufacturer / Packer:</td>
+            <td class="meta-val" colspan="3">ITC Limited - 37, J.L. Nehru Road, Kolkata - 700071, West Bengal</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Inspection Location:</td>
+            <td class="meta-val">Big Bazaar, Connaught Place, New Delhi</td>
+            <td class="meta-label">Origin Country:</td>
+            <td class="meta-val">India</td>
+        </tr>
+    </table>
+
+    <div class="section-title">Mandatory Declaration Findings (LMPC Rules, 2011)</div>
+    <table class="declaration-table">
+        <thead>
+            <tr>
+                <th style="width: 20%;">Declaration Field</th>
+                <th style="width: 35%;">Extracted Text & Measurements</th>
+                <th style="width: 15%;">Verdict</th>
+                <th style="width: 30%;">Rule Reference & Findings</th>
+            </tr>
+        </thead>
+        <tbody>
+            
+            <tr>
+                <td>
+                    <strong>Common Name</strong>
+                    
+                </td>
+                <td>
+                    
+                        "Whole Wheat Flour (Atta)"
+                        
+                            <br><span style="font-size: 7.5pt; color: #424655;">Measured Font Height: <strong>6.5 mm</strong></span>
+                        
+                    
+                </td>
+                <td>
+                    
+                        <span class="status-pill pill-pass">COMPLIANT</span>
+                    
+                </td>
+                <td>
+                    <div class="citation-text">Rule 6(1)(a) of LMPC Rules, 2011</div>
+                    
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                    <strong>Net Quantity</strong>
+                    
+                </td>
+                <td>
+                    
+                        "Net Quantity: 5 kg"
+                        
+                            <br><span style="font-size: 7.5pt; color: #424655;">Measured Font Height: <strong>8.2 mm</strong></span>
+                        
+                    
+                </td>
+                <td>
+                    
+                        <span class="status-pill pill-pass">COMPLIANT</span>
+                    
+                </td>
+                <td>
+                    <div class="citation-text">Rule 6(1)(d) read with Rule 8 &amp; Second Schedule</div>
+                    
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                    <strong>Mrp</strong>
+                    
+                </td>
+                <td>
+                    
+                        "MRP ₹ 245.00 (inclusive of all taxes)"
+                        
+                            <br><span style="font-size: 7.5pt; color: #424655;">Measured Font Height: <strong>6.0 mm</strong></span>
+                        
+                    
+                </td>
+                <td>
+                    
+                        <span class="status-pill pill-pass">COMPLIANT</span>
+                    
+                </td>
+                <td>
+                    <div class="citation-text">Rule 6(1)(f) of LMPC Rules, 2011</div>
+                    
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                    <strong>Mfg Date</strong>
+                    
+                </td>
+                <td>
+                    
+                        "Mfg Date: 08/2026"
+                        
+                            <br><span style="font-size: 7.5pt; color: #424655;">Measured Font Height: <strong>4.0 mm</strong></span>
+                        
+                    
+                </td>
+                <td>
+                    
+                        <span class="status-pill pill-pass">COMPLIANT</span>
+                    
+                </td>
+                <td>
+                    <div class="citation-text">Rule 6(1)(e) of LMPC Rules, 2011</div>
+                    
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                    <strong>Manufacturer Details</strong>
+                    
+                </td>
+                <td>
+                    
+                        "Manufactured &amp; Packed by: ITC Limited, 37 J.L. Nehru Road, Kolkata - 700071"
+                        
+                            <br><span style="font-size: 7.5pt; color: #424655;">Measured Font Height: <strong>3.5 mm</strong></span>
+                        
+                    
+                </td>
+                <td>
+                    
+                        <span class="status-pill pill-pass">COMPLIANT</span>
+                    
+                </td>
+                <td>
+                    <div class="citation-text">Rule 6(1)(b) of LMPC Rules, 2011</div>
+                    
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                    <strong>Consumer Care</strong>
+                    
+                </td>
+                <td>
+                    
+                        "Consumer Care: ITC Care Cell, Toll Free: 1800-425-4444, Email: itccares@itc.in"
+                        
+                            <br><span style="font-size: 7.5pt; color: #424655;">Measured Font Height: <strong>3.0 mm</strong></span>
+                        
+                    
+                </td>
+                <td>
+                    
+                        <span class="status-pill pill-pass">COMPLIANT</span>
+                    
+                </td>
+                <td>
+                    <div class="citation-text">Rule 6(1)(h) of LMPC Rules, 2011</div>
+                    
+                </td>
+            </tr>
+            
+        </tbody>
+    </table>
+
+    <div class="section-title">Summary & Legal Determination</div>
+    <div class="notes-box">
+        <strong>Statutory Assessment:</strong>
+        
+            All mandatory declarations specified under the Legal Metrology (Packaged Commodities) Rules, 2011 are duly present, legibly displayed, and meet statutory font height and format requirements.
+        
+    </div>
+
+    <table class="signature-section">
+        <tr>
+            <td class="signature-box" style="float: left;">
+                <br><br>
+                <strong>Rajesh Kumar Verma</strong><br>
+                Enforcement Inspector / Reviewer<br>
+                Department of Legal Metrology
+            </td>
+            <td style="width: 10%;"></td>
+            <td class="signature-box" style="float: right;">
+                <br><br>
+                <strong>Authorized Controller of Legal Metrology</strong><br>
+                Digital Verification Seal<br>
+                Date: 2026-09-03 06:20:19 UTC
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

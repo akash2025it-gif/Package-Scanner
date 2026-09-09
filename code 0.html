@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PackCheck - Login</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline-variant": "#c3c6d8",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#f8f9ff",
+                        "on-secondary-fixed-variant": "#005045",
+                        "on-primary-fixed-variant": "#003ea7",
+                        "surface-container-low": "#f1f3fa",
+                        "on-surface": "#181c21",
+                        "primary": "#0051d5",
+                        "secondary-container": "#65fade",
+                        "surface-dim": "#d8dae1",
+                        "on-primary-container": "#fefcff",
+                        "background": "#f6f8ff",
+                        "tertiary-fixed": "#ffdad2",
+                        "on-tertiary-container": "#fffbff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#e0e2e9",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed-variant": "#8c1900",
+                        "on-tertiary-fixed": "#3d0600",
+                        "tertiary-container": "#cd4729",
+                        "surface-container-high": "#e6e8ef",
+                        "on-surface-variant": "#424655",
+                        "primary-container": "#276afa",
+                        "on-error-container": "#93000a",
+                        "primary-fixed": "#dbe1ff",
+                        "on-primary": "#ffffff",
+                        "surface-container": "#eceef5",
+                        "secondary": "#006b5c",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#00174b",
+                        "on-secondary-fixed": "#00201b",
+                        "inverse-primary": "#b4c5ff",
+                        "secondary-fixed": "#65fade",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb4a3",
+                        "surface-tint": "#0053da",
+                        "inverse-on-surface": "#eef1f7",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#41ddc2",
+                        "on-background": "#181c21",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "outline": "#737687",
+                        "tertiary": "#aa2f13",
+                        "inverse-surface": "#2d3136",
+                        "surface": "#ffffff",
+                        "surface-container-highest": "#e0e2e9",
+                        "on-secondary-container": "#007262"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1.25rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "xs": "4px",
+                        "md": "24px",
+                        "base": "8px",
+                        "xl": "64px",
+                        "gutter": "16px",
+                        "margin-desktop": "32px",
+                        "lg": "40px",
+                        "max-width": "1280px",
+                        "sm": "12px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter", "sans-serif"],
+                        "headline-lg": ["Hanken Grotesk", "sans-serif"],
+                        "headline-lg-mobile": ["Hanken Grotesk", "sans-serif"],
+                        "body-lg": ["Inter", "sans-serif"],
+                        "display-lg": ["Hanken Grotesk", "sans-serif"],
+                        "caption": ["Inter", "sans-serif"],
+                        "label-md": ["Inter", "sans-serif"],
+                        "headline-md": ["Hanken Grotesk", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "caption": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+                    },
+                    "boxShadow": {
+                        "ambient": "0px 10px 30px rgba(47, 111, 255, 0.08)",
+                        "overlay": "0px 20px 40px rgba(0, 0, 0, 0.12)"
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bg-gradient-tech {
+            background: linear-gradient(135deg, #0051d5 0%, #006b5c 100%);
+        }
+    </style>
+</head>
+<body class="bg-background h-full font-body-md text-on-surface antialiased flex flex-col md:flex-row">
+<!-- Top/Left Gradient Section -->
+<div class="bg-gradient-tech flex-1 flex flex-col justify-center items-center p-lg relative overflow-hidden h-1/2 md:h-full md:w-1/2 rounded-b-2xl md:rounded-r-2xl md:rounded-bl-none z-10 shadow-overlay">
+<!-- Decorative subtle pattern overlay -->
+<div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 20px 20px;"></div>
+<div class="relative z-20 flex flex-col items-center text-center max-w-sm">
+<img alt="PackCheck Logo" class="w-32 h-32 md:w-48 md:h-48 mb-lg object-contain drop-shadow-xl" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPdTQIdKL3vai_pFc1N0ejYctuJIEIB2LhP97NMblt9xdVEQNFRb5shqkd4DJ5fN8-9h42qVW2psCH8OwztDxlwvt5o_DLYVCmLlS7rBO5ryFbdZXN6Czbpb89z_RHFTWxpIq3F_l-Qvr_iBq_Yg3SFgrjVpJYso3eIagERaxQwKNQJV61phyie3bv2B1U6jPx47g9jJu-t2ob7kJZRxKuFqUTjCfEiJ6-x7vcat1yVe2-G_-LNzs"/>
+<h1 class="font-display-lg text-display-lg text-on-primary mb-base">PackCheck</h1>
+<p class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-secondary-container opacity-90 mb-xl">Scan. Verify. Comply.</p>
+<div class="w-full relative mt-lg hidden md:block">
+<!-- Abstract scanning illustration -->
+<div class="bg-surface/20 backdrop-blur-md border-l-2 border-secondary-container rounded-2xl p-md shadow-overlay relative mx-auto w-64 h-64 flex items-center justify-center overflow-hidden">
+<span class="material-symbols-outlined text-6xl text-secondary-container absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10" style="font-variation-settings: 'FILL' 1;">barcode_scanner</span>
+<div class="absolute inset-0 border-2 border-secondary-container/30 rounded-2xl scale-90 animate-pulse"></div>
+<div class="absolute top-0 left-0 w-full h-1 bg-secondary-container shadow-[0_0_15px_#65fade] animate-[scan_2s_ease-in-out_infinite_alternate]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom/Right Login Form Section -->
+<div class="flex-1 flex items-center justify-center p-margin-mobile md:p-margin-desktop bg-background h-1/2 md:h-full md:w-1/2">
+<div class="w-full max-w-md bg-surface p-lg rounded-2xl shadow-ambient">
+<div class="mb-lg">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-xs">Welcome Back</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Enter your credentials to access the compliance dashboard.</p>
+</div>
+<form class="space-y-md">
+<!-- Role Selector -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-xs">Select Role</label>
+<div class="flex bg-surface-container-low rounded-xl p-xs gap-xs relative">
+<label class="flex-1 text-center cursor-pointer relative">
+<input checked="" class="peer sr-only" name="role" type="radio" value="inspector"/>
+<div class="py-sm px-xs rounded-lg font-label-md text-label-md text-on-surface-variant peer-checked:bg-surface peer-checked:text-primary peer-checked:shadow-sm transition-all duration-200">
+                                Inspector
+                            </div>
+</label>
+<label class="flex-1 text-center cursor-pointer relative">
+<input class="peer sr-only" name="role" type="radio" value="admin"/>
+<div class="py-sm px-xs rounded-lg font-label-md text-label-md text-on-surface-variant peer-checked:bg-surface peer-checked:text-primary peer-checked:shadow-sm transition-all duration-200">
+                                Admin
+                            </div>
+</label>
+<label class="flex-1 text-center cursor-pointer relative">
+<input class="peer sr-only" name="role" type="radio" value="viewer"/>
+<div class="py-sm px-xs rounded-lg font-label-md text-label-md text-on-surface-variant peer-checked:bg-surface peer-checked:text-primary peer-checked:shadow-sm transition-all duration-200">
+                                Viewer
+                            </div>
+</label>
+</div>
+</div>
+<!-- Email / OTP Field -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-xs" for="email">Email Address</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant">mail</span>
+<input class="w-full h-[56px] pl-[44px] pr-sm rounded-xl border border-outline-variant bg-surface-bright focus:border-primary focus:ring-2 focus:ring-primary/20 transition-shadow outline-none font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50" id="email" placeholder="officer@packcheck.gov" type="email"/>
+</div>
+</div>
+<div class="flex justify-between items-center mb-lg">
+<label class="flex items-center gap-xs cursor-pointer">
+<input class="w-5 h-5 rounded text-primary focus:ring-primary border-outline-variant rounded" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface-variant">Remember me</span>
+</label>
+<a class="font-label-md text-label-md text-primary hover:text-primary-container transition-colors" href="#">Use OTP Instead</a>
+</div>
+<!-- Submit Button -->
+<button class="w-full h-[56px] bg-tertiary-container hover:bg-tertiary text-on-tertiary font-label-md text-label-md rounded-full shadow-md active:scale-95 transition-all duration-200 flex items-center justify-center gap-sm" type="button">
+                    Login to PackCheck
+                    <span class="material-symbols-outlined text-lg">arrow_forward</span>
+</button>
+<p class="text-center font-caption text-caption text-on-surface-variant mt-md">
+                    By logging in, you agree to our <a class="text-primary underline" href="#">Terms of Service</a> and <a class="text-primary underline" href="#">Privacy Policy</a>.
+                </p>
+</form>
+</div>
+</div>
+<style>
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+    </style>
+</body></html>

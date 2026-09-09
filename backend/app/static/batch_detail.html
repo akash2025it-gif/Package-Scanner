@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>PackCheck - Batch Inspection Intelligence</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#0051d5",
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-[#f8f9ff] font-['Inter'] text-[#181c21] min-h-screen flex">
+    <!-- Left Navigation Rail -->
+    <aside class="w-64 bg-[#0051d5] text-white flex flex-col justify-between p-5 shadow-xl hidden md:flex shrink-0">
+        <div>
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[#65fade] text-2xl">verified_user</span>
+                </div>
+                <div>
+                    <h2 class="font-['Hanken_Grotesk'] font-bold text-lg leading-tight">PackCheck</h2>
+                    <span class="text-xs text-[#65fade] tracking-wider uppercase font-semibold">LMPC Enforcement</span>
+                </div>
+            </div>
+
+            <nav class="space-y-1.5 text-sm font-medium">
+                <a href="/dashboard" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white/90 rounded-xl transition-all">
+                    <span class="material-symbols-outlined">dashboard</span> Dashboard
+                </a>
+                <a href="/scan/new" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white/90 rounded-xl transition-all">
+                    <span class="material-symbols-outlined">add_photo_alternate</span> New Scan
+                </a>
+                <a href="/products-ui" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white/90 rounded-xl transition-all">
+                    <span class="material-symbols-outlined">inventory_2</span> Product Catalog
+                </a>
+                <a href="/enforcement" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white/90 rounded-xl transition-all">
+                    <span class="material-symbols-outlined">map</span> Regional Heatmap
+                </a>
+                <a href="/team" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white/90 rounded-xl transition-all">
+                    <span class="material-symbols-outlined">group</span> Manage Team
+                </a>
+            </nav>
+        </div>
+
+        <div class="pt-4 border-t border-white/10">
+            <a href="/" onclick="PackCheck.clearAuth()" class="flex items-center gap-2 text-xs text-white/80 hover:text-white">
+                <span class="material-symbols-outlined text-sm">logout</span> Sign Out
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+        <!-- Header -->
+        <header class="bg-white border-b border-gray-200 px-4 sm:px-6 py-3.5 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sticky top-0 z-20 shadow-xs">
+            <div class="flex items-center gap-3">
+                <a href="/dashboard" class="p-2 hover:bg-gray-100 rounded-xl text-gray-500 transition-colors">
+                    <span class="material-symbols-outlined text-xl">arrow_back</span>
+                </a>
+                <div>
+                    <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-primary text-xl">batch_prediction</span>
+                        <h1 class="font-['Hanken_Grotesk'] font-bold text-lg sm:text-xl text-gray-900 leading-tight">
+                            Batch Intelligence: <span id="headerBatchTitle" class="font-mono text-primary">...</span>
+                        </h1>
+                        <span id="headerStatusBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-700 border border-gray-200">
+                            LOADING
+                        </span>
+                    </div>
+                    <p class="text-[11px] sm:text-xs text-gray-500 mt-0.5" id="headerProductMeta">
+                        Production Lot Traceability & Inspection History
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button onclick="loadBatchData()" title="Refresh" class="p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold text-xs transition-all flex items-center gap-1">
+                    <span class="material-symbols-outlined text-base">refresh</span>
+                    <span class="hidden sm:inline text-xs">Refresh</span>
+                </button>
+                <button id="btnUpdateStatus" onclick="openStatusModal()" class="px-3.5 py-2 bg-primary hover:bg-blue-800 text-white rounded-xl font-semibold text-xs shadow-sm transition-all flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-sm">edit_note</span>
+                    <span>Update Batch Status</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="p-3.5 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl mx-auto w-full">
+            <!-- Loading / Error States -->
+            <div id="batchLoadingState" class="p-12 text-center text-gray-400 text-xs">
+                <span class="animate-spin text-2xl block mb-2">⏳</span>
+                <span>Loading batch-level inspection intelligence...</span>
+            </div>
+
+            <div id="batchErrorState" class="hidden p-8 rounded-2xl bg-red-50 border border-red-200 text-red-800 text-xs text-center space-y-2">
+                <span class="material-symbols-outlined text-4xl text-red-500">error</span>
+                <h3 class="font-bold text-sm text-red-900" id="batchErrorMessage">Batch Not Found</h3>
+                <p class="text-red-700">No inspection records found for this batch or lot number.</p>
+                <div class="pt-2">
+                    <a href="/dashboard" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold inline-block">Back to Dashboard</a>
+                </div>
+            </div>
+
+            <div id="batchContentSection" class="hidden space-y-5 sm:space-y-6">
+                <!-- Batch Metrics Grid (4 KPI cards) -->
+                <section class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                    <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs space-y-1">
+                        <span class="text-[10px] font-bold uppercase text-gray-500 block tracking-wider">Total Inspections in Batch</span>
+                        <h3 class="text-2xl font-bold font-['Hanken_Grotesk'] text-gray-900" id="kpiTotal">0</h3>
+                        <p class="text-[10px] text-gray-400 font-medium">Scanned product units</p>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs space-y-1">
+                        <span class="text-[10px] font-bold uppercase text-emerald-600 block tracking-wider">Compliant Units</span>
+                        <h3 class="text-2xl font-bold font-['Hanken_Grotesk'] text-emerald-600" id="kpiCompliant">0</h3>
+                        <p class="text-[10px] text-gray-400 font-medium">Verified without violations</p>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs space-y-1">
+                        <span class="text-[10px] font-bold uppercase text-red-600 block tracking-wider">Requiring Attention</span>
+                        <h3 class="text-2xl font-bold font-['Hanken_Grotesk'] text-red-600" id="kpiAttention">0</h3>
+                        <p class="text-[10px] text-gray-400 font-medium">Non-compliant inspections</p>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs space-y-1">
+                        <span class="text-[10px] font-bold uppercase text-amber-600 block tracking-wider">In Review</span>
+                        <h3 class="text-2xl font-bold font-['Hanken_Grotesk'] text-amber-600" id="kpiNeedsReview">0</h3>
+                        <p class="text-[10px] text-gray-400 font-medium">Pending manual verification</p>
+                    </div>
+                </section>
+
+                <!-- Batch Alert Banner (When non-compliant or under attention) -->
+                <div id="batchAlertBanner" class="hidden p-4 rounded-2xl bg-amber-50 border-2 border-amber-300 text-amber-950 text-xs shadow-sm flex items-start gap-3">
+                    <span class="material-symbols-outlined text-amber-600 text-2xl shrink-0 mt-0.5">notification_important</span>
+                    <div class="space-y-1">
+                        <strong class="font-bold text-sm text-amber-900 block">Batch-Level Investigation Alert</strong>
+                        <p class="text-amber-800 leading-relaxed" id="batchAlertText">
+                            One or more package units inspected from this production lot have confirmed or potential statutory non-compliance. Inspectors are advised to exercise heightened scrutiny when encountering this batch in the field.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Statutory Notice Card -->
+                <div class="p-3.5 sm:p-4 rounded-2xl bg-blue-50/70 border border-blue-200 text-blue-950 text-xs flex items-start gap-2.5">
+                    <span class="material-symbols-outlined text-primary text-xl shrink-0 mt-0.5">gavel</span>
+                    <div class="space-y-0.5">
+                        <strong class="font-bold text-primary block">Statutory Legal Framework</strong>
+                        <p class="text-blue-900 text-[11px] leading-relaxed">
+                            Batch-level information is provided to support inspection and investigation. Presence of an issue in one inspected package does not by itself establish that all products in the batch are non-compliant. Further statutory enforcement is subject to authorized sampling procedures under the Legal Metrology (Packaged Commodities) Rules, 2011.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Findings Across Batch -->
+                <section class="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden space-y-3 p-4 sm:p-5">
+                    <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-xl">rule</span>
+                            <h2 class="font-['Hanken_Grotesk'] font-bold text-sm sm:text-base text-gray-900">Observed Non-Compliance Findings in Batch</h2>
+                        </div>
+                        <span id="findingsCountBadge" class="text-xs font-semibold text-gray-500">0 Rule Citations</span>
+                    </div>
+
+                    <div id="findingsBreakdownList" class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        <div class="p-4 text-center text-gray-400 col-span-2">No non-compliance findings recorded for this batch.</div>
+                    </div>
+                </section>
+
+                <!-- Inspections in this Batch Table -->
+                <section class="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden">
+                    <div class="p-4 sm:p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                            <h2 class="font-['Hanken_Grotesk'] font-bold text-sm sm:text-base text-gray-900">Recorded Package Inspections in Batch</h2>
+                            <p class="text-[11px] text-gray-500 mt-0.5">Comprehensive chronological history of scans associated with this production lot</p>
+                        </div>
+                        <span id="inspectionsCountTag" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-primary border border-blue-200 self-start sm:self-auto">
+                            0 Recorded
+                        </span>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-gray-50 text-gray-600 uppercase font-semibold border-b border-gray-200 text-[10px]">
+                                <tr>
+                                    <th class="p-3.5">Inspection ID</th>
+                                    <th class="p-3.5">Product & Brand</th>
+                                    <th class="p-3.5">Location / Store</th>
+                                    <th class="p-3.5">Date</th>
+                                    <th class="p-3.5">Compliance Status</th>
+                                    <th class="p-3.5">Findings</th>
+                                    <th class="p-3.5 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="batchInspectionsTableBody" class="divide-y divide-gray-100 text-gray-700 font-medium">
+                                <tr>
+                                    <td colspan="7" class="p-8 text-center text-gray-400">Loading inspection records...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Update Batch Status Modal -->
+    <div id="statusModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 border border-gray-100">
+            <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-xl">policy</span>
+                    <h3 class="font-['Hanken_Grotesk'] font-bold text-base text-gray-900">Update Batch Investigation Status</h3>
+                </div>
+                <button type="button" onclick="closeStatusModal()" class="text-gray-400 hover:text-gray-700 p-1 rounded-lg">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="space-y-3.5 text-xs">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Investigation Status <span class="text-red-500">*</span></label>
+                    <select id="modalStatusSelect" class="w-full text-xs rounded-xl border-gray-300 p-2.5 font-medium focus:ring-primary focus:border-primary">
+                        <option value="normal">Normal / Standard (No Active Investigation)</option>
+                        <option value="attention_required">Attention Required (Elevated Risk / High Scrutiny)</option>
+                        <option value="under_investigation">Under Formal Investigation (Enforcement Active)</option>
+                        <option value="resolved">Resolved (Investigation Concluded / Compliant)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Reason / Officer Investigation Notes <span class="text-red-500">*</span></label>
+                    <textarea id="modalStatusNotes" rows="3" required class="w-full text-xs rounded-xl border-gray-300 p-2.5 focus:ring-primary focus:border-primary" placeholder="State reason for updating batch investigation status..."></textarea>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+                <button type="button" onclick="closeStatusModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold text-xs transition-colors">
+                    Cancel
+                </button>
+                <button type="button" onclick="submitStatusUpdate()" id="btnSaveStatus" class="px-5 py-2 bg-primary hover:bg-blue-700 text-white rounded-xl font-semibold text-xs shadow-md transition-colors flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-sm">check_circle</span>
+                    <span>Update Status</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+    <script>
+        let currentBatchNumber = '';
+        let currentBatchData = null;
+
+        function getBatchFromUrl() {
+            const pathParts = window.location.pathname.split('/');
+            const batchIdx = pathParts.indexOf('batch');
+            if (batchIdx !== -1 && pathParts[batchIdx + 1]) {
+                return decodeURIComponent(pathParts[batchIdx + 1]);
+            }
+            const params = new URLSearchParams(window.location.search);
+            return params.get('number') || params.get('batch') || '';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            currentBatchNumber = getBatchFromUrl();
+            if (currentBatchNumber) {
+                loadBatchData();
+            } else {
+                showError('No batch number specified in URL.');
+            }
+        });
+
+        function showError(msg) {
+            document.getElementById('batchLoadingState').classList.add('hidden');
+            document.getElementById('batchContentSection').classList.add('hidden');
+            document.getElementById('batchErrorState').classList.remove('hidden');
+            document.getElementById('batchErrorMessage').textContent = msg || 'Batch not found.';
+        }
+
+        async function loadBatchData() {
+            const loading = document.getElementById('batchLoadingState');
+            const content = document.getElementById('batchContentSection');
+            const errorState = document.getElementById('batchErrorState');
+
+            loading.classList.remove('hidden');
+            errorState.classList.add('hidden');
+            content.classList.add('hidden');
+
+            document.getElementById('headerBatchTitle').textContent = currentBatchNumber;
+
+            const res = await PackCheck.request(`/batches/${encodeURIComponent(currentBatchNumber)}`);
+            loading.classList.add('hidden');
+
+            if (!res.success || !res.data) {
+                showError(res.error?.message || `No inspection records found for batch ${currentBatchNumber}`);
+                return;
+            }
+
+            const b = res.data;
+            currentBatchData = b;
+            content.classList.remove('hidden');
+
+            // Header info
+            document.getElementById('headerBatchTitle').textContent = b.batch_number;
+            document.getElementById('headerProductMeta').textContent = `${b.product_name || 'Commodity'} • Brand: ${b.product_brand || 'Standard'} • ${b.total_inspections} inspection(s) recorded`;
+
+            // Status badge
+            const stBadge = document.getElementById('headerStatusBadge');
+            const st = b.status || 'normal';
+            stBadge.textContent = st.replace(/_/g, ' ').toUpperCase();
+            if (st === 'under_investigation') {
+                stBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-100 text-red-800 border border-red-300 animate-pulse';
+            } else if (st === 'attention_required') {
+                stBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300';
+            } else if (st === 'resolved') {
+                stBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-purple-100 text-purple-800 border border-purple-300';
+            } else {
+                stBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300';
+            }
+
+            // KPIs
+            document.getElementById('kpiTotal').textContent = b.total_inspections;
+            document.getElementById('kpiCompliant').textContent = b.compliant_inspections;
+            document.getElementById('kpiAttention').textContent = b.non_compliant_inspections;
+            document.getElementById('kpiNeedsReview').textContent = b.needs_review_inspections;
+
+            // Alert banner
+            const alertBanner = document.getElementById('batchAlertBanner');
+            if (st === 'attention_required' || st === 'under_investigation' || b.non_compliant_inspections > 0) {
+                alertBanner.classList.remove('hidden');
+                document.getElementById('batchAlertText').textContent = b.attention_reason || `This batch has ${b.non_compliant_inspections} non-compliant inspection finding(s) on record. Inspections from this batch require officer verification.`;
+            } else {
+                alertBanner.classList.add('hidden');
+            }
+
+            // Render Findings Across Batch
+            renderFindingsList(b.inspections || []);
+
+            // Render Inspections Table
+            renderInspectionsTable(b.inspections || []);
+        }
+
+        function renderFindingsList(inspections) {
+            const container = document.getElementById('findingsBreakdownList');
+            const badge = document.getElementById('findingsCountBadge');
+
+            const findingsMap = {};
+            let totalFindings = 0;
+
+            inspections.forEach(ins => {
+                (ins.findings_summary || []).forEach(f => {
+                    totalFindings++;
+                    findingsMap[f] = (findingsMap[f] || 0) + 1;
+                });
+            });
+
+            badge.textContent = `${totalFindings} Citation(s) Found`;
+
+            const entries = Object.entries(findingsMap);
+            if (entries.length === 0) {
+                container.innerHTML = '<div class="p-4 text-center text-gray-400 col-span-2">No non-compliance violations recorded across this batch.</div>';
+                return;
+            }
+
+            container.innerHTML = entries.map(([finding, count]) => `
+                <div class="p-3 bg-red-50/60 rounded-xl border border-red-100 flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-red-500 text-lg">error</span>
+                        <span class="font-bold text-gray-900">${finding}</span>
+                    </div>
+                    <span class="px-2 py-0.5 bg-red-100 text-red-800 rounded-full font-bold text-[10px]">
+                        ${count} unit(s)
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        function renderInspectionsTable(inspections) {
+            const tbody = document.getElementById('batchInspectionsTableBody');
+            const countTag = document.getElementById('inspectionsCountTag');
+
+            countTag.textContent = `${inspections.length} Recorded`;
+
+            if (inspections.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-gray-400">No inspections recorded for this batch.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = inspections.map(item => {
+                const dt = new Date(item.created_at).toLocaleDateString();
+                let stBadge = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-700">UNDER REVIEW</span>';
+                if (item.compliance_status === 'Compliant') {
+                    stBadge = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">COMPLIANT</span>';
+                } else if (item.compliance_status === 'Non-Compliant') {
+                    stBadge = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800">NON-COMPLIANT</span>';
+                } else if (item.compliance_status === 'Needs Review') {
+                    stBadge = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">NEEDS REVIEW</span>';
+                }
+
+                return `
+                    <tr class="hover:bg-blue-50/20 transition-colors">
+                        <td class="p-3.5 font-mono font-bold text-gray-900 text-xs">
+                            #${item.id.substring(0, 8)}...
+                        </td>
+                        <td class="p-3.5">
+                            <strong class="font-bold text-gray-900 block truncate max-w-[180px]">${item.product_name}</strong>
+                            <span class="text-gray-400 text-[11px]">${item.product_brand || 'Standard'}</span>
+                        </td>
+                        <td class="p-3.5 text-gray-600 truncate max-w-[160px]">${item.location_name || 'Retail Market'}</td>
+                        <td class="p-3.5 text-gray-500 whitespace-nowrap">${dt}</td>
+                        <td class="p-3.5">${stBadge}</td>
+                        <td class="p-3.5">
+                            ${item.non_compliant_count > 0 ? `<span class="text-red-600 font-bold">${item.non_compliant_count} violation(s)</span>` : `<span class="text-gray-500">${item.findings_count} total</span>`}
+                        </td>
+                        <td class="p-3.5 text-right whitespace-nowrap">
+                            <a href="/analysis?id=${item.id}" class="px-3 py-1.5 bg-primary hover:bg-blue-800 text-white rounded-lg font-semibold text-xs inline-flex items-center gap-1 shadow-xs transition-all">
+                                <span>View Scan</span>
+                                <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                            </a>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Status Update Modal
+        function openStatusModal() {
+            if (!currentBatchData) return;
+            const modal = document.getElementById('statusModal');
+            document.getElementById('modalStatusSelect').value = currentBatchData.status || 'normal';
+            document.getElementById('modalStatusNotes').value = '';
+            modal.classList.remove('hidden');
+            document.getElementById('modalStatusNotes').focus();
+        }
+
+        function closeStatusModal() {
+            document.getElementById('statusModal').classList.add('hidden');
+        }
+
+        async function submitStatusUpdate() {
+            const btn = document.getElementById('btnSaveStatus');
+            const newStatus = document.getElementById('modalStatusSelect').value;
+            const notes = document.getElementById('modalStatusNotes').value.trim();
+
+            if (!notes) {
+                alert('Please enter mandatory officer investigation notes.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="animate-spin text-xs">⏳</span> Updating...';
+
+            const res = await PackCheck.request(`/batches/${encodeURIComponent(currentBatchNumber)}/status`, {
+                method: 'PATCH',
+                body: JSON.stringify({
+                    status: newStatus,
+                    notes: notes
+                })
+            });
+
+            btn.disabled = false;
+            btn.innerHTML = '<span class="material-symbols-outlined text-sm">check_circle</span><span>Update Status</span>';
+
+            if (res.success) {
+                closeStatusModal();
+                loadBatchData();
+            } else {
+                alert('Failed to update status: ' + (res.error?.message || 'Error'));
+            }
+        }
+    </script>
+</body>
+</html>

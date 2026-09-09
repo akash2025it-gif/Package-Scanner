@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PackCheck - Scan Analysis</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline-variant": "#c3c6d8",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#f8f9ff",
+                        "on-secondary-fixed-variant": "#005045",
+                        "on-primary-fixed-variant": "#003ea7",
+                        "surface-container-low": "#f1f3fa",
+                        "on-surface": "#181c21",
+                        "primary": "#0051d5",
+                        "secondary-container": "#65fade",
+                        "surface-dim": "#d8dae1",
+                        "on-primary-container": "#fefcff",
+                        "background": "#f8f9ff",
+                        "tertiary-fixed": "#ffdad2",
+                        "on-tertiary-container": "#fffbff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#e0e2e9",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed-variant": "#8c1900",
+                        "on-tertiary-fixed": "#3d0600",
+                        "tertiary-container": "#cd4729",
+                        "surface-container-high": "#e6e8ef",
+                        "on-surface-variant": "#424655",
+                        "primary-container": "#276afa",
+                        "on-error-container": "#93000a",
+                        "primary-fixed": "#dbe1ff",
+                        "on-primary": "#ffffff",
+                        "surface-container": "#eceef5",
+                        "secondary": "#006b5c",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#00174b",
+                        "on-secondary-fixed": "#00201b",
+                        "inverse-primary": "#b4c5ff",
+                        "secondary-fixed": "#65fade",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb4a3",
+                        "surface-tint": "#0053da",
+                        "inverse-on-surface": "#eef1f7",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#41ddc2",
+                        "on-background": "#181c21",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "outline": "#737687",
+                        "tertiary": "#aa2f13",
+                        "inverse-surface": "#2d3136",
+                        "surface": "#f8f9ff",
+                        "surface-container-highest": "#e0e2e9",
+                        "on-secondary-container": "#007262"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "xs": "4px",
+                        "md": "24px",
+                        "base": "8px",
+                        "xl": "64px",
+                        "gutter": "16px",
+                        "margin-desktop": "32px",
+                        "lg": "40px",
+                        "max-width": "1280px",
+                        "sm": "12px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "body-lg": ["Inter"],
+                        "display-lg": ["Hanken Grotesk"],
+                        "caption": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-md": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "caption": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-overlay {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .soft-shadow {
+            box-shadow: 0px 10px 30px rgba(47, 111, 255, 0.08);
+        }
+        .ai-tooltip-shadow {
+            box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.12);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen font-body-md text-body-md pb-xl">
+<!-- Desktop Navigation Shell -->
+<nav class="hidden md:flex flex-col h-screen fixed left-0 top-0 z-50 py-base bg-surface border-r border-outline-variant w-72">
+<div class="px-margin-desktop mb-lg flex items-center gap-base">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary font-headline-md">PC</div>
+<div>
+<div class="font-headline-md text-headline-md text-primary">PackCheck AI</div>
+<div class="font-caption text-caption text-on-surface-variant">Compliance Officer</div>
+</div>
+</div>
+<div class="flex-1 flex flex-col gap-xs overflow-y-auto">
+<a class="text-on-surface-variant hover:bg-surface-container-low rounded-full mx-2 flex items-center gap-sm px-4 py-3 font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                Dashboard
+            </a>
+<a class="bg-primary-container text-on-primary-container font-bold rounded-full mx-2 flex items-center gap-sm px-4 py-3 font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">barcode_scanner</span>
+                New Scan
+            </a>
+<a class="text-on-surface-variant hover:bg-surface-container-low rounded-full mx-2 flex items-center gap-sm px-4 py-3 font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined">description</span>
+                Reports
+            </a>
+<a class="text-on-surface-variant hover:bg-surface-container-low rounded-full mx-2 flex items-center gap-sm px-4 py-3 font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+                Repository
+            </a>
+</div>
+</nav>
+<!-- Top App Bar (Mobile & Desktop Header Area) -->
+<header class="md:hidden flex justify-between items-center px-margin-mobile h-16 w-full z-40 bg-surface border-b border-outline-variant shadow-sm fixed top-0">
+<div class="flex items-center gap-sm">
+<button class="text-on-surface active:scale-95 duration-150">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Scan Results</h1>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="md:ml-72 pt-16 md:pt-0 p-margin-mobile md:p-margin-desktop max-w-max-width mx-auto flex flex-col gap-md">
+<!-- Desktop Header Content -->
+<div class="hidden md:flex justify-between items-end mb-sm">
+<div>
+<h1 class="font-display-lg text-display-lg text-on-surface">Scan Analysis</h1>
+<p class="text-on-surface-variant font-body-lg text-body-lg">Product Label Compliance Verification</p>
+</div>
+<div class="flex gap-sm">
+<button class="px-6 py-3 rounded-full border-2 border-primary text-primary font-label-md text-label-md hover:bg-primary-fixed transition-colors">
+                    Retake Scan
+                </button>
+<button class="px-6 py-3 rounded-full bg-tertiary-container text-on-tertiary-container font-label-md text-label-md hover:opacity-90 transition-opacity shadow-md">
+                    Generate Report
+                </button>
+</div>
+</div>
+<!-- Compliance Banner Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-md">
+<!-- Non-Compliant Badge Card -->
+<div class="lg:col-span-2 bg-error-container rounded-xl p-md flex items-center justify-between soft-shadow relative overflow-hidden">
+<div class="absolute -right-10 -top-10 w-40 h-40 bg-error opacity-10 rounded-full blur-2xl"></div>
+<div>
+<div class="flex items-center gap-sm mb-xs">
+<span class="material-symbols-outlined text-error" style="font-variation-settings: 'FILL' 1;">warning</span>
+<h2 class="font-headline-md text-headline-md text-on-error-container">NON-COMPLIANT</h2>
+</div>
+<p class="font-body-lg text-body-lg text-on-error-container opacity-90">3 Violations Detected (Rule 6, Rule 4)</p>
+</div>
+</div>
+<!-- Score Card -->
+<div class="bg-surface-container-lowest rounded-xl p-md flex items-center justify-center gap-md soft-shadow">
+<div class="relative w-24 h-24 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 36 36">
+<path class="text-surface-variant" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="100, 100" stroke-linecap="round" stroke-width="3"></path>
+<path class="text-error" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="65, 100" stroke-linecap="round" stroke-width="3"></path>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="font-headline-md text-headline-md text-on-surface">65%</span>
+</div>
+</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Compliance</div>
+<div class="font-headline-md text-headline-md text-on-surface">Score</div>
+</div>
+</div>
+</div>
+<!-- AI Annotation View (Bento Style) -->
+<div class="grid grid-cols-1 lg:grid-cols-5 gap-md">
+<!-- Image Canvas -->
+<div class="lg:col-span-3 bg-surface-container-lowest rounded-xl p-md soft-shadow flex flex-col gap-sm">
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-2">Visual Inspection</h3>
+<div class="relative w-full aspect-square md:aspect-video rounded-lg overflow-hidden bg-surface-container-low">
+<!-- Placeholder Product Image -->
+<img class="w-full h-full object-cover filter grayscale contrast-125 opacity-70 mix-blend-multiply" data-alt="A modern product label for a beverage bottle, styled in a sleek, duotone aesthetic featuring deep blues and muted teals. The label text is crisp and technical. The lighting is soft and analytical, reflecting a high-tech AI scanning environment, characteristic of a premium compliance application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuALdAjXysGAMgBShp8izOJZDWf59Qc46XBiadVcLJ-EYHsefK5kuUyfKvn_9SoDCUPHWmB22y5fniJjghqvD_mNfg_Ki6xUXzgGvKRRED6JjthWlnmC3mDe7RAG4WWP3q-il3Wcq7wZQpsSH2rtGwmzvpKkB1VO0FuPiafWx3T1JM2_btxw5Tmjmsg9NanaX0CGXYh0TYTHZpcJZ2dywRzjtIsW6Oz5OihT80wz0Q0piDxELG0t-rI"/>
+<!-- AI Bounding Boxes -->
+<!-- MRP Box -->
+<div class="absolute top-[20%] left-[30%] w-[20%] h-[15%] border-2 border-primary bg-primary/20 rounded cursor-pointer group transition-all hover:bg-primary/30">
+<div class="absolute -top-8 left-0 glass-overlay px-2 py-1 rounded text-primary font-caption text-caption shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">MRP</div>
+</div>
+<!-- Net Qty Box -->
+<div class="absolute top-[50%] left-[60%] w-[15%] h-[10%] border-2 border-secondary bg-secondary/20 rounded cursor-pointer group transition-all hover:bg-secondary/30">
+<div class="absolute -top-8 left-0 glass-overlay px-2 py-1 rounded text-secondary font-caption text-caption shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">Net Qty</div>
+</div>
+<!-- Mfg Date Box (Violation area usually highlighted differently, let's use tertiary) -->
+<div class="absolute top-[70%] left-[20%] w-[25%] h-[12%] border-2 border-error bg-error/20 rounded cursor-pointer group transition-all hover:bg-error/30">
+<div class="absolute -top-8 left-0 glass-overlay px-2 py-1 rounded text-error font-caption text-caption shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">Font Size</div>
+</div>
+</div>
+</div>
+<!-- Mandatory Declarations Checklist -->
+<div class="lg:col-span-2 flex flex-col gap-md">
+<div class="bg-surface-container-lowest rounded-xl p-md soft-shadow h-full">
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-sm">Declaration Checklist</h3>
+<div class="flex flex-col gap-sm">
+<!-- Compliant Item -->
+<div class="glass-overlay border-l-2 border-secondary p-4 rounded-r-lg flex gap-3 items-start ai-tooltip-shadow">
+<span class="material-symbols-outlined text-secondary mt-1" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<div>
+<div class="font-label-md text-label-md text-on-surface">Net Quantity</div>
+<div class="font-body-md text-body-md text-on-surface-variant">500ml detected. Compliant.</div>
+</div>
+</div>
+<!-- Violation Item -->
+<div class="glass-overlay border-l-2 border-error p-4 rounded-r-lg flex gap-3 items-start ai-tooltip-shadow bg-error-container/10">
+<span class="material-symbols-outlined text-error mt-1" style="font-variation-settings: 'FILL' 1;">cancel</span>
+<div>
+<div class="font-label-md text-label-md text-on-surface">Font Size (Rule 6)</div>
+<div class="font-body-md text-body-md text-on-surface-variant">Detected <span class="font-bold text-error">0.8mm</span>. Minimum 1mm required for this package size.</div>
+</div>
+</div>
+<!-- Warning Item -->
+<div class="glass-overlay border-l-2 border-tertiary-container p-4 rounded-r-lg flex gap-3 items-start ai-tooltip-shadow bg-tertiary-container/10">
+<span class="material-symbols-outlined text-tertiary-container mt-1" style="font-variation-settings: 'FILL' 1;">warning</span>
+<div>
+<div class="font-label-md text-label-md text-on-surface">MRP Declaration (Rule 4)</div>
+<div class="font-body-md text-body-md text-on-surface-variant">Rs. 45.00 detected. Format acceptable, manual check advised for current pricing bracket.</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Mobile Floating Action Buttons (Sticky Bottom) -->
+<div class="md:hidden fixed bottom-0 left-0 w-full p-margin-mobile glass-overlay border-t border-outline-variant shadow-[0_-10px_30px_rgba(0,0,0,0.05)] z-40 flex gap-sm">
+<button class="flex-1 py-3 rounded-xl border-2 border-primary text-primary font-label-md-mobile text-label-md-mobile active:scale-95 transition-transform bg-surface-container-lowest">
+            Retake
+        </button>
+<button class="flex-[2] py-3 rounded-xl bg-tertiary-container text-on-tertiary-container font-label-md-mobile text-label-md-mobile active:scale-95 transition-transform shadow-md">
+            Generate Report
+        </button>
+</div>
+</body></html>

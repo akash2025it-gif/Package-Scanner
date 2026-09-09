@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PackCheck Legal Metrology Compliance Report</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 18mm 14mm 18mm 14mm;
+            @bottom-right {
+                content: "Page " counter(page) " of " counter(pages);
+                font-family: 'Inter', sans-serif;
+                font-size: 8pt;
+                color: #737687;
+            }
+            @bottom-left {
+                content: "PackCheck • Legal Metrology (Packaged Commodities) Rules, 2011";
+                font-family: 'Inter', sans-serif;
+                font-size: 8pt;
+                color: #737687;
+            }
+        }
+
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            color: #181c21;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+            font-size: 9.5pt;
+            line-height: 1.4;
+        }
+
+        .header-container {
+            border-bottom: 2px solid #0051d5;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .header-table td {
+            vertical-align: middle;
+        }
+
+        .govt-title {
+            font-size: 15pt;
+            font-weight: 800;
+            color: #0051d5;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: -0.01em;
+        }
+
+        .govt-subtitle {
+            font-size: 8.5pt;
+            color: #424655;
+            margin: 2px 0 0 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .report-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 9999px;
+            font-weight: 700;
+            font-size: 9pt;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .badge-compliant {
+            background-color: #e0f8f2;
+            color: #006b5c;
+            border: 1px solid #65fade;
+        }
+
+        .badge-non-compliant {
+            background-color: #ffdad6;
+            color: #ba1a1a;
+            border: 1px solid #ffb4ab;
+        }
+
+        .badge-needs-review {
+            background-color: #fff1d6;
+            color: #b25e00;
+            border: 1px solid #ffd599;
+        }
+
+        .section-title {
+            font-size: 11pt;
+            font-weight: 700;
+            color: #0051d5;
+            margin-top: 16px;
+            margin-bottom: 6px;
+            border-bottom: 1px solid #e0e2e9;
+            padding-bottom: 3px;
+        }
+
+        .meta-grid {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 12px;
+            background-color: #f8f9ff;
+            border-radius: 6px;
+            border: 1px solid #e6e8ef;
+        }
+
+        .meta-grid td {
+            padding: 6px 10px;
+            border-bottom: 1px solid #e6e8ef;
+            font-size: 8.5pt;
+        }
+
+        .meta-label {
+            font-weight: 600;
+            color: #424655;
+            width: 22%;
+            text-transform: uppercase;
+            font-size: 7.5pt;
+        }
+
+        .meta-val {
+            color: #181c21;
+            font-weight: 500;
+        }
+
+        table.declaration-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+            margin-bottom: 16px;
+        }
+
+        table.declaration-table th {
+            background-color: #0051d5;
+            color: #ffffff;
+            font-weight: 600;
+            text-align: left;
+            padding: 7px 8px;
+            font-size: 8pt;
+            text-transform: uppercase;
+        }
+
+        table.declaration-table td {
+            padding: 7px 8px;
+            border-bottom: 1px solid #e0e2e9;
+            font-size: 8pt;
+            vertical-align: top;
+        }
+
+        table.declaration-table tr:nth-child(even) {
+            background-color: #f8f9ff;
+        }
+
+        .status-pill {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 7pt;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .pill-pass {
+            background-color: #e0f8f2;
+            color: #006b5c;
+        }
+
+        .pill-fail {
+            background-color: #ffdad6;
+            color: #ba1a1a;
+        }
+
+        .pill-review {
+            background-color: #fff1d6;
+            color: #b25e00;
+        }
+
+        .pill-override {
+            background-color: #f1f3fa;
+            color: #555869;
+            border: 1px solid #dcdfe8;
+        }
+
+        .conf-badge {
+            display: inline-block;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 6.5pt;
+            font-weight: 700;
+        }
+
+        .conf-high {
+            background-color: #e2f8eb;
+            color: #0f7b3c;
+        }
+
+        .conf-med {
+            background-color: #fef4e5;
+            color: #b45309;
+        }
+
+        .conf-low {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .notes-box {
+            background-color: #f1f3fa;
+            border-left: 3px solid #0051d5;
+            padding: 9px 12px;
+            font-size: 8.5pt;
+            margin-top: 12px;
+            border-radius: 0 5px 5px 0;
+            line-height: 1.4;
+        }
+
+        .signature-section {
+            margin-top: 30px;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .signature-box {
+            width: 45%;
+            border-top: 1px solid #737687;
+            padding-top: 5px;
+            font-size: 8pt;
+            color: #424655;
+            text-align: center;
+        }
+
+        .citation-text {
+            font-size: 7.5pt;
+            color: #555869;
+            font-weight: 600;
+        }
+
+        .evidence-subtext {
+            font-size: 7pt;
+            color: #737687;
+            margin-top: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <table class="header-table">
+            <tr>
+                <td>
+                    <h1 class="govt-title">PackCheck Compliance Verification Report</h1>
+                    <div class="govt-subtitle">Department of Legal Metrology • Packaged Commodities Rules, 2011</div>
+                </td>
+                <td style="text-align: right;">
+                    
+                        <div class="report-badge badge-compliant">VERIFIED COMPLIANT</div>
+                    
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <table class="meta-grid">
+        <tr>
+            <td class="meta-label">Report ID:</td>
+            <td class="meta-val">24605de2-c492-4319-b999-270ca7dad0b7</td>
+            <td class="meta-label">Scan ID:</td>
+            <td class="meta-val">4e69ac03-5f2b-4bdb-84e3-49e9511d0682</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Inspection Date:</td>
+            <td class="meta-val">2026-09-04 17:12:49 UTC</td>
+            <td class="meta-label">Enforcement Officer:</td>
+            <td class="meta-val">Inspector Vikram Sharma (Inspector)</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Product Name:</td>
+            <td class="meta-val"><strong>California Whole Almonds 250g</strong></td>
+            <td class="meta-label">Brand & Category:</td>
+            <td class="meta-val">NutriBite (Dry Fruits &amp; Nuts)</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Manufacturer / Packer:</td>
+            <td class="meta-val" colspan="3">None - None</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Inspection Location:</td>
+            <td class="meta-val">Spencer&#39;s Retail, Saket, New Delhi</td>
+            <td class="meta-label">Origin Country:</td>
+            <td class="meta-val">India</td>
+        </tr>
+    </table>
+
+    <div class="section-title">Mandatory Declaration Findings (LMPC Rules, 2011)</div>
+    <table class="declaration-table">
+        <thead>
+            <tr>
+                <th style="width: 18%;">Declaration Field</th>
+                <th style="width: 32%;">Extracted Value & Evidence</th>
+                <th style="width: 12%;">Confidence</th>
+                <th style="width: 14%;">Status</th>
+                <th style="width: 24%;">Rule Citation & Reason</th>
+            </tr>
+        </thead>
+        <tbody>
+            
+            <tr>
+                <td>
+                    <strong>Generic or Common Name</strong>
+                    
+                        <br><span class="status-pill pill-override">Inspector Override</span>
+                    
+                </td>
+                <td>
+                    
+                        "<strong>California Almonds (Dry Fruits)</strong>"
+                        
+                            <br><span style="font-size: 7pt; color: #424655;">Estimated visual size: approximately 3.3 mm — subject to manual verification</span>
+                        
+                        
+                            <div class="evidence-subtext">Label text: &#34;California Almonds (Dry Fruits)&#34; [Region: x=72, y=176, w=585, h=55]</div>
+                        
+                    
+                </td>
+                <td>
+                    <span class="conf-badge conf-high">
+                        96% HIGH
+                    </span>
+                </td>
+                <td>
+                    
+                        <span class="status-pill pill-pass">COMPLIANT</span>
+                    
+                </td>
+                <td>
+                    <div class="citation-text">Rule 6(1)(a) of Legal Metrology (Packaged Commodities) Rules, 2011</div>
+                    
+                        <div style="font-size: 7.5pt; margin-top: 2px; color: #181c21;">Verified by Senior Legal Metrology Officer Patel.</div>
+                    
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                    <strong>Manufacturer / Packer / Importer Details</strong>
+                    
+                </td>
+                <td>
+                    
+                        "<strong>Manufactured &amp; Packed by: NutriBite Consumer Products Pvt. Ltd., Plot No. 42, Sector 18, Industrial Estate, Gurugram - 122015, Haryana. Lic. No. 10019011000888</strong>"
+                        
+                            <br><span style="font-size: 7pt; color: #424655;">Estimated visual size: approximately 6.2 mm — subject to manual verification</span>
+                        
+                        
+                            <div class="evidence-subtext">Label text: &#34;Manufactured &amp; Packed by: NutriBite Consumer Products Pvt. Ltd., Plot No. 42, Sector 18, Industrial Estate, Gurugram - 122015, Haryana. Lic. No. 10019011000888&#34; [Region: x=72, y=550, w=756, h=104]</div>
+                        
+                    
+                </td>
+                <td>
+                    <span class="conf-badge conf-high">
+                        94% HIGH
+                    </span>
+                </td>
+                <td>
+                    
+                        <span class="status-pill pill-pass">COMPLIANT</span>
+                    
+                </td>
+                <td>
+                    <div class="citation-text">Rule 6(1)(b) of Legal Metrology (Packaged Commodities) Rules, 2011</div>
+                    
+                        <div style="font-size: 7.5pt; margin-top: 2px; color: #181c21;">Valid statutory declaration for &#39;Manufacturer / Packer / Importer Details&#39; detected.</div>
+                    
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                    <strong>Country of Origin</strong>
+                    
+                </td>
+                <td>
+                    
+                        "<strong>Country of Origin: India</strong>"
+                        
+                            <br><span style="font-size: 7pt; color: #424655;">Estimated visual size: approximately 2.9 mm — subject to manual verification</span>
+                        
+                        
+                            <div class="evidence-subtext">Label text: &#34;Country of Origin: India&#34; [Region: x=72, y=682, w=405, h=50]</div>
+                        
+                    
+                </td>
+                <td>
+                    <span class="conf-badge conf-high">
+                        97% HIGH
+                    </span>
+                </td>
+                <td>
+                    
+                        <span class="status-pill pill-pass">COMPLIANT</span>
+                    
+                </td>
+                <td>
+                    <div class="citation-text">Rule 6(1)(c) of Legal Metrology (Packaged Commodities) Rules, 2011</div>
+                    
+                        <div style="font-size: 7.5pt; margin-top: 2px; color: #181c21;">Valid statutory declaration for &#39;Country of Origin for Imported Goods&#39; detected.</div>
+                    
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                    <strong>Net Quantity &amp; Unit of Measurement</strong>
+                    
+                </td>
+                <td>
+                    
+                        "<strong>NUTRIBITE CALIFORNIA WHOLE ALMONDS 250G Net Quantity: 250 g</strong>"
+                        
+                            <br><span style="font-size: 7pt; color: #424655;">Estimated visual size: approximately 13.4 mm — subject to manual verification</span>
+                        
+                        
+                            <div class="evidence-subtext">Label text: &#34;NUTRIBITE CALIFORNIA WHOLE ALMONDS 250G Net Quantity: 250 g&#34; [Region: x=72, y=88, w=720, h=226]</div>
+                        
+                    
+                </td>
+                <td>
+                    <span class="conf-badge conf-high">
+                        97% HIGH
+                    </span>
+                </td>
+                <td>
+                    
+                        <span class="status-pill pill-pass">COMPLIANT</span>
+                    
+                </td>
+                <td>
+                    <div class="citation-text">Rule 6(1)(d) read with Rule 8 of LMPC Rules, 2011</div>
+                    
+                        <div style="font-size: 7.5pt; margin-top: 2px; color: #181c21;">Valid net quantity declaration: 250.0 g. Estimated visual size: approximately 13.4 mm — subject to manual verification by physical scale.</div>
+                    
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                    <strong>Month &amp; Year of Manufacture / Packing</strong>
+                    
+                </td>
+                <td>
+                    
+                        "<strong>Mfg Date: 08/2026</strong>"
+                        
+                            <br><span style="font-size: 7pt; color: #424655;">Estimated visual size: approximately 2.9 mm — subject to manual verification</span>
+                        
+                        
+                            <div class="evidence-subtext">Label text: &#34;Mfg Date: 08/2026&#34; [Region: x=72, y=473, w=360, h=50]</div>
+                        
+                    
+                </td>
+                <td>
+                    <span class="conf-badge conf-high">
+                        96% HIGH
+                    </span>
+                </td>
+                <td>
+                    
+                        <span class="status-pill pill-pass">COMPLIANT</span>
+                    
+                </td>
+                <td>
+                    <div class="citation-text">Rule 6(1)(e) of Legal Metrology (Packaged Commodities) Rules, 2011</div>
+                    
+                        <div style="font-size: 7.5pt; margin-top: 2px; color: #181c21;">Valid month/year of manufacture or packing detected (08/2026) per Rule 6(1)(e).</div>
+                    
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                    <strong>Maximum Retail Price (MRP)</strong>
+                    
+                </td>
+                <td>
+                    
+                        "<strong>MRP ₹ 299.00 (inclusive of all taxes)</strong>"
+                        
+                            <br><span style="font-size: 7pt; color: #424655;">Estimated visual size: approximately 3.6 mm — subject to manual verification</span>
+                        
+                        
+                            <div class="evidence-subtext">Label text: &#34;MRP ₹ 299.00 (inclusive of all taxes)&#34; [Region: x=72, y=330, w=630, h=60]</div>
+                        
+                    
+                </td>
+                <td>
+                    <span class="conf-badge conf-high">
+                        95% HIGH
+                    </span>
+                </td>
+                <td>
+                    
+                        <span class="status-pill pill-pass">COMPLIANT</span>
+                    
+                </td>
+                <td>
+                    <div class="citation-text">Rule 6(1)(f) of Legal Metrology (Packaged Commodities) Rules, 2011</div>
+                    
+                        <div style="font-size: 7.5pt; margin-top: 2px; color: #181c21;">Valid MRP declaration with statutory currency symbol and tax-inclusive clause.</div>
+                    
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                    <strong>Unit Sale Price (USP)</strong>
+                    
+                </td>
+                <td>
+                    
+                        "<strong>Unit Sale Price: ₹ 1.20 / g</strong>"
+                        
+                            <br><span style="font-size: 7pt; color: #424655;">Estimated visual size: approximately 2.9 mm — subject to manual verification</span>
+                        
+                        
+                            <div class="evidence-subtext">Label text: &#34;Unit Sale Price: ₹ 1.20 / g&#34; [Region: x=72, y=407, w=495, h=50]</div>
+                        
+                    
+                </td>
+                <td>
+                    <span class="conf-badge conf-high">
+                        93% HIGH
+                    </span>
+                </td>
+                <td>
+                    
+                        <span class="status-pill pill-pass">COMPLIANT</span>
+                    
+                </td>
+                <td>
+                    <div class="citation-text">Rule 6(1)(g) of Legal Metrology (Packaged Commodities) Rules, 2011</div>
+                    
+                        <div style="font-size: 7.5pt; margin-top: 2px; color: #181c21;">Compliant Unit Sale Price declared per Rule 6(1)(g) (₹ 1.20 / g).</div>
+                    
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                    <strong>Consumer Care Grievance Redressal</strong>
+                    
+                </td>
+                <td>
+                    
+                        "<strong>Consumer Care: Executive, NutriBite Consumer Care Cell, Toll Free: 1800-222-4444, Email: care@nutribite.com</strong>"
+                        
+                            <br><span style="font-size: 7pt; color: #424655;">Estimated visual size: approximately 5.5 mm — subject to manual verification</span>
+                        
+                        
+                            <div class="evidence-subtext">Label text: &#34;Consumer Care: Executive, NutriBite Consumer Care Cell, Toll Free: 1800-222-4444, Email: care@nutribite.com&#34; [Region: x=72, y=748, w=756, h=94]</div>
+                        
+                    
+                </td>
+                <td>
+                    <span class="conf-badge conf-high">
+                        92% HIGH
+                    </span>
+                </td>
+                <td>
+                    
+                        <span class="status-pill pill-pass">COMPLIANT</span>
+                    
+                </td>
+                <td>
+                    <div class="citation-text">Rule 6(1)(h) of Legal Metrology (Packaged Commodities) Rules, 2011</div>
+                    
+                        <div style="font-size: 7.5pt; margin-top: 2px; color: #181c21;">Valid statutory consumer care details detected with active helpline and/or email address.</div>
+                    
+                </td>
+            </tr>
+            
+        </tbody>
+    </table>
+
+    <div class="section-title">Summary & Legal Determination</div>
+    <div class="notes-box">
+        <strong>Statutory Assessment:</strong> All mandatory declarations specified under the Legal Metrology (Packaged Commodities) Rules, 2011 are duly present, legibly displayed, and meet statutory requirements based on automated verification.
+        
+            <br><span style="font-size: 8pt; color: #424655; font-style: italic;">Officer Remarks: Statutory inspection completed.</span>
+        
+    </div>
+
+    <table class="signature-section">
+        <tr>
+            <td class="signature-box" style="float: left;">
+                <br><br>
+                <strong>Inspector Vikram Sharma</strong><br>
+                Enforcement Inspector / Reviewer<br>
+                Department of Legal Metrology
+            </td>
+            <td style="width: 10%;"></td>
+            <td class="signature-box" style="float: right;">
+                <br><br>
+                <strong>Authorized Controller of Legal Metrology</strong><br>
+                Digital Verification Seal<br>
+                Date: 2026-09-04 17:12:49 UTC
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

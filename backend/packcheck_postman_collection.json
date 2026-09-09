@@ -1,0 +1,244 @@
+{
+  "info": {
+    "name": "PackCheck API Collection",
+    "_postman_id": "packcheck-lmpc-scanner-v1",
+    "description": "Comprehensive Postman collection for PackCheck (Legal Metrology Compliance Scanner APIs).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "scan_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "1. Login (Email + Password)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"inspector.sharma@packcheck.gov.in\",\n  \"password\": \"inspector123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "2. Get Current User Profile (/auth/me)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Scans & AI Pipeline",
+      "item": [
+        {
+          "name": "1. Create New Scan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"source\": \"physical_store\",\n  \"location_name\": \"Smart Bazaar, Sector 18, Noida\",\n  \"product_data\": {\n    \"name\": \"Tata Salt Vacuum Evaporated 1kg\",\n    \"brand\": \"Tata Salt\",\n    \"category\": \"Salt & Spices\",\n    \"country_of_origin\": \"India\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/scans",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "scans"
+              ]
+            }
+          }
+        },
+        {
+          "name": "2. Trigger AI Analysis Pipeline",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/scans/{{scan_id}}/analyze",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "scans",
+                "{{scan_id}}",
+                "analyze"
+              ]
+            }
+          }
+        },
+        {
+          "name": "3. Get Scan Details & Verdicts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/scans/{{scan_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "scans",
+                "{{scan_id}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "1. Generate Compliance Report (PDF + DOCX)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Inspected on-site during routine enforcement drive.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/scans/{{scan_id}}/report",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "scans",
+                "{{scan_id}}",
+                "report"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Analytics & Dashboard",
+      "item": [
+        {
+          "name": "1. Summary KPIs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/analytics/summary",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analytics",
+                "summary"
+              ]
+            }
+          }
+        },
+        {
+          "name": "2. Regional Heatmap",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/analytics/region-heatmap",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analytics",
+                "region-heatmap"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

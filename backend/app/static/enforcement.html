@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>PackCheck - Regional Enforcement Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+</head>
+<body class="bg-[#f8f9ff] font-['Inter'] text-[#181c21] min-h-screen flex">
+    <!-- Left Navigation Rail -->
+    <aside class="w-64 bg-[#0051d5] text-white flex flex-col justify-between p-5 shadow-xl hidden md:flex shrink-0">
+        <div>
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[#65fade] text-2xl">verified_user</span>
+                </div>
+                <div>
+                    <h2 class="font-['Hanken_Grotesk'] font-bold text-lg leading-tight">PackCheck</h2>
+                    <span class="text-xs text-[#65fade] tracking-wider uppercase font-semibold">LMPC Enforcement</span>
+                </div>
+            </div>
+
+            <nav class="space-y-1.5 text-sm font-medium">
+                <a href="/dashboard" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white/90 rounded-xl transition-all">
+                    <span class="material-symbols-outlined">dashboard</span> Dashboard
+                </a>
+                <a href="/scan/new" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white/90 rounded-xl transition-all">
+                    <span class="material-symbols-outlined">add_photo_alternate</span> New Scan
+                </a>
+                <a href="/products-ui" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white/90 rounded-xl transition-all">
+                    <span class="material-symbols-outlined">inventory_2</span> Product Catalog
+                </a>
+                <a href="/enforcement" class="flex items-center gap-3 px-4 py-3 bg-white/20 text-white rounded-xl font-semibold transition-all">
+                    <span class="material-symbols-outlined">map</span> Regional Heatmap
+                </a>
+                <a href="/team" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white/90 rounded-xl transition-all">
+                    <span class="material-symbols-outlined">group</span> Manage Team
+                </a>
+            </nav>
+        </div>
+
+        <div class="pt-4 border-t border-white/10">
+            <a href="/" onclick="PackCheck.clearAuth()" class="flex items-center gap-2 text-xs text-white/80 hover:text-white">
+                <span class="material-symbols-outlined text-sm">logout</span> Sign Out
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+        <header class="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between sticky top-0 z-20">
+            <div>
+                <h1 class="font-['Hanken_Grotesk'] font-bold text-lg sm:text-xl text-gray-900">National Compliance Heatmap & Surveillance</h1>
+                <p class="text-[11px] sm:text-xs text-gray-500">Geographic distribution of inspections, violations & officer performance</p>
+            </div>
+        </header>
+
+        <div class="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl mx-auto w-full">
+            <!-- Heatmap Cards -->
+            <div class="space-y-3">
+                <h2 class="text-sm font-bold font-['Hanken_Grotesk'] text-gray-900 uppercase">State & Regional Surveillance Zones</h2>
+                <div id="heatmapGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                    <div class="p-8 text-center text-gray-400 bg-white rounded-2xl border border-gray-200 col-span-1 sm:col-span-2 lg:col-span-3 text-xs">Loading regional heatmap data...</div>
+                </div>
+            </div>
+
+            <!-- Officer Performance Table -->
+            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                <div class="p-5 border-b border-gray-100">
+                    <h3 class="font-['Hanken_Grotesk'] font-bold text-base text-gray-900">Enforcement Officer Throughput & Performance</h3>
+                    <p class="text-xs text-gray-500">Inspection velocity, review turnaround and violation detection metrics</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-gray-50 text-gray-600 uppercase font-semibold border-b border-gray-200">
+                            <tr>
+                                <th class="p-3.5">Officer Name</th>
+                                <th class="p-3.5">Region</th>
+                                <th class="p-3.5">Total Inspections</th>
+                                <th class="p-3.5">Reviews Completed</th>
+                                <th class="p-3.5">Pending Review</th>
+                                <th class="p-3.5">Violations Flagged</th>
+                            </tr>
+                        </thead>
+                        <tbody id="officerTbody" class="divide-y divide-gray-100 font-medium text-gray-700">
+                            <tr>
+                                <td colspan="6" class="p-8 text-center text-gray-400">Loading officer performance...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/static/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            PackCheck.syncNavigation('/enforcement');
+            // Load Heatmap
+            const heatRes = await PackCheck.request('/analytics/region-heatmap');
+            if (heatRes.success && heatRes.data) {
+                document.getElementById('heatmapGrid').innerHTML = heatRes.data.map(r => `
+                    <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm space-y-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="px-2 py-0.5 rounded bg-blue-100 text-primary font-bold text-[10px]">${r.state_code || 'ZN'}</span>
+                                <h3 class="font-bold text-sm text-gray-900 mt-1">${r.region}</h3>
+                            </div>
+                            <span class="text-xs font-bold ${r.violation_rate > 20 ? 'text-red-600' : 'text-emerald-600'}">
+                                ${r.violation_rate}% Violations
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-xs bg-gray-50 p-2.5 rounded-xl border border-gray-100">
+                            <div>
+                                <span class="text-gray-400 block text-[10px]">Inspections</span>
+                                <span class="font-bold text-gray-800">${r.total_inspections}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-400 block text-[10px]">Compliant</span>
+                                <span class="font-bold text-emerald-600">${r.compliant_count}</span>
+                            </div>
+                        </div>
+                        <p class="text-[11px] text-gray-500"><strong>Primary Violation:</strong> ${r.top_violated_rule || 'MRP Statement'}</p>
+                    </div>
+                `).join('');
+            }
+
+            // Load Officer Performance
+            const offRes = await PackCheck.request('/analytics/officer-performance');
+            if (offRes.success && offRes.data) {
+                document.getElementById('officerTbody').innerHTML = offRes.data.map(o => `
+                    <tr class="hover:bg-blue-50/30 transition-colors">
+                        <td class="p-3.5 font-bold text-gray-900">${o.officer_name}</td>
+                        <td class="p-3.5 text-gray-600">${o.region}</td>
+                        <td class="p-3.5 font-bold text-gray-800">${o.total_scans}</td>
+                        <td class="p-3.5 text-emerald-600 font-semibold">${o.reviewed_count}</td>
+                        <td class="p-3.5 text-amber-600 font-semibold">${o.pending_review_count}</td>
+                        <td class="p-3.5 text-red-600 font-bold">${o.violations_detected}</td>
+                    </tr>
+                `).join('');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PackCheck - New Compliance Scan</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline-variant": "#c3c6d8",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#f8f9ff",
+                        "on-secondary-fixed-variant": "#005045",
+                        "on-primary-fixed-variant": "#003ea7",
+                        "surface-container-low": "#f1f3fa",
+                        "on-surface": "#181c21",
+                        "primary": "#0051d5",
+                        "secondary-container": "#65fade",
+                        "surface-dim": "#d8dae1",
+                        "on-primary-container": "#fefcff",
+                        "background": "#f8f9ff",
+                        "tertiary-fixed": "#ffdad2",
+                        "on-tertiary-container": "#fffbff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#e0e2e9",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed-variant": "#8c1900",
+                        "on-tertiary-fixed": "#3d0600",
+                        "tertiary-container": "#cd4729",
+                        "surface-container-high": "#e6e8ef",
+                        "on-surface-variant": "#424655",
+                        "primary-container": "#276afa",
+                        "on-error-container": "#93000a",
+                        "primary-fixed": "#dbe1ff",
+                        "on-primary": "#ffffff",
+                        "surface-container": "#eceef5",
+                        "secondary": "#006b5c",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#00174b",
+                        "on-secondary-fixed": "#00201b",
+                        "inverse-primary": "#b4c5ff",
+                        "secondary-fixed": "#65fade",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb4a3",
+                        "surface-tint": "#0053da",
+                        "inverse-on-surface": "#eef1f7",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#41ddc2",
+                        "on-background": "#181c21",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "outline": "#737687",
+                        "tertiary": "#aa2f13",
+                        "inverse-surface": "#2d3136",
+                        "surface": "#f8f9ff",
+                        "surface-container-highest": "#e0e2e9",
+                        "on-secondary-container": "#007262"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "xs": "4px",
+                        "md": "24px",
+                        "base": "8px",
+                        "xl": "64px",
+                        "gutter": "16px",
+                        "margin-desktop": "32px",
+                        "lg": "40px",
+                        "max-width": "1280px",
+                        "sm": "12px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "body-lg": ["Inter"],
+                        "display-lg": ["Hanken Grotesk"],
+                        "caption": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-md": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "caption": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col antialiased">
+<!-- Top Navigation (Mobile/Transaction Focus) -->
+<header class="bg-surface border-b border-outline-variant shadow-sm flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16 w-full z-40 sticky top-0">
+<button aria-label="Go back" class="text-primary p-2 -ml-2 rounded-full hover:bg-surface-container-high transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface">New Compliance Scan</h1>
+<div class="w-10"></div> <!-- Spacer for centering -->
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col px-margin-mobile md:px-margin-desktop py-md md:py-lg max-w-max-width mx-auto w-full gap-lg">
+<!-- Upload Zone -->
+<section class="w-full">
+<div class="relative w-full aspect-square md:aspect-[2/1] max-w-2xl mx-auto rounded-[32px] border-4 border-dashed border-secondary-fixed-dim bg-surface-container-lowest flex flex-col items-center justify-center p-md hover:bg-surface-container-low transition-colors cursor-pointer group shadow-[0px_10px_30px_rgba(47,111,255,0.08)]">
+<!-- Central Duotone Camera Illustration (CSS + Icon) -->
+<div class="relative mb-6">
+<div class="absolute inset-0 bg-secondary-container rounded-full blur-xl opacity-50 group-hover:opacity-70 transition-opacity"></div>
+<div class="relative bg-primary-container text-on-primary-container p-6 rounded-3xl shadow-lg transform group-hover:scale-105 transition-transform duration-300">
+<span class="material-symbols-outlined text-5xl" data-icon="photo_camera" style="font-variation-settings: 'FILL' 0;">photo_camera</span>
+</div>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface text-center mb-2">Tap to Scan Package</h2>
+<p class="font-body-md text-body-md text-on-surface-variant text-center max-w-xs">Position the label clearly within the frame for best AI extraction results.</p>
+</div>
+</section>
+<!-- Primary Actions -->
+<section class="flex flex-col md:flex-row gap-4 max-w-2xl mx-auto w-full">
+<button class="flex-1 bg-gradient-to-r from-primary to-[#3B82F6] text-on-primary font-label-md text-label-md rounded-full py-4 px-8 shadow-md hover:shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" data-icon="camera_alt">camera_alt</span>
+                Take Photo
+            </button>
+<button class="flex-1 bg-gradient-to-r from-secondary-fixed-dim to-secondary text-on-secondary font-label-md text-label-md rounded-full py-4 px-8 shadow-md hover:shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" data-icon="image">image</span>
+                Upload Image
+            </button>
+</section>
+<!-- Thumbnail Strip -->
+<section class="w-full max-w-2xl mx-auto">
+<h3 class="font-label-md text-label-md text-on-surface-variant mb-3 uppercase tracking-wider">Required Angles</h3>
+<div class="flex gap-4 overflow-x-auto pb-4 snap-x">
+<!-- Placeholder 1: Front -->
+<div class="snap-start shrink-0 w-28 h-28 rounded-xl bg-surface-container border border-outline-variant flex flex-col items-center justify-center gap-1">
+<span class="material-symbols-outlined text-outline" data-icon="package" style="font-variation-settings: 'FILL' 0;">package</span>
+<span class="font-caption text-caption text-on-surface-variant">Front</span>
+</div>
+<!-- Placeholder 2: Back -->
+<div class="snap-start shrink-0 w-28 h-28 rounded-xl bg-surface-container border border-outline-variant flex flex-col items-center justify-center gap-1">
+<span class="material-symbols-outlined text-outline" data-icon="flip_to_back" style="font-variation-settings: 'FILL' 0;">flip_to_back</span>
+<span class="font-caption text-caption text-on-surface-variant">Back</span>
+</div>
+<!-- Placeholder 3: Side -->
+<div class="snap-start shrink-0 w-28 h-28 rounded-xl bg-surface-container border border-outline-variant flex flex-col items-center justify-center gap-1">
+<span class="material-symbols-outlined text-outline" data-icon="view_sidebar" style="font-variation-settings: 'FILL' 0;">view_sidebar</span>
+<span class="font-caption text-caption text-on-surface-variant">Side</span>
+</div>
+<!-- Add More -->
+<button class="snap-start shrink-0 w-28 h-28 rounded-xl bg-primary-fixed border border-dashed border-primary flex flex-col items-center justify-center gap-1 hover:bg-primary-fixed-dim transition-colors text-on-primary-fixed">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+<span class="font-caption text-caption">Add More</span>
+</button>
+</div>
+</section>
+<!-- Tips Bar -->
+<section class="mt-auto max-w-2xl mx-auto w-full">
+<div class="bg-primary-fixed/50 backdrop-blur-md rounded-2xl p-4 flex flex-col md:flex-row gap-4 items-start md:items-center border-l-4 border-primary">
+<div class="flex items-center gap-2 text-on-primary-fixed font-label-md text-label-md shrink-0">
+<span class="material-symbols-outlined" data-icon="tips_and_updates">tips_and_updates</span>
+                    Scan Tips:
+                </div>
+<ul class="flex flex-col md:flex-row flex-wrap gap-x-6 gap-y-2 font-body-md text-body-md text-on-surface">
+<li class="flex items-center gap-2 before:content-[''] before:w-1.5 before:h-1.5 before:bg-primary before:rounded-full">Capture full label</li>
+<li class="flex items-center gap-2 before:content-[''] before:w-1.5 before:h-1.5 before:bg-primary before:rounded-full">Avoid glare</li>
+<li class="flex items-center gap-2 before:content-[''] before:w-1.5 before:h-1.5 before:bg-primary before:rounded-full">Include net quantity</li>
+</ul>
+</div>
+</section>
+</main>
+</body></html>

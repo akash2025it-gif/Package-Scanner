@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PackCheck - Manage Team</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "outline-variant": "#c3c6d8",
+                      "error": "#ba1a1a",
+                      "surface-bright": "#f8f9ff",
+                      "on-secondary-fixed-variant": "#005045",
+                      "on-primary-fixed-variant": "#003ea7",
+                      "surface-container-low": "#f1f3fa",
+                      "on-surface": "#181c21",
+                      "primary": "#0051d5",
+                      "secondary-container": "#65fade",
+                      "surface-dim": "#d8dae1",
+                      "on-primary-container": "#fefcff",
+                      "background": "#f8f9ff",
+                      "tertiary-fixed": "#ffdad2",
+                      "on-tertiary-container": "#fffbff",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-variant": "#e0e2e9",
+                      "on-error": "#ffffff",
+                      "on-tertiary-fixed-variant": "#8c1900",
+                      "on-tertiary-fixed": "#3d0600",
+                      "tertiary-container": "#cd4729",
+                      "surface-container-high": "#e6e8ef",
+                      "on-surface-variant": "#424655",
+                      "primary-container": "#276afa",
+                      "on-error-container": "#93000a",
+                      "primary-fixed": "#dbe1ff",
+                      "on-primary": "#ffffff",
+                      "surface-container": "#eceef5",
+                      "secondary": "#006b5c",
+                      "on-tertiary": "#ffffff",
+                      "on-primary-fixed": "#00174b",
+                      "on-secondary-fixed": "#00201b",
+                      "inverse-primary": "#b4c5ff",
+                      "secondary-fixed": "#65fade",
+                      "on-secondary": "#ffffff",
+                      "tertiary-fixed-dim": "#ffb4a3",
+                      "surface-tint": "#0053da",
+                      "inverse-on-surface": "#eef1f7",
+                      "error-container": "#ffdad6",
+                      "secondary-fixed-dim": "#41ddc2",
+                      "on-background": "#181c21",
+                      "primary-fixed-dim": "#b4c5ff",
+                      "outline": "#737687",
+                      "tertiary": "#aa2f13",
+                      "inverse-surface": "#2d3136",
+                      "surface": "#f8f9ff",
+                      "surface-container-highest": "#e0e2e9",
+                      "on-secondary-container": "#007262"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-mobile": "16px",
+                      "xs": "4px",
+                      "md": "24px",
+                      "base": "8px",
+                      "xl": "64px",
+                      "gutter": "16px",
+                      "margin-desktop": "32px",
+                      "lg": "40px",
+                      "max-width": "1280px",
+                      "sm": "12px"
+              },
+              "fontFamily": {
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Hanken Grotesk"
+                      ],
+                      "headline-lg-mobile": [
+                              "Hanken Grotesk"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Hanken Grotesk"
+                      ],
+                      "caption": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Hanken Grotesk"
+                      ]
+              },
+              "fontSize": {
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "36px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "caption": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col md:flex-row">
+<!-- Navigation Drawer (Desktop) -->
+<nav class="hidden md:flex flex-col h-screen fixed left-0 top-0 z-50 py-base bg-surface border-r border-outline-variant shadow-sm w-72 rounded-r-xl transition-all duration-300 ease-in-out">
+<div class="px-margin-desktop py-4 mb-6 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+<span class="font-headline-md text-headline-md text-primary font-bold tracking-tight">PackCheck</span>
+</div>
+<div class="px-margin-desktop mb-8 flex items-center gap-4">
+<img alt="Officer Avatar" class="w-12 h-12 rounded-full object-cover border-2 border-surface-container-high" data-alt="A highly detailed professional headshot of an Asian male AI compliance officer in his 30s. He is wearing a crisp light blue button-down shirt. The background is a blurred modern office setting with bright, natural lighting. The lighting is soft and flattering, creating a polished, corporate tech aesthetic suitable for a high-end enterprise application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuByGRZpNfKDEnbBH5j-jSa5jFhYOPHplgoqN_h43zK6CSsd2CKMmvIt0b7YQrb23703Bke7Ddkd1CvmCUusqXlVW3wC_O6HxKvnXCBXzBB30vcyb81EBYmzXcYJmz8k9pf3W6o-6yi4aO5ExeExphDIlaYNd6dNALIPCJ4Eem-d3AnEzsGROQ38-QZX5Uj8ZqeWhe7BUAgmqkSs9cqRRd827CHMQdU4uCPnuw0xxP0RXCdRGLBKBdc"/>
+<div>
+<p class="font-label-md text-label-md text-on-surface">PackCheck AI</p>
+<p class="font-caption text-caption text-on-surface-variant">Compliance Officer</p>
+</div>
+</div>
+<ul class="flex-1 px-2 space-y-1 overflow-y-auto">
+<li><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-full mx-2 transition-colors font-label-md text-label-md" href="#"><span class="material-symbols-outlined">dashboard</span>Dashboard</a></li>
+<li><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-full mx-2 transition-colors font-label-md text-label-md" href="#"><span class="material-symbols-outlined">barcode_scanner</span>New Scan</a></li>
+<li><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-full mx-2 transition-colors font-label-md text-label-md" href="#"><span class="material-symbols-outlined">description</span>Reports</a></li>
+<li><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-full mx-2 transition-colors font-label-md text-label-md" href="#"><span class="material-symbols-outlined">inventory_2</span>Repository</a></li>
+<li><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-full mx-2 transition-colors font-label-md text-label-md" href="#"><span class="material-symbols-outlined">insights</span>Analytics</a></li>
+<li><a class="flex items-center gap-3 px-4 py-3 bg-primary-container text-on-primary-container font-bold rounded-full mx-2 transition-colors font-label-md text-label-md" href="#"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">group</span>Users</a></li>
+<li><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-full mx-2 transition-colors font-label-md text-label-md" href="#"><span class="material-symbols-outlined">settings</span>Settings</a></li>
+</ul>
+<div class="px-margin-desktop py-4 mt-auto">
+<p class="font-caption text-caption text-on-surface-variant text-center">v2.1.0</p>
+</div>
+</nav>
+<!-- Top App Bar (Mobile) -->
+<header class="md:hidden flex justify-between items-center px-margin-mobile h-16 w-full z-40 bg-surface border-b border-outline-variant shadow-sm sticky top-0">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+<span class="font-headline-md text-headline-md font-bold text-primary tracking-tight">PackCheck</span>
+</div>
+<img alt="Legal Metrology Officer Profile" class="w-8 h-8 rounded-full object-cover border border-outline-variant" data-alt="A highly detailed professional headshot of an Asian male AI compliance officer in his 30s. He is wearing a crisp light blue button-down shirt. The background is a blurred modern office setting with bright, natural lighting. The lighting is soft and flattering, creating a polished, corporate tech aesthetic suitable for a high-end enterprise application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZcl-oFQJoYa4cWTta9tBu2b3XEsuML3grLBYNZpbqr59SvOGAkcqtRv5L8aJONHFJeZAIQkKLQ63uKbjRCnubIrxx1c6pbhYSbGAReR_78Z_vl7nj8HpM-uJWW-8zwiqq72qeWfWS3lIv-1_yKTrncVDqw8-zwfpZcOCfr-z3yxZLhKSaRdlQWQS-4MJWQbLLEfFvwyT9oBkHRI8AhLZiwCg1_sKu3nzJ0Od3cH5A-RHpXBnb5CY"/>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-72 w-full max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-8 md:py-12 pb-32 md:pb-12 min-h-screen">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+<div>
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-2">Manage Team</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Control access levels and permissions for your compliance officers.</p>
+</div>
+<button class="bg-tertiary-container hover:bg-tertiary text-on-tertiary-container font-label-md text-label-md px-6 py-3 rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 active:scale-95 whitespace-nowrap">
+<span class="material-symbols-outlined text-sm">person_add</span>
+                Invite User
+            </button>
+</div>
+<!-- Search Bar -->
+<div class="relative max-w-md mb-8">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full pl-12 pr-4 h-[56px] bg-surface-container-lowest border border-outline-variant rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-body-md text-body-md text-on-surface shadow-sm placeholder:text-on-surface-variant/70" placeholder="Search users by name or email..." type="text"/>
+</div>
+<!-- Users Grid / List -->
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
+<!-- User Card 1 -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0px_10px_30px_rgba(47,111,255,0.08)] border border-surface-variant flex flex-col sm:flex-row gap-6 relative overflow-hidden group hover:shadow-[0px_15px_40px_rgba(47,111,255,0.12)] transition-shadow">
+<!-- Decorative left border for admin -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="flex items-center gap-4 sm:w-1/3 shrink-0">
+<img alt="Sarah Jenkins" class="w-14 h-14 rounded-full object-cover border-2 border-surface-container" data-alt="A high-quality professional portrait of a Caucasian female in her 40s. She has short blonde hair and is wearing a dark navy blazer over a white blouse. The setting is a brightly lit, modern corporate office with subtle reflections on glass panels in the background. The mood is confident and authoritative, perfectly fitting a senior administrative role in a tech company." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5Ia2mQ237se6O0tWEnKnwjGOVHax3SPlhTjPyrVRmqtSI5T8qz9ztGiDUP6S1xfw54HXyol_42CGOihC-sX6GaoZrB_CoebiD1lmFITUEZPOIm1cE7xMF5XViXU6JFAF71lF45dXhau5uUWYnY6ZG-QIhRYFLFULKCHKEOUJrEhGTqSZAiWhGiTNTR3Qedoqhs8hMjD8riAmHLl1a3xE6xiYHnNJ6ncyY8Hxx6DvuoDH9hX8OXIM"/>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface mb-1">Sarah Jenkins</h3>
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary-container text-on-primary-container border border-primary/20">
+                             Admin
+                         </span>
+</div>
+</div>
+<div class="flex-1 flex flex-col sm:flex-row gap-4 sm:justify-end sm:items-center border-t sm:border-t-0 sm:border-l border-outline-variant pt-4 sm:pt-0 sm:pl-6">
+<div class="flex items-center justify-between gap-3 min-w-[120px]">
+<span class="font-body-md text-body-md text-on-surface-variant text-sm">Can Edit</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary-fixed"></div>
+</label>
+</div>
+<div class="flex items-center justify-between gap-3 min-w-[120px]">
+<span class="font-body-md text-body-md text-on-surface-variant text-sm">Can Export</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary-fixed"></div>
+</label>
+</div>
+<div class="flex items-center justify-between gap-3 min-w-[120px]">
+<span class="font-body-md text-body-md text-on-surface-variant text-sm">Can Delete</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary-fixed"></div>
+</label>
+</div>
+</div>
+</div>
+<!-- User Card 2 -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0px_10px_30px_rgba(47,111,255,0.08)] border border-surface-variant flex flex-col sm:flex-row gap-6 relative overflow-hidden group hover:shadow-[0px_15px_40px_rgba(47,111,255,0.12)] transition-shadow">
+<div class="flex items-center gap-4 sm:w-1/3 shrink-0">
+<img alt="Marcus Rodriguez" class="w-14 h-14 rounded-full object-cover border-2 border-surface-container" data-alt="A professional headshot of a Hispanic male in his late 20s. He has dark wavy hair and a neat beard, wearing a casual grey sweater over a collared shirt. The background is a bright, minimalist modern office with soft natural daylight. The image has a clean, high-contrast modern aesthetic appropriate for a tech platform profile." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDKTGVJm9cJE0DvO-HjqUaui-Y6M45c1lJFxfxz02bnph8j-vI8x8KARbIUSMF09my8ZRgRuvccwU2649tqRja0TZhAOUSI0VV3KRKWoybSueLBZgwu-YvPBeCf4y9suBegtC4yhzIy0gEl2dvRqG-TTfsUtqXoTeXGQ9KOqs20OpsDAXHMkMZ-t7-OEtP67gZYA6bHd1qcQHtw56A0xoRShwQGUurd2CFoF6uca3lnn-fmXPDY_xw"/>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface mb-1">Marcus Rodriguez</h3>
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-secondary-container text-on-secondary-container border border-secondary/20">
+                             Inspector
+                         </span>
+</div>
+</div>
+<div class="flex-1 flex flex-col sm:flex-row gap-4 sm:justify-end sm:items-center border-t sm:border-t-0 sm:border-l border-outline-variant pt-4 sm:pt-0 sm:pl-6">
+<div class="flex items-center justify-between gap-3 min-w-[120px]">
+<span class="font-body-md text-body-md text-on-surface-variant text-sm">Can Edit</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary-fixed"></div>
+</label>
+</div>
+<div class="flex items-center justify-between gap-3 min-w-[120px]">
+<span class="font-body-md text-body-md text-on-surface-variant text-sm">Can Export</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary-fixed"></div>
+</label>
+</div>
+<div class="flex items-center justify-between gap-3 min-w-[120px]">
+<span class="font-body-md text-body-md text-on-surface-variant text-sm">Can Delete</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary-fixed"></div>
+</label>
+</div>
+</div>
+</div>
+<!-- User Card 3 -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0px_10px_30px_rgba(47,111,255,0.08)] border border-surface-variant flex flex-col sm:flex-row gap-6 relative overflow-hidden group hover:shadow-[0px_15px_40px_rgba(47,111,255,0.12)] transition-shadow">
+<div class="flex items-center gap-4 sm:w-1/3 shrink-0">
+<div class="w-14 h-14 rounded-full bg-surface-variant flex items-center justify-center border-2 border-surface-container">
+<span class="font-headline-md text-headline-md text-on-surface-variant">EL</span>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface mb-1">Emily Chen</h3>
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface-variant text-on-surface-variant border border-outline-variant/30">
+                             Viewer
+                         </span>
+</div>
+</div>
+<div class="flex-1 flex flex-col sm:flex-row gap-4 sm:justify-end sm:items-center border-t sm:border-t-0 sm:border-l border-outline-variant pt-4 sm:pt-0 sm:pl-6 opacity-60">
+<div class="flex items-center justify-between gap-3 min-w-[120px]">
+<span class="font-body-md text-body-md text-on-surface-variant text-sm">Can Edit</span>
+<label class="relative inline-flex items-center cursor-not-allowed">
+<input class="sr-only peer" disabled="" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary-fixed"></div>
+</label>
+</div>
+<div class="flex items-center justify-between gap-3 min-w-[120px]">
+<span class="font-body-md text-body-md text-on-surface-variant text-sm">Can Export</span>
+<label class="relative inline-flex items-center cursor-not-allowed">
+<input class="sr-only peer" disabled="" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary-fixed"></div>
+</label>
+</div>
+<div class="flex items-center justify-between gap-3 min-w-[120px]">
+<span class="font-body-md text-body-md text-on-surface-variant text-sm">Can Delete</span>
+<label class="relative inline-flex items-center cursor-not-allowed">
+<input class="sr-only peer" disabled="" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary-fixed"></div>
+</label>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar (Mobile) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 pb-safe bg-surface/80 backdrop-blur-md shadow-lg border-t border-outline-variant rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-highest active:scale-90 transition-transform duration-200 px-2 py-1 rounded-lg" href="#">
+<span class="material-symbols-outlined mb-1">home</span>
+<span class="font-label-md-mobile text-label-md-mobile text-xs">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-highest active:scale-90 transition-transform duration-200 px-2 py-1 rounded-lg" href="#">
+<span class="material-symbols-outlined mb-1">add_circle</span>
+<span class="font-label-md-mobile text-label-md-mobile text-xs">Scan</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-highest active:scale-90 transition-transform duration-200 px-2 py-1 rounded-lg" href="#">
+<span class="material-symbols-outlined mb-1">assessment</span>
+<span class="font-label-md-mobile text-label-md-mobile text-xs">Reports</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-highest active:scale-90 transition-transform duration-200 px-2 py-1 rounded-lg" href="#">
+<span class="material-symbols-outlined mb-1">database</span>
+<span class="font-label-md-mobile text-label-md-mobile text-xs">Store</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">more_horiz</span>
+<span class="font-label-md-mobile text-label-md-mobile text-xs font-bold">More</span>
+</a>
+</nav>
+</body></html>

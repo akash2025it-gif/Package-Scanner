@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>PackCheck - Product Repository</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+</head>
+<body class="bg-[#f8f9ff] font-['Inter'] text-[#181c21] min-h-screen flex">
+    <!-- Left Navigation Rail -->
+    <aside class="w-64 bg-[#0051d5] text-white flex flex-col justify-between p-5 shadow-xl hidden md:flex shrink-0">
+        <div>
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[#65fade] text-2xl">verified_user</span>
+                </div>
+                <div>
+                    <h2 class="font-['Hanken_Grotesk'] font-bold text-lg leading-tight">PackCheck</h2>
+                    <span class="text-xs text-[#65fade] tracking-wider uppercase font-semibold">LMPC Enforcement</span>
+                </div>
+            </div>
+
+            <nav class="space-y-1.5 text-sm font-medium">
+                <a href="/dashboard" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white/90 rounded-xl transition-all">
+                    <span class="material-symbols-outlined">dashboard</span> Dashboard
+                </a>
+                <a href="/scan/new" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white/90 rounded-xl transition-all">
+                    <span class="material-symbols-outlined">add_photo_alternate</span> New Scan
+                </a>
+                <a href="/products-ui" class="flex items-center gap-3 px-4 py-3 bg-white/20 text-white rounded-xl font-semibold transition-all">
+                    <span class="material-symbols-outlined">inventory_2</span> Product Catalog
+                </a>
+                <a href="/enforcement" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white/90 rounded-xl transition-all">
+                    <span class="material-symbols-outlined">map</span> Regional Heatmap
+                </a>
+                <a href="/team" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white/90 rounded-xl transition-all">
+                    <span class="material-symbols-outlined">group</span> Manage Team
+                </a>
+            </nav>
+        </div>
+
+        <div class="pt-4 border-t border-white/10">
+            <a href="/" onclick="PackCheck.clearAuth()" class="flex items-center gap-2 text-xs text-white/80 hover:text-white">
+                <span class="material-symbols-outlined text-sm">logout</span> Sign Out
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+        <header class="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sticky top-0 z-20">
+            <div>
+                <h1 class="font-['Hanken_Grotesk'] font-bold text-lg sm:text-xl text-gray-900">Packaged Product Repository</h1>
+                <p class="text-[11px] sm:text-xs text-gray-500">Centralized database of registered commodities, manufacturers & inspection history</p>
+            </div>
+            <div class="relative w-full sm:w-64 shrink-0">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">search</span>
+                <input id="searchInput" oninput="filterProducts()" type="text" class="w-full text-xs pl-9 pr-4 py-2 border border-gray-300 rounded-full focus:ring-primary focus:border-primary" placeholder="Search brand, category, barcode..."/>
+            </div>
+        </header>
+
+        <div class="p-3 sm:p-6 max-w-7xl mx-auto w-full">
+            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-gray-50 text-gray-600 uppercase font-semibold border-b border-gray-200">
+                            <tr>
+                                <th class="p-3.5">Product Name</th>
+                                <th class="p-3.5">Brand</th>
+                                <th class="p-3.5">Category</th>
+                                <th class="p-3.5">Manufacturer</th>
+                                <th class="p-3.5">Origin</th>
+                                <th class="p-3.5">Barcode / EAN</th>
+                                <th class="p-3.5">Known Batches</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTbody" class="divide-y divide-gray-100 font-medium text-gray-700">
+                            <tr>
+                                <td colspan="7" class="p-8 text-center text-gray-400">Loading product repository...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/static/app.js"></script>
+    <script>
+        let allProducts = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            PackCheck.syncNavigation('/products-ui');
+            const res = await PackCheck.request('/products?page_size=50');
+            if (res.success && res.data?.items) {
+                allProducts = res.data.items;
+                renderProducts(allProducts);
+            }
+        });
+
+        function renderProducts(products) {
+            const tbody = document.getElementById('productsTbody');
+            if (products.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-gray-400">No products matching query.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = products.map(p => {
+                let batchesHtml = '<span class="text-gray-400 italic text-[11px]">None recorded</span>';
+                if (p.known_batches && p.known_batches.length > 0) {
+                    batchesHtml = `
+                        <div class="flex flex-wrap gap-1 max-w-xs">
+                            ${p.known_batches.map(b => `
+                                <a href="/batch/${encodeURIComponent(b)}" class="px-1.5 py-0.5 rounded bg-blue-50 hover:bg-blue-100 text-primary border border-blue-200 font-mono text-[10px] font-bold transition-colors inline-block" title="View Batch Investigation">
+                                    ${b}
+                                </a>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
+                return `
+                    <tr class="hover:bg-blue-50/30 transition-colors">
+                        <td class="p-3.5 font-bold text-gray-900">${p.name}</td>
+                        <td class="p-3.5 text-gray-700 font-semibold">${p.brand}</td>
+                        <td class="p-3.5 text-gray-600">${p.category}</td>
+                        <td class="p-3.5 text-gray-500 max-w-xs truncate">${p.manufacturer_name || 'N/A'}</td>
+                        <td class="p-3.5 font-semibold text-gray-700">${p.country_of_origin || 'India'}</td>
+                        <td class="p-3.5 font-mono text-gray-600">${p.barcode || 'N/A'}</td>
+                        <td class="p-3.5">${batchesHtml}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterProducts() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allProducts.filter(p => 
+                p.name.toLowerCase().includes(q) || 
+                p.brand.toLowerCase().includes(q) || 
+                p.category.toLowerCase().includes(q) ||
+                (p.barcode && p.barcode.toLowerCase().includes(q)) ||
+                (p.known_batches && p.known_batches.some(b => b.toLowerCase().includes(q)))
+            );
+            renderProducts(filtered);
+        }
+    </script>
+</body>
+</html>

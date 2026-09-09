@@ -1,0 +1,108 @@
+# Legal Metrology (Packaged Commodities) Rules, 2011 Rule Definitions
+# Config-driven rule set for PackCheck compliance engine
+
+version: "2011.1"
+rules:
+  - id: "RULE_6_1_A_COMMON_NAME"
+    field_type: "common_name"
+    name: "Generic or Common Name Declaration"
+    description: "The generic or common name of the commodity contained in the package must be prominently declared."
+    rule_reference: "Rule 6(1)(a) of Legal Metrology (Packaged Commodities) Rules, 2011"
+    validation_type: "common_name"
+    severity: "critical"
+    enabled: true
+    min_confidence_threshold: 0.70
+
+  - id: "RULE_6_1_B_MANUFACTURER_DETAILS"
+    field_type: "manufacturer_details"
+    name: "Manufacturer / Packer / Importer Details"
+    description: "Name and complete address of the manufacturer, or packer, or importer must be clearly declared on the label."
+    rule_reference: "Rule 6(1)(b) of Legal Metrology (Packaged Commodities) Rules, 2011"
+    validation_type: "presence"
+    severity: "critical"
+    enabled: true
+    min_confidence_threshold: 0.70
+
+  - id: "RULE_6_1_C_COUNTRY_OF_ORIGIN"
+    field_type: "country_of_origin"
+    name: "Country of Origin for Imported Goods"
+    description: "For imported goods, the country of origin or manufacturer country must be conspicuously declared."
+    rule_reference: "Rule 6(1)(c) of Legal Metrology (Packaged Commodities) Rules, 2011"
+    validation_type: "presence"
+    severity: "critical"
+    enabled: true
+    requires_import_check: true
+    min_confidence_threshold: 0.70
+
+  - id: "RULE_6_1_D_NET_QUANTITY"
+    field_type: "net_quantity"
+    name: "Net Quantity in Standard Units of Measurement"
+    description: "Net quantity in terms of standard unit of weight, volume, measure, or number as per Rule 8 and Second Schedule."
+    rule_reference: "Rule 6(1)(d) read with Rule 8 of LMPC Rules, 2011"
+    validation_type: "net_quantity"
+    severity: "critical"
+    enabled: true
+    allowed_units:
+      mass: ["g", "kg", "mg"]
+      volume: ["ml", "l", "kl", "L", "mL"]
+      length: ["cm", "m", "mm"]
+      count: ["N", "U", "units", "pieces", "count", "pkts", "sachets"]
+    disallowed_symbols: ["gms", "gms.", "kgs", "kgs.", "ml.", "lts", "ltrs", "gm", "g."]
+    min_confidence_threshold: 0.70
+
+  - id: "RULE_6_1_E_MFG_DATE"
+    field_type: "mfg_date"
+    name: "Month and Year of Manufacture / Packing / Import"
+    description: "The month and year in which the commodity is manufactured or pre-packed or imported."
+    rule_reference: "Rule 6(1)(e) of Legal Metrology (Packaged Commodities) Rules, 2011"
+    validation_type: "date_format"
+    severity: "major"
+    enabled: true
+    min_confidence_threshold: 0.70
+
+  - id: "RULE_6_1_F_MRP"
+    field_type: "mrp"
+    name: "Maximum Retail Price (MRP) & Tax Inclusivity"
+    description: "Maximum Retail Price inclusive of all taxes must be declared with rupee symbol and required statement."
+    rule_reference: "Rule 6(1)(f) of Legal Metrology (Packaged Commodities) Rules, 2011"
+    validation_type: "mrp"
+    severity: "critical"
+    enabled: true
+    currency_symbols: ["₹", "Rs", "Rs.", "INR"]
+    mandatory_phrases:
+      - "inclusive of all taxes"
+      - "incl. of all taxes"
+      - "incl of all taxes"
+      - "incl all taxes"
+      - "all taxes included"
+    min_confidence_threshold: 0.70
+
+  - id: "RULE_6_1_G_UNIT_SALE_PRICE"
+    field_type: "unit_sale_price"
+    name: "Unit Sale Price (USP)"
+    description: "Unit sale price rounded off to the nearest two decimal places per g/kg/ml/l/unit."
+    rule_reference: "Rule 6(1)(g) of Legal Metrology (Packaged Commodities) Rules, 2011"
+    validation_type: "unit_sale_price"
+    severity: "major"
+    enabled: true
+    min_confidence_threshold: 0.70
+
+  - id: "RULE_6_1_H_CONSUMER_CARE"
+    field_type: "consumer_care"
+    name: "Consumer Care Contact Information"
+    description: "Name, address, telephone number, and email of person/office to be contacted in case of consumer complaints."
+    rule_reference: "Rule 6(1)(h) of Legal Metrology (Packaged Commodities) Rules, 2011"
+    validation_type: "consumer_care"
+    severity: "major"
+    enabled: true
+    min_confidence_threshold: 0.70
+
+  - id: "RULE_SECOND_SCHEDULE_FONT_SIZE"
+    field_type: "font_size"
+    name: "Minimum Font Size / Numeral Height Regulation"
+    description: "Minimum height of numerals and letters depending on net quantity slab or Principal Display Panel area."
+    rule_reference: "Second Schedule of Legal Metrology (Packaged Commodities) Rules, 2011"
+    validation_type: "font_size"
+    severity: "major"
+    enabled: false
+    min_confidence_threshold: 0.70

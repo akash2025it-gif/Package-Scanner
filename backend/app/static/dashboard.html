@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>PackSure AI - Enforcement Intelligence Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0051d5",
+                        "primary-container": "#276afa",
+                        "secondary": "#006b5c",
+                        "secondary-container": "#65fade",
+                        "background": "#f8f9ff",
+                        "surface": "#ffffff",
+                        "tertiary": "#aa2f13",
+                        "tertiary-container": "#cd4729",
+                        "on-surface": "#181c21",
+                        "on-surface-variant": "#424655",
+                        "surface-container-low": "#f1f3fa",
+                        "error": "#ba1a1a"
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 260px;
+        }
+        @media (min-width: 1024px) {
+            .chart-container {
+                height: 290px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-[#f8f9ff] font-['Inter'] text-[#181c21] min-h-screen flex">
+    <!-- Left Navigation Rail (Desktop) -->
+    <aside class="w-64 bg-[#0051d5] text-white flex flex-col justify-between p-5 shadow-xl hidden md:flex shrink-0">
+        <div>
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md">
+                    <span class="material-symbols-outlined text-[#65fade] text-2xl">verified_user</span>
+                </div>
+                <div>
+                    <h2 class="font-['Hanken_Grotesk'] font-bold text-lg leading-tight">PackSure AI</h2>
+                    <span class="text-xs text-[#65fade] tracking-wider uppercase font-semibold">LMPC Enforcement</span>
+                </div>
+            </div>
+
+            <nav class="space-y-1.5 text-sm font-medium">
+                <a href="/dashboard" class="flex items-center gap-3 px-4 py-3 bg-white/20 text-white rounded-xl font-semibold transition-all">
+                    <span class="material-symbols-outlined">dashboard</span> Enforcement Intelligence
+                </a>
+                <a href="/scan/new" id="navNewScan" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white/90 rounded-xl transition-all">
+                    <span class="material-symbols-outlined">add_photo_alternate</span> New Inspection Scan
+                </a>
+                <a href="/products-ui" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white/90 rounded-xl transition-all">
+                    <span class="material-symbols-outlined">inventory_2</span> Product Catalog
+                </a>
+                <a href="/enforcement" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white/90 rounded-xl transition-all">
+                    <span class="material-symbols-outlined">map</span> Regional Surveillance
+                </a>
+                <a href="/team" id="navManageTeam" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white/90 rounded-xl transition-all">
+                    <span class="material-symbols-outlined">group</span> Manage Team
+                </a>
+                <a href="/docs" target="_blank" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white/90 rounded-xl transition-all">
+                    <span class="material-symbols-outlined">api</span> API Documentation
+                </a>
+            </nav>
+        </div>
+
+        <div class="pt-4 border-t border-white/10">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm" id="userAvatar">PC</div>
+                <div class="overflow-hidden">
+                    <p class="text-xs font-bold truncate text-white" id="userName">Authorized Officer</p>
+                    <p class="text-[11px] text-[#65fade] truncate" id="userRole">Legal Metrology Officer</p>
+                </div>
+            </div>
+            <a href="/" onclick="PackCheck.clearAuth()" class="flex items-center gap-2 text-xs text-white/80 hover:text-white transition-colors">
+                <span class="material-symbols-outlined text-sm">logout</span> Sign Out
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content Workspace -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+        <!-- Header Bar -->
+        <header class="bg-white border-b border-gray-200 px-4 sm:px-6 py-3.5 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sticky top-0 z-20 shadow-xs">
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-xl hidden sm:inline">insights</span>
+                    <h1 class="font-['Hanken_Grotesk'] font-bold text-lg sm:text-xl text-gray-900 leading-tight">Enforcement Intelligence</h1>
+                </div>
+                <p class="text-[11px] sm:text-xs text-gray-500 mt-0.5">Monitor inspections, compliance trends and potential enforcement risks.</p>
+            </div>
+            <div class="flex items-center gap-2.5">
+                <button onclick="refreshDashboard()" title="Refresh live intelligence data" class="p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold text-xs transition-all flex items-center gap-1">
+                    <span class="material-symbols-outlined text-base">refresh</span>
+                    <span class="hidden lg:inline text-[11px]">Refresh</span>
+                </button>
+                <a href="/scan/new" id="btnStartScanHeader" class="px-3.5 sm:px-4 py-2 bg-[#cd4729] hover:bg-[#aa2f13] text-white rounded-xl font-semibold text-xs shadow-md transition-all flex items-center gap-1.5 shrink-0">
+                    <span class="material-symbols-outlined text-sm">qr_code_scanner</span>
+                    <span>New Inspection</span>
+                </a>
+            </div>
+        </header>
+
+        <div class="p-3.5 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl mx-auto w-full">
+            <!-- Global Multi-Dimensional Filters Toolbar -->
+            <section class="bg-white p-3.5 sm:p-4 rounded-2xl border border-gray-200 shadow-xs space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 pb-2.5">
+                    <div class="flex items-center gap-2 text-xs font-bold text-gray-800">
+                        <span class="material-symbols-outlined text-primary text-base">filter_alt</span>
+                        <span>Dashboard Filters</span>
+                        <span id="activeFilterBadge" class="hidden px-2 py-0.5 rounded-full text-[10px] bg-blue-50 text-primary border border-blue-200">Filtered</span>
+                    </div>
+                    <button onclick="resetFilters()" class="text-xs text-gray-500 hover:text-primary font-medium flex items-center gap-1 transition-colors">
+                        <span class="material-symbols-outlined text-sm">restart_alt</span> Reset Filters
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 text-xs">
+                    <!-- Date Filter -->
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Time Period</label>
+                        <select id="filterDays" onchange="applyFilters()" class="w-full rounded-xl border-gray-300 text-xs p-2 font-medium focus:ring-primary focus:border-primary">
+                            <option value="7">Last 7 Days</option>
+                            <option value="30" selected>Last 30 Days</option>
+                            <option value="90">Last 90 Days</option>
+                            <option value="all">All Time History</option>
+                        </select>
+                    </div>
+
+                    <!-- Status Filter -->
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Inspection Status</label>
+                        <select id="filterStatus" onchange="applyFilters()" class="w-full rounded-xl border-gray-300 text-xs p-2 font-medium focus:ring-primary focus:border-primary">
+                            <option value="all" selected>All Inspection Statuses</option>
+                            <option value="compliant">Verified Compliant</option>
+                            <option value="non_compliant">Non-Compliant (Violations)</option>
+                            <option value="needs_review">Needs Manual Review</option>
+                        </select>
+                    </div>
+
+                    <!-- Product Category Filter -->
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Commodity Category</label>
+                        <select id="filterCategory" onchange="applyFilters()" class="w-full rounded-xl border-gray-300 text-xs p-2 font-medium focus:ring-primary focus:border-primary">
+                            <option value="all" selected>All Categories</option>
+                        </select>
+                    </div>
+
+                    <!-- Region Filter -->
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Jurisdiction / Region</label>
+                        <select id="filterRegion" onchange="applyFilters()" class="w-full rounded-xl border-gray-300 text-xs p-2 font-medium focus:ring-primary focus:border-primary">
+                            <option value="all" selected>All Jurisdictions / Zones</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dynamic Insights Panel -->
+            <section id="insightsSection" class="bg-gradient-to-r from-blue-900 to-[#0051d5] text-white p-4 sm:p-5 rounded-2xl shadow-sm space-y-2">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[#65fade] text-lg">lightbulb</span>
+                    <h2 class="font-['Hanken_Grotesk'] font-bold text-xs sm:text-sm uppercase tracking-wider text-white">Enforcement Intelligence Insights</h2>
+                </div>
+                <div id="insightsContainer" class="flex flex-wrap gap-2 text-xs">
+                    <div class="px-3 py-1.5 rounded-xl bg-white/10 border border-white/15 text-white/90 text-xs">
+                        Calculating live enforcement intelligence from database records...
+                    </div>
+                </div>
+            </section>
+
+            <!-- KPI Cards Grid (6 Metric Cards) -->
+            <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3.5">
+                <!-- 1. Total Inspections -->
+                <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs flex flex-col justify-between space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Total Scans</span>
+                        <div class="w-7 h-7 rounded-lg bg-blue-50 text-primary flex items-center justify-center">
+                            <span class="material-symbols-outlined text-base">document_scanner</span>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl sm:text-2xl font-bold font-['Hanken_Grotesk'] text-gray-900" id="kpiTotalInspections">0</h3>
+                        <p class="text-[10px] text-gray-400 font-medium truncate mt-0.5">Inspections in scope</p>
+                    </div>
+                </div>
+
+                <!-- 2. Compliant -->
+                <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs flex flex-col justify-between space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Compliant</span>
+                        <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-base">check_circle</span>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl sm:text-2xl font-bold font-['Hanken_Grotesk'] text-emerald-600" id="kpiCompliant">0</h3>
+                        <p class="text-[10px] text-gray-400 font-medium truncate mt-0.5">Finalized compliant</p>
+                    </div>
+                </div>
+
+                <!-- 3. Non-Compliant -->
+                <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs flex flex-col justify-between space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Non-Compliant</span>
+                        <div class="w-7 h-7 rounded-lg bg-red-50 text-red-600 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-base">cancel</span>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl sm:text-2xl font-bold font-['Hanken_Grotesk'] text-red-600" id="kpiNonCompliant">0</h3>
+                        <p class="text-[10px] text-gray-400 font-medium truncate mt-0.5">Violations recorded</p>
+                    </div>
+                </div>
+
+                <!-- 4. Needs Manual Review -->
+                <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs flex flex-col justify-between space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Needs Review</span>
+                        <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-base">pending_actions</span>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl sm:text-2xl font-bold font-['Hanken_Grotesk'] text-amber-600" id="kpiNeedsReview">0</h3>
+                        <p class="text-[10px] text-gray-400 font-medium truncate mt-0.5">Pending verification</p>
+                    </div>
+                </div>
+
+                <!-- 5. Compliance Rate -->
+                <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs flex flex-col justify-between space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Compliance Rate</span>
+                        <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-base">verified</span>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl sm:text-2xl font-bold font-['Hanken_Grotesk'] text-emerald-600" id="kpiComplianceRate">N/A</h3>
+                        <p class="text-[10px] text-gray-400 font-medium truncate mt-0.5" id="kpiComplianceRateSubtitle">% of finalized</p>
+                    </div>
+                </div>
+
+                <!-- 6. Violation Rate -->
+                <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs flex flex-col justify-between space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Violation Rate</span>
+                        <div class="w-7 h-7 rounded-lg bg-red-50 text-red-600 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-base">warning</span>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl sm:text-2xl font-bold font-['Hanken_Grotesk'] text-red-600" id="kpiViolationRate">N/A</h3>
+                        <p class="text-[10px] text-gray-400 font-medium truncate mt-0.5" id="kpiViolationRateSubtitle">% of finalized</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Batch Intelligence KPI Bar (3 Metric Cards) -->
+            <section class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3.5">
+                <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs flex items-center justify-between">
+                    <div class="space-y-0.5">
+                        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Batches Inspected</span>
+                        <h3 class="text-xl sm:text-2xl font-bold font-['Hanken_Grotesk'] text-gray-900" id="kpiBatchesInspected">0</h3>
+                        <p class="text-[10px] text-gray-400 font-medium">Distinct production lots recorded</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-primary flex items-center justify-center">
+                        <span class="material-symbols-outlined text-xl">batch_prediction</span>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs flex items-center justify-between">
+                    <div class="space-y-0.5">
+                        <span class="text-[10px] font-bold text-red-600 uppercase tracking-wider">Batches Requiring Attention</span>
+                        <h3 class="text-xl sm:text-2xl font-bold font-['Hanken_Grotesk'] text-red-600" id="kpiBatchesAttention">0</h3>
+                        <p class="text-[10px] text-gray-400 font-medium">With non-compliant findings</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-xl">warning</span>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs flex items-center justify-between">
+                    <div class="space-y-0.5">
+                        <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Batches Under Investigation</span>
+                        <h3 class="text-xl sm:text-2xl font-bold font-['Hanken_Grotesk'] text-amber-600" id="kpiBatchesInvestigating">0</h3>
+                        <p class="text-[10px] text-gray-400 font-medium">Active officer investigation</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-xl">policy</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Audit Automation & Violation Detection Threshold Intelligence (3 Metric Cards) -->
+            <section class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3.5">
+                <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs flex items-center justify-between">
+                    <div class="space-y-0.5">
+                        <span class="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Auto-Confirmed Findings</span>
+                        <h3 class="text-xl sm:text-2xl font-bold font-['Hanken_Grotesk'] text-emerald-700" id="kpiAutoConfirmedFindings">0</h3>
+                        <p class="text-[10px] text-gray-400 font-medium">Confidence &ge; configured threshold</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-xl">bolt</span>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs flex items-center justify-between">
+                    <div class="space-y-0.5">
+                        <span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider">Manual Review Findings</span>
+                        <h3 class="text-xl sm:text-2xl font-bold font-['Hanken_Grotesk'] text-amber-700" id="kpiManualReviewFindings">0</h3>
+                        <p class="text-[10px] text-gray-400 font-medium">Confidence &lt; configured threshold</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-xl">hourglass_top</span>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs flex items-center justify-between">
+                    <div class="space-y-0.5">
+                        <span class="text-[10px] font-bold text-primary uppercase tracking-wider">Automatic Confirmation Rate</span>
+                        <h3 class="text-xl sm:text-2xl font-bold font-['Hanken_Grotesk'] text-primary" id="kpiAutoConfirmRate">N/A</h3>
+                        <p class="text-[10px] text-gray-400 font-medium">% of all declaration findings</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-primary flex items-center justify-center">
+                        <span class="material-symbols-outlined text-xl">auto_mode</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Charts Row 1: Inspection Trend + Compliance Distribution -->
+            <section class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+                <!-- Inspection Activity Trend Line Chart -->
+                <div class="lg:col-span-2 bg-white p-4 sm:p-5 rounded-2xl border border-gray-200 shadow-xs flex flex-col justify-between">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-3">
+                        <div>
+                            <h2 class="font-['Hanken_Grotesk'] font-bold text-sm sm:text-base text-gray-900">Inspection Activity</h2>
+                            <p class="text-[11px] text-gray-500">Inspection volume and compliance trajectory over time</p>
+                        </div>
+                        <span id="trendSummaryBadge" class="text-[11px] font-semibold text-primary bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100 self-start sm:self-auto">
+                            Based on real inspection records
+                        </span>
+                    </div>
+
+                    <div class="chart-container my-3">
+                        <canvas id="canvasTrend"></canvas>
+                        <div id="trendEmptyState" class="hidden absolute inset-0 flex flex-col items-center justify-center text-center p-6 bg-white/90">
+                            <span class="material-symbols-outlined text-gray-300 text-3xl">show_chart</span>
+                            <p class="text-xs text-gray-500 font-medium mt-1">Not enough historical data to calculate a trend for the selected period.</p>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-500">
+                        <span id="trendPeriodLabel">Selected Period</span>
+                        <span class="flex items-center gap-3">
+                            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#0051d5]"></span> Total Inspections</span>
+                            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#10b981]"></span> Compliant</span>
+                            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#ef4444]"></span> Non-Compliant</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Compliance Distribution Donut Chart -->
+                <div class="bg-white p-4 sm:p-5 rounded-2xl border border-gray-200 shadow-xs flex flex-col justify-between">
+                    <div class="border-b border-gray-100 pb-3">
+                        <h2 class="font-['Hanken_Grotesk'] font-bold text-sm sm:text-base text-gray-900">Compliance Distribution</h2>
+                        <p class="text-[11px] text-gray-500">Statutory determinations & review breakdown</p>
+                    </div>
+
+                    <div class="chart-container my-3 flex items-center justify-center">
+                        <canvas id="canvasDistribution"></canvas>
+                        <div id="distributionEmptyState" class="hidden absolute inset-0 flex flex-col items-center justify-center text-center p-6 bg-white/90">
+                            <span class="material-symbols-outlined text-gray-300 text-3xl">pie_chart</span>
+                            <p class="text-xs text-gray-500 font-medium mt-1">No inspection data available yet.</p>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 border-t border-gray-100 grid grid-cols-3 gap-1 text-center text-[10px] font-semibold">
+                        <div class="bg-emerald-50 text-emerald-800 p-1.5 rounded-lg">
+                            <span class="block font-bold" id="distCompliantPct">0%</span> Compliant
+                        </div>
+                        <div class="bg-red-50 text-red-800 p-1.5 rounded-lg">
+                            <span class="block font-bold" id="distNonCompliantPct">0%</span> Non-Comp
+                        </div>
+                        <div class="bg-amber-50 text-amber-800 p-1.5 rounded-lg">
+                            <span class="block font-bold" id="distNeedsReviewPct">0%</span> In Review
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Charts Row 2: Most Common Compliance Findings -->
+            <section class="bg-white p-4 sm:p-5 rounded-2xl border border-gray-200 shadow-xs space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-3">
+                    <div>
+                        <h2 class="font-['Hanken_Grotesk'] font-bold text-sm sm:text-base text-gray-900">Most Common Compliance Findings</h2>
+                        <p class="text-[11px] text-gray-500">Ranking of statutory declaration violations and findings observed in packaged goods</p>
+                    </div>
+                    <span class="text-[11px] text-gray-400 font-medium self-start sm:self-auto">Frequency Ranking</span>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+                    <!-- Horizontal Bar Chart -->
+                    <div class="chart-container">
+                        <canvas id="canvasCommonViolations"></canvas>
+                        <div id="violationsEmptyState" class="hidden absolute inset-0 flex flex-col items-center justify-center text-center p-6 bg-white/90">
+                            <span class="material-symbols-outlined text-gray-300 text-3xl">check_circle</span>
+                            <p class="text-xs text-gray-500 font-medium mt-1">No violation findings recorded in the database.</p>
+                        </div>
+                    </div>
+
+                    <!-- Findings Breakdown List -->
+                    <div class="space-y-2 overflow-y-auto max-h-[290px] pr-1" id="findingsListContainer">
+                        <div class="p-6 text-center text-gray-400 text-xs">Loading compliance findings ranking...</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Product Category Risk Overview -->
+            <section class="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden">
+                <div class="p-4 sm:p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <h2 class="font-['Hanken_Grotesk'] font-bold text-sm sm:text-base text-gray-900">Product Risk Overview</h2>
+                        <p class="text-[11px] text-gray-500">Observed commodity compliance rates and non-compliance risk classification</p>
+                    </div>
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 uppercase self-start sm:self-auto">
+                        Observed Inspection Risk
+                    </span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-gray-50 text-gray-600 uppercase font-semibold border-b border-gray-200">
+                            <tr>
+                                <th class="p-3.5">Commodity Category</th>
+                                <th class="p-3.5">Total Inspections</th>
+                                <th class="p-3.5">Non-Compliant</th>
+                                <th class="p-3.5">Compliance Rate</th>
+                                <th class="p-3.5">Observed Violation Rate</th>
+                                <th class="p-3.5 text-right">Risk Classification</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productRiskTableBody" class="divide-y divide-gray-100 text-gray-700 font-medium">
+                            <tr>
+                                <td colspan="6" class="p-8 text-center text-gray-400">Loading product risk metrics...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="p-3 bg-gray-50/70 border-t border-gray-100 text-[10px] text-gray-500 flex items-center justify-between">
+                    <span><strong>Legal Note:</strong> Risk classification reflects observed inspection sampling and does not constitute a statutory liability judgment.</span>
+                    <span class="hidden sm:inline">HIGH: &ge;30% &bull; MEDIUM: 10-30% &bull; LOW: &lt;10%</span>
+                </div>
+            </section>
+
+            <!-- Inspections Requiring Attention -->
+            <section class="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden">
+                <div class="p-4 sm:p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
+                            <h2 class="font-['Hanken_Grotesk'] font-bold text-sm sm:text-base text-gray-900">Inspections Requiring Attention</h2>
+                        </div>
+                        <p class="text-[11px] text-gray-500 mt-0.5">Priority queue of non-compliant, low-confidence, or pending review inspections</p>
+                    </div>
+                    <span id="attentionCountTag" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-50 text-red-700 border border-red-200 self-start sm:self-auto">
+                        0 Requiring Action
+                    </span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-gray-50 text-gray-600 uppercase font-semibold border-b border-gray-200">
+                            <tr>
+                                <th class="p-3.5">Product / Commodity</th>
+                                <th class="p-3.5">Inspection ID & Date</th>
+                                <th class="p-3.5">Status</th>
+                                <th class="p-3.5">Findings</th>
+                                <th class="p-3.5">Officer</th>
+                                <th class="p-3.5">Attention Reason</th>
+                                <th class="p-3.5 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attentionTableBody" class="divide-y divide-gray-100 text-gray-700 font-medium">
+                            <tr>
+                                <td colspan="7" class="p-8 text-center text-gray-400">Loading priority inspection queue...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Batch Investigation Alerts Table Section -->
+            <section class="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden">
+                <div class="p-4 sm:p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-xl">batch_prediction</span>
+                            <h2 class="font-['Hanken_Grotesk'] font-bold text-sm sm:text-base text-gray-900">Batch Investigation Alerts</h2>
+                        </div>
+                        <p class="text-[11px] text-gray-500 mt-0.5">Priority production batch monitoring based on recorded inspection findings</p>
+                    </div>
+                    <span id="batchAlertCountTag" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-primary border border-blue-200 self-start sm:self-auto">
+                        0 Batches Monitored
+                    </span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-gray-50 text-gray-600 uppercase font-semibold border-b border-gray-200 text-[10px]">
+                            <tr>
+                                <th class="p-3.5">Batch / Lot Number</th>
+                                <th class="p-3.5">Product & Brand</th>
+                                <th class="p-3.5">Trigger Reason</th>
+                                <th class="p-3.5">Inspections in Batch</th>
+                                <th class="p-3.5">Status</th>
+                                <th class="p-3.5 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="batchAlertsTableBody" class="divide-y divide-gray-100 text-gray-700 font-medium">
+                            <tr>
+                                <td colspan="6" class="p-8 text-center text-gray-400">Loading batch investigation alerts...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="p-3 bg-gray-50/70 border-t border-gray-100 text-[10px] text-gray-500">
+                    <strong>Statutory Note:</strong> Batch investigation indicators are intelligence aids for officer prioritization and do not automatically declare other packages non-compliant without authorized sampling.
+                </div>
+            </section>
+
+            <!-- Officer Activity & Regional Overview (2 Columns) -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                <!-- Section 7: Inspection Activity by Officer -->
+                <section class="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden flex flex-col justify-between">
+                    <div>
+                        <div class="p-4 sm:p-5 border-b border-gray-100">
+                            <h3 class="font-['Hanken_Grotesk'] font-bold text-sm sm:text-base text-gray-900">Inspection Activity by Officer</h3>
+                            <p class="text-[11px] text-gray-500">Inspection throughput, workload, and finalized determinations</p>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-gray-50 text-gray-600 uppercase font-semibold border-b border-gray-200">
+                                    <tr>
+                                        <th class="p-3">Officer Name</th>
+                                        <th class="p-3">Total</th>
+                                        <th class="p-3 text-emerald-700">Compliant</th>
+                                        <th class="p-3 text-red-700">Non-Comp</th>
+                                        <th class="p-3 text-amber-700">Review</th>
+                                        <th class="p-3 text-right">Finalized</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="officerActivityTbody" class="divide-y divide-gray-100 text-gray-700 font-medium">
+                                    <tr>
+                                        <td colspan="6" class="p-6 text-center text-gray-400">Loading officer activity...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 8: Regional Inspection Overview -->
+                <section class="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden flex flex-col justify-between">
+                    <div>
+                        <div class="p-4 sm:p-5 border-b border-gray-100 flex items-center justify-between">
+                            <div>
+                                <h3 class="font-['Hanken_Grotesk'] font-bold text-sm sm:text-base text-gray-900">Regional Inspection Overview</h3>
+                                <p class="text-[11px] text-gray-500">Jurisdictional inspection distribution & observed violation rates</p>
+                            </div>
+                            <a href="/enforcement" class="text-xs text-primary font-semibold hover:underline flex items-center gap-1">
+                                Full Map <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                            </a>
+                        </div>
+                        <div id="regionalOverviewGrid" class="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[340px] overflow-y-auto">
+                            <div class="p-6 text-center text-gray-400 col-span-2 text-xs">Loading regional inspection data...</div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <script src="/static/app.js"></script>
+    <script>
+        let currentAnalyticsData = null;
+        let chartTrendInstance = null;
+        let chartDistInstance = null;
+        let chartViolationsInstance = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            PackCheck.syncNavigation('/dashboard');
+            await loadDashboardData();
+        });
+
+        async function loadDashboardData() {
+            const daysVal = document.getElementById('filterDays').value;
+            const statusVal = document.getElementById('filterStatus').value;
+            const catVal = document.getElementById('filterCategory').value;
+            const regVal = document.getElementById('filterRegion').value;
+
+            let queryParams = [];
+            if (daysVal && daysVal !== 'all') queryParams.push(`days=${encodeURIComponent(daysVal)}`);
+            if (statusVal && statusVal !== 'all') queryParams.push(`status=${encodeURIComponent(statusVal)}`);
+            if (catVal && catVal !== 'all') queryParams.push(`category=${encodeURIComponent(catVal)}`);
+            if (regVal && regVal !== 'all') queryParams.push(`region=${encodeURIComponent(regVal)}`);
+
+            const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
+
+            // Update active filter badge
+            const filterBadge = document.getElementById('activeFilterBadge');
+            if (filterBadge) {
+                if (queryParams.length > 0 && (daysVal !== '30' || statusVal !== 'all' || catVal !== 'all' || regVal !== 'all')) {
+                    filterBadge.classList.remove('hidden');
+                } else {
+                    filterBadge.classList.add('hidden');
+                }
+            }
+
+            try {
+                const res = await PackCheck.request(`/analytics/summary${queryString}`);
+                if (res.success && res.data) {
+                    currentAnalyticsData = res.data;
+                    populateDropdownOptions(res.data);
+                    renderKPIs(res.data);
+                    renderInsights(res.data);
+                    renderTrendChart(res.data);
+                    renderDistributionChart(res.data);
+                    renderViolationsChart(res.data);
+                    renderProductRiskTable(res.data);
+                    renderAttentionTable(res.data);
+                    renderBatchAlertsTable(res.data);
+                    renderOfficerActivityTable(res.data);
+                    renderRegionalOverview(res.data);
+                } else {
+                    console.error('Failed to load analytics summary:', res.error);
+                }
+            } catch (err) {
+                console.error('Error fetching dashboard data:', err);
+            }
+        }
+
+        function populateDropdownOptions(data) {
+            // Populate category dropdown
+            const catSelect = document.getElementById('filterCategory');
+            const currentCat = catSelect.value;
+            if (data.available_categories && catSelect.options.length <= 1) {
+                data.available_categories.forEach(cat => {
+                    const opt = document.createElement('option');
+                    opt.value = cat;
+                    opt.textContent = cat;
+                    catSelect.appendChild(opt);
+                });
+                catSelect.value = currentCat || 'all';
+            }
+
+            // Populate region dropdown
+            const regSelect = document.getElementById('filterRegion');
+            const currentReg = regSelect.value;
+            if (data.available_regions && regSelect.options.length <= 1) {
+                data.available_regions.forEach(reg => {
+                    const opt = document.createElement('option');
+                    opt.value = reg;
+                    opt.textContent = reg;
+                    regSelect.appendChild(opt);
+                });
+                regSelect.value = currentReg || 'all';
+            }
+        }
+
+        function renderKPIs(d) {
+            document.getElementById('kpiTotalInspections').textContent = d.total_inspections;
+            document.getElementById('kpiCompliant').textContent = d.compliant_count;
+            document.getElementById('kpiNonCompliant').textContent = d.non_compliant_count;
+            document.getElementById('kpiNeedsReview').textContent = d.needs_review_count;
+
+            // Populate Batch KPIs
+            document.getElementById('kpiBatchesInspected').textContent = d.batches_inspected || 0;
+            document.getElementById('kpiBatchesAttention').textContent = d.batches_attention_required || 0;
+            document.getElementById('kpiBatchesInvestigating').textContent = d.batches_under_investigation || 0;
+
+            // Populate Audit Automation KPIs
+            document.getElementById('kpiAutoConfirmedFindings').textContent = d.automatically_confirmed_findings_count ?? 0;
+            document.getElementById('kpiManualReviewFindings').textContent = d.manual_review_findings_count ?? 0;
+            const autoConfirmRateEl = document.getElementById('kpiAutoConfirmRate');
+            if (d.automatic_confirmation_rate !== null && d.automatic_confirmation_rate !== undefined) {
+                autoConfirmRateEl.textContent = `${d.automatic_confirmation_rate}%`;
+            } else {
+                autoConfirmRateEl.textContent = 'N/A';
+            }
+
+            const compRateEl = document.getElementById('kpiComplianceRate');
+            const compRateSub = document.getElementById('kpiComplianceRateSubtitle');
+            if (d.compliance_rate !== null && d.compliance_rate !== undefined) {
+                compRateEl.textContent = `${d.compliance_rate}%`;
+                compRateSub.textContent = `${d.compliant_count} of ${d.finalized_count} finalized`;
+            } else {
+                compRateEl.textContent = 'N/A';
+                compRateSub.textContent = 'No finalized scans';
+            }
+
+            const violRateEl = document.getElementById('kpiViolationRate');
+            const violRateSub = document.getElementById('kpiViolationRateSubtitle');
+            if (d.violation_rate !== null && d.violation_rate !== undefined) {
+                violRateEl.textContent = `${d.violation_rate}%`;
+                violRateSub.textContent = `${d.non_compliant_count} of ${d.finalized_count} finalized`;
+            } else {
+                violRateEl.textContent = 'N/A';
+                violRateSub.textContent = 'No finalized scans';
+            }
+        }
+
+        function renderInsights(d) {
+            const container = document.getElementById('insightsContainer');
+            const insights = d.dynamic_insights || [];
+            if (insights.length > 0) {
+                container.innerHTML = insights.map(text => `
+                    <div class="px-3.5 py-2 rounded-xl bg-white/10 border border-white/15 text-white/95 text-xs flex items-center gap-2 backdrop-blur-xs">
+                        <span class="material-symbols-outlined text-[#65fade] text-sm shrink-0">check_circle</span>
+                        <span>${text}</span>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = '<div class="px-3 py-1.5 rounded-xl bg-white/10 text-xs text-white/80">No significant compliance anomalies recorded in the selected period.</div>';
+            }
+        }
+
+        function renderTrendChart(d) {
+            const canvas = document.getElementById('canvasTrend');
+            const emptyState = document.getElementById('trendEmptyState');
+            const trendBadge = document.getElementById('trendSummaryBadge');
+            const periodLabel = document.getElementById('trendPeriodLabel');
+
+            const trendData = d.trend_over_time || [];
+            const hasData = trendData.length > 0 && trendData.some(t => t.total_scans > 0);
+
+            trendBadge.textContent = `Based on ${d.total_inspections} inspection(s) in selected scope`;
+            periodLabel.textContent = `Period: ${trendData.length > 0 ? trendData[0].date : ''} to ${trendData.length > 0 ? trendData[trendData.length - 1].date : ''}`;
+
+            if (!hasData && d.total_inspections === 0) {
+                emptyState.classList.remove('hidden');
+                if (chartTrendInstance) {
+                    chartTrendInstance.destroy();
+                    chartTrendInstance = null;
+                }
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            const labels = trendData.map(t => {
+                const parts = t.date.split('-');
+                return parts.length === 3 ? `${parts[1]}/${parts[2]}` : t.date;
+            });
+            const totals = trendData.map(t => t.total_scans);
+            const compliant = trendData.map(t => t.compliant_scans);
+            const nonCompliant = trendData.map(t => t.non_compliant_scans);
+
+            if (chartTrendInstance) chartTrendInstance.destroy();
+
+            chartTrendInstance = new Chart(canvas, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Total Scans',
+                            data: totals,
+                            borderColor: '#0051d5',
+                            backgroundColor: 'rgba(0, 81, 213, 0.08)',
+                            fill: true,
+                            tension: 0.3,
+                            borderWidth: 2,
+                            pointRadius: 3,
+                            pointBackgroundColor: '#0051d5'
+                        },
+                        {
+                            label: 'Compliant',
+                            data: compliant,
+                            borderColor: '#10b981',
+                            backgroundColor: 'transparent',
+                            borderDash: [3, 3],
+                            tension: 0.3,
+                            borderWidth: 2,
+                            pointRadius: 2,
+                            pointBackgroundColor: '#10b981'
+                        },
+                        {
+                            label: 'Non-Compliant',
+                            data: nonCompliant,
+                            borderColor: '#ef4444',
+                            backgroundColor: 'transparent',
+                            borderDash: [3, 3],
+                            tension: 0.3,
+                            borderWidth: 2,
+                            pointRadius: 2,
+                            pointBackgroundColor: '#ef4444'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#181c21',
+                            titleFont: { family: 'Inter', size: 11 },
+                            bodyFont: { family: 'Inter', size: 11 },
+                            padding: 10,
+                            cornerRadius: 8
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 10, family: 'Inter' }, maxTicksLimit: 12 }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1, font: { size: 10, family: 'Inter' } },
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderDistributionChart(d) {
+            const canvas = document.getElementById('canvasDistribution');
+            const emptyState = document.getElementById('distributionEmptyState');
+
+            const comp = d.compliant_count || 0;
+            const nonComp = d.non_compliant_count || 0;
+            const needs = d.needs_review_count || 0;
+            const total = d.total_inspections || 0;
+
+            if (total === 0) {
+                emptyState.classList.remove('hidden');
+                document.getElementById('distCompliantPct').textContent = '0%';
+                document.getElementById('distNonCompliantPct').textContent = '0%';
+                document.getElementById('distNeedsReviewPct').textContent = '0%';
+                if (chartDistInstance) {
+                    chartDistInstance.destroy();
+                    chartDistInstance = null;
+                }
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            const compPct = Math.round((comp / total) * 100);
+            const nonCompPct = Math.round((nonComp / total) * 100);
+            const needsPct = Math.round((needs / total) * 100);
+
+            document.getElementById('distCompliantPct').textContent = `${compPct}%`;
+            document.getElementById('distNonCompliantPct').textContent = `${nonCompPct}%`;
+            document.getElementById('distNeedsReviewPct').textContent = `${needsPct}%`;
+
+            if (chartDistInstance) chartDistInstance.destroy();
+
+            chartDistInstance = new Chart(canvas, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Compliant', 'Non-Compliant', 'Needs Review'],
+                    datasets: [{
+                        data: [comp, nonComp, needs],
+                        backgroundColor: ['#10b981', '#ef4444', '#f59e0b'],
+                        borderWidth: 3,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const val = context.raw || 0;
+                                    const pct = Math.round((val / total) * 100);
+                                    return ` ${context.label}: ${val} (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderViolationsChart(d) {
+            const canvas = document.getElementById('canvasCommonViolations');
+            const emptyState = document.getElementById('violationsEmptyState');
+            const listContainer = document.getElementById('findingsListContainer');
+
+            const findings = d.most_common_findings || [];
+            if (findings.length === 0) {
+                emptyState.classList.remove('hidden');
+                listContainer.innerHTML = '<div class="p-8 text-center text-gray-400 text-xs">No statutory violation findings recorded in the database.</div>';
+                if (chartViolationsInstance) {
+                    chartViolationsInstance.destroy();
+                    chartViolationsInstance = null;
+                }
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            const top5 = findings.slice(0, 5);
+            const labels = top5.map(f => {
+                const name = f.finding_name.split('[')[0].trim();
+                return name.length > 24 ? name.substring(0, 22) + '...' : name;
+            });
+            const counts = top5.map(f => f.affected_inspections);
+
+            if (chartViolationsInstance) chartViolationsInstance.destroy();
+
+            chartViolationsInstance = new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Inspections Affected',
+                        data: counts,
+                        backgroundColor: 'rgba(239, 68, 68, 0.85)',
+                        borderRadius: 6,
+                        barThickness: 16
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) {
+                                    return ` Affected Inspections: ${ctx.raw}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1, font: { size: 10, family: 'Inter' } },
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        },
+                        y: {
+                            ticks: { font: { size: 10, family: 'Inter' } },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+
+            // Populate Breakdown List
+            listContainer.innerHTML = findings.map((f, idx) => `
+                <div class="p-3 rounded-xl border border-gray-100 bg-gray-50/70 hover:bg-gray-100/70 transition-colors space-y-1.5 text-xs">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="w-5 h-5 rounded-full bg-red-100 text-red-700 font-bold text-[10px] flex items-center justify-center shrink-0">#${idx+1}</span>
+                            <span class="font-bold text-gray-900 truncate">${f.finding_name}</span>
+                        </div>
+                        <span class="text-red-600 font-bold shrink-0">${f.affected_inspections} scan(s)</span>
+                    </div>
+                    <div class="flex items-center justify-between text-[11px] text-gray-500">
+                        <span class="truncate"><strong>Rule:</strong> ${f.rule_reference}</span>
+                        <span class="font-medium text-gray-600">${f.percentage_of_non_compliant}% of non-compliant</span>
+                    </div>
+                    <div class="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-red-500 h-full rounded-full" style="width: ${Math.min(100, Math.max(5, f.percentage_of_non_compliant))}%;"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderProductRiskTable(d) {
+            const tbody = document.getElementById('productRiskTableBody');
+            const riskItems = d.product_risk_overview || [];
+
+            if (riskItems.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-gray-400">Insufficient inspection data for risk classification.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = riskItems.map(item => {
+                let badge = '';
+                if (item.risk_level === 'HIGH') {
+                    badge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-100 text-red-800 border border-red-300 uppercase">HIGH RISK</span>';
+                } else if (item.risk_level === 'MEDIUM') {
+                    badge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300 uppercase">MEDIUM RISK</span>';
+                } else if (item.risk_level === 'LOW') {
+                    badge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 uppercase">LOW RISK</span>';
+                } else {
+                    badge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-gray-100 text-gray-700 border border-gray-200 uppercase">INSUFFICIENT DATA</span>';
+                }
+
+                const compRateText = item.compliance_rate !== null ? `${item.compliance_rate}%` : 'N/A';
+                const violRateText = item.violation_rate !== null ? `${item.violation_rate}%` : '0.0%';
+
+                return `
+                    <tr class="hover:bg-blue-50/20 transition-colors">
+                        <td class="p-3.5 font-bold text-gray-900">${item.category}</td>
+                        <td class="p-3.5 font-semibold text-gray-800">${item.total_inspections}</td>
+                        <td class="p-3.5 font-bold text-red-600">${item.non_compliant_count}</td>
+                        <td class="p-3.5 text-emerald-700 font-semibold">${compRateText}</td>
+                        <td class="p-3.5 text-red-700 font-semibold">${violRateText}</td>
+                        <td class="p-3.5 text-right">${badge}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderAttentionTable(d) {
+            const tbody = document.getElementById('attentionTableBody');
+            const countTag = document.getElementById('attentionCountTag');
+            const items = d.attention_inspections || [];
+
+            countTag.textContent = `${items.length} Requiring Action`;
+
+            if (items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-gray-400">No inspections currently require urgent attention. All inspections compliant or verified.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = items.map(item => {
+                let statusBadge = '';
+                if (item.final_decision === 'non_compliant' || item.status === 'closed') {
+                    statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800 border border-red-200">NON-COMPLIANT</span>';
+                } else if (item.status === 'needs_review' || item.status === 'under_review') {
+                    statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">NEEDS REVIEW</span>';
+                } else {
+                    statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200 uppercase">${item.status}</span>`;
+                }
+
+                const actionLabel = 'Inspect / Review';
+
+                return `
+                    <tr class="hover:bg-red-50/20 transition-colors">
+                        <td class="p-3.5">
+                            <strong class="font-bold text-gray-900 block truncate max-w-[200px]">${item.product_name}</strong>
+                            <span class="text-gray-400 text-[11px]">${item.product_brand ? `${item.product_brand} • ` : ''}${item.product_category}</span>
+                        </td>
+                        <td class="p-3.5">
+                            <span class="font-mono text-gray-700 font-medium block">#${item.id.substring(0, 8)}</span>
+                            <span class="text-gray-400 text-[10px]">${item.created_at}</span>
+                        </td>
+                        <td class="p-3.5">${statusBadge}</td>
+                        <td class="p-3.5">
+                            <span class="font-bold ${item.violations_count > 0 ? 'text-red-600' : 'text-gray-700'}">${item.violations_count} violation(s)</span>
+                            <span class="block text-gray-400 text-[10px]">${item.findings_count} total declaration(s)</span>
+                        </td>
+                        <td class="p-3.5 text-gray-700">${item.inspector_name || 'Officer'}</td>
+                        <td class="p-3.5">
+                            <span class="text-[11px] font-medium text-amber-900 bg-amber-50 px-2 py-1 rounded-md border border-amber-200 block truncate max-w-[220px]">
+                                ${item.attention_reason}
+                            </span>
+                        </td>
+                        <td class="p-3.5 text-right">
+                            <a href="/analysis?id=${item.id}" class="px-3 py-1.5 bg-primary hover:bg-blue-800 text-white rounded-lg font-semibold text-xs inline-flex items-center gap-1 shadow-xs transition-all">
+                                <span>${actionLabel}</span>
+                                <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                            </a>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderBatchAlertsTable(d) {
+            const tbody = document.getElementById('batchAlertsTableBody');
+            const countTag = document.getElementById('batchAlertCountTag');
+            const alerts = d.batch_investigation_alerts || [];
+
+            countTag.textContent = `${alerts.length} Batches Flagged`;
+
+            if (alerts.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-gray-400">No batch-level inspection alerts at this time. All batches compliant or verified.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = alerts.map(item => {
+                let statusBadge = '';
+                const st = item.status || 'normal';
+                if (st === 'under_investigation') {
+                    statusBadge = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800 border border-red-300 animate-pulse">UNDER INVESTIGATION</span>';
+                } else if (st === 'attention_required' || item.non_compliant_inspections > 0) {
+                    statusBadge = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">ATTENTION REQUIRED</span>';
+                } else if (st === 'resolved') {
+                    statusBadge = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-300">RESOLVED</span>';
+                } else {
+                    statusBadge = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">NORMAL</span>';
+                }
+
+                return `
+                    <tr class="hover:bg-blue-50/20 transition-colors">
+                        <td class="p-3.5">
+                            <strong class="font-mono font-bold text-gray-900 text-xs block">${item.batch_number}</strong>
+                            ${item.latest_inspection_date ? `<span class="text-gray-400 text-[10px]">${item.latest_inspection_date}</span>` : ''}
+                        </td>
+                        <td class="p-3.5">
+                            <strong class="font-bold text-gray-900 block truncate max-w-[200px]">${item.product_name}</strong>
+                            <span class="text-gray-400 text-[11px]">${item.product_brand || 'Standard'}</span>
+                        </td>
+                        <td class="p-3.5">
+                            <span class="text-[11px] font-medium text-amber-900 bg-amber-50 px-2 py-1 rounded-md border border-amber-200 block truncate max-w-[240px]">
+                                ${item.reason}
+                            </span>
+                        </td>
+                        <td class="p-3.5">
+                            <span class="font-semibold text-gray-800">${item.related_inspections} inspection(s)</span>
+                            ${item.non_compliant_inspections > 0 ? `<span class="block text-red-600 text-[10px] font-bold">${item.non_compliant_inspections} non-compliant</span>` : ''}
+                        </td>
+                        <td class="p-3.5">${statusBadge}</td>
+                        <td class="p-3.5 text-right">
+                            <a href="/batch/${encodeURIComponent(item.batch_number)}" class="px-3 py-1.5 bg-primary hover:bg-blue-800 text-white rounded-lg font-semibold text-xs inline-flex items-center gap-1 shadow-xs transition-all">
+                                <span>Review Batch</span>
+                                <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                            </a>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderOfficerActivityTable(d) {
+            const tbody = document.getElementById('officerActivityTbody');
+            const officers = d.officer_activity || [];
+
+            if (officers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-gray-400">No officer activity recorded yet.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = officers.map(o => `
+                <tr class="hover:bg-blue-50/20 transition-colors">
+                    <td class="p-3">
+                        <strong class="font-bold text-gray-900 block truncate">${o.officer_name}</strong>
+                        <span class="text-[10px] text-gray-400">${o.department || 'Enforcement Squad'} • ${o.region || 'Zone'}</span>
+                    </td>
+                    <td class="p-3 font-bold text-gray-800">${o.total_inspections}</td>
+                    <td class="p-3 text-emerald-600 font-semibold">${o.compliant_count}</td>
+                    <td class="p-3 text-red-600 font-semibold">${o.non_compliant_count}</td>
+                    <td class="p-3 text-amber-600 font-semibold">${o.needs_review_count}</td>
+                    <td class="p-3 text-right font-bold text-primary">${o.finalized_count}</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderRegionalOverview(d) {
+            const grid = document.getElementById('regionalOverviewGrid');
+            const regions = d.regional_overview || [];
+
+            if (regions.length === 0) {
+                grid.innerHTML = '<div class="p-8 text-center text-gray-400 col-span-2 text-xs">Regional insights will appear as inspection location data becomes available.</div>';
+                return;
+            }
+
+            grid.innerHTML = regions.map(r => `
+                <div class="p-3.5 rounded-xl border border-gray-200 bg-gray-50/60 hover:bg-white hover:shadow-xs transition-all space-y-2 text-xs">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-1.5">
+                            <span class="px-1.5 py-0.5 rounded bg-blue-100 text-primary font-bold text-[10px]">${r.state_code || 'ZN'}</span>
+                            <h4 class="font-bold text-gray-900 truncate">${r.region}</h4>
+                        </div>
+                        <span class="text-[11px] font-bold ${r.violation_rate >= 20 ? 'text-red-600' : 'text-emerald-600'}">
+                            ${r.violation_rate}% Violations
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 p-2 bg-white rounded-lg border border-gray-100 text-[11px]">
+                        <div>
+                            <span class="text-gray-400 block text-[9px] uppercase font-bold">Total Scans</span>
+                            <strong class="text-gray-800 font-bold">${r.total_inspections}</strong>
+                        </div>
+                        <div>
+                            <span class="text-gray-400 block text-[9px] uppercase font-bold">Compliant</span>
+                            <strong class="text-emerald-600 font-bold">${r.compliant_count}</strong>
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-gray-500 truncate"><strong>Primary Clause:</strong> ${r.top_violated_rule}</p>
+                </div>
+            `).join('');
+        }
+
+        function applyFilters() {
+            loadDashboardData();
+        }
+
+        function resetFilters() {
+            document.getElementById('filterDays').value = '30';
+            document.getElementById('filterStatus').value = 'all';
+            document.getElementById('filterCategory').value = 'all';
+            document.getElementById('filterRegion').value = 'all';
+            loadDashboardData();
+        }
+
+        function refreshDashboard() {
+            loadDashboardData();
+        }
+    </script>
+</body>
+</html>

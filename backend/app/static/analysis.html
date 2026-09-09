@@ -1,0 +1,1719 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>PackCheck - Scan Analysis & Verification</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <style>
+        .evidence-img-container {
+            transition: transform 0.2s ease-out;
+            transform-origin: center center;
+        }
+    </style>
+</head>
+<body class="bg-[#f8f9ff] font-['Inter'] text-[#181c21] min-h-screen flex flex-col">
+    <!-- Top Header -->
+    <header class="bg-[#0051d5] text-white px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
+        <div class="flex items-center gap-3 sm:gap-4">
+            <a href="/dashboard" class="text-white/80 hover:text-white flex items-center gap-1 text-xs font-semibold shrink-0">
+                <span class="material-symbols-outlined text-sm">arrow_back</span> Dashboard
+            </a>
+            <div class="h-5 w-px bg-white/20"></div>
+            <div class="min-w-0">
+                <h1 class="font-['Hanken_Grotesk'] font-bold text-base sm:text-lg leading-tight truncate" id="headerProductTitle">Scan Analysis & Compliance Verification</h1>
+                <p class="text-[11px] sm:text-xs text-[#65fade]" id="headerScanMeta">Legal Metrology (Packaged Commodities) Rules, 2011</p>
+            </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3" id="headerActionButtons">
+            <span id="roleNoticeBadge" class="hidden px-3 py-1 rounded-full text-xs font-bold bg-white/20 text-white border border-white/30 backdrop-blur-sm"></span>
+            <button id="btnGenReport" onclick="generateReport()" class="px-4 sm:px-5 py-2 bg-[#cd4729] hover:bg-[#aa2f13] text-white rounded-full font-semibold text-xs shadow-md transition-all flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-sm">picture_as_pdf</span> Generate Statutory Report
+            </button>
+            <button id="btnHeaderFinalize" onclick="promptFinalizeInspection()" class="px-3.5 sm:px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full font-semibold text-xs shadow-md transition-all flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-sm">check_circle</span> Finalize Inspection
+            </button>
+        </div>
+    </header>
+
+    <!-- Metadata Banner -->
+    <section class="bg-white border-b border-gray-200 px-4 sm:px-6 py-2.5 shadow-sm">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs">
+            <div>
+                <span class="text-gray-400 block text-[10px] font-bold uppercase">Product / Commodity</span>
+                <span id="metaProductName" class="font-bold text-gray-900 truncate block">...</span>
+            </div>
+            <div>
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-400 block text-[10px] font-bold uppercase">Batch / Lot Number</span>
+                    <button id="btnEditBatch" onclick="openBatchVerifyModal()" class="text-primary hover:underline text-[10px] font-bold flex items-center gap-0.5">
+                        <span class="material-symbols-outlined text-[12px]">edit</span>
+                    </button>
+                </div>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                    <span id="metaBatchNumber" class="font-bold text-gray-900 font-mono">None</span>
+                    <span id="metaBatchSourceBadge" class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-gray-100 text-gray-600">Manual</span>
+                </div>
+            </div>
+            <div>
+                <span class="text-gray-400 block text-[10px] font-bold uppercase">Inspection Date</span>
+                <span id="metaDate" class="font-medium text-gray-800 block">...</span>
+            </div>
+            <div>
+                <span class="text-gray-400 block text-[10px] font-bold uppercase">Enforcement Officer</span>
+                <span id="metaInspector" class="font-medium text-gray-800 block">...</span>
+            </div>
+            <div>
+                <span class="text-gray-400 block text-[10px] font-bold uppercase">Overall Compliance Status</span>
+                <span id="metaOverallVerdict" class="font-bold block">...</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main 2-Column Split Workspace -->
+    <div class="flex-1 flex flex-col lg:flex-row min-h-0 overflow-y-auto lg:overflow-hidden">
+        <!-- Left: Image & Bounding Box Visualizer -->
+        <div class="w-full lg:w-1/2 bg-gray-900 p-4 sm:p-6 flex flex-col items-center justify-center relative shrink-0 lg:shrink border-b lg:border-b-0 lg:border-r border-gray-800">
+            <div id="imageCard" class="relative max-w-full max-h-[45vh] lg:max-h-[80vh] border-2 border-primary/40 rounded-xl overflow-hidden shadow-2xl bg-black flex items-center justify-center min-h-[220px] sm:min-h-[320px] w-full">
+                <!-- Scanned Label Image -->
+                <img id="labelImage" src="" alt="Scanned Label" class="max-h-[42vh] lg:max-h-[75vh] w-auto max-w-full object-contain hidden select-none"/>
+                
+                <!-- Dynamic Bounding Box Overlay Container -->
+                <div id="boundingOverlay" class="absolute pointer-events-none hidden"></div>
+
+                <!-- Image Loading State -->
+                <div id="imageLoadingState" class="text-gray-400 text-xs flex flex-col items-center gap-2 p-8">
+                    <span class="animate-spin text-2xl">⏳</span>
+                    <span>Loading packaging label image...</span>
+                </div>
+
+                <!-- Image Unavailable / Error State -->
+                <div id="imageErrorState" class="text-gray-400 text-xs flex flex-col items-center gap-2 p-8 hidden text-center">
+                    <span class="material-symbols-outlined text-4xl text-gray-500">broken_image</span>
+                    <span id="imageErrorMessage" class="font-medium">No packaging image available for this scan</span>
+                </div>
+            </div>
+            <div class="mt-3 flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-[11px] sm:text-xs text-gray-400">
+                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span> Compliant Field</span>
+                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span> Needs Review / Override</span>
+                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> Statutory Violation</span>
+            </div>
+        </div>
+
+        <!-- Right: Declaration Findings Table, Final Decision & Audit Trail -->
+        <div class="w-full lg:w-1/2 p-4 sm:p-6 overflow-y-auto space-y-6">
+            <div class="flex items-center justify-between pb-3 border-b border-gray-200">
+                <div>
+                    <h2 class="font-['Hanken_Grotesk'] font-bold text-base text-gray-900">Mandatory Declarations Audit</h2>
+                    <p class="text-xs text-gray-500">Legal Metrology (Packaged Commodities) Rules, 2011</p>
+                </div>
+                <div id="overallBadge" class="px-3 py-1 bg-gray-100 text-gray-700 border border-gray-200 rounded-full font-bold text-xs">
+                    PENDING
+                </div>
+            </div>
+
+            <!-- Review Notice Banner (when manual review required) -->
+            <div id="manualReviewBanner" class="hidden p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-center gap-3">
+                <span class="material-symbols-outlined text-amber-600 text-lg">fact_check</span>
+                <div>
+                    <strong class="block font-semibold">Manual Verification Required</strong>
+                    <span class="text-amber-800">One or more declarations require officer verification due to OCR uncertainty or uncalibrated image scale.</span>
+                </div>
+            </div>
+
+            <!-- Batch Discrepancy Warning Banner -->
+            <div id="batchDiscrepancyBanner" class="hidden p-3.5 sm:p-4 rounded-2xl bg-amber-50 border-2 border-amber-300 text-amber-950 text-xs shadow-sm space-y-2">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    <div class="flex items-start gap-2.5">
+                        <span class="material-symbols-outlined text-amber-600 text-xl shrink-0 mt-0.5">warning</span>
+                        <div>
+                            <strong class="font-bold text-sm text-amber-900">Batch Number Discrepancy Detected</strong>
+                            <p class="text-[11px] text-amber-800 mt-0.5" id="batchDiscrepancyText">
+                                Manually entered batch number differs from OCR extracted value.
+                            </p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="openBatchVerifyModal()" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-1 self-start sm:self-auto shrink-0">
+                        <span class="material-symbols-outlined text-sm">verified</span>
+                        <span>Verify Batch</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Analysis Progress Banner -->
+            <div id="analysisProgressBanner" class="hidden p-4 rounded-xl bg-blue-50 border border-blue-200 text-blue-800 text-xs flex items-center gap-3">
+                <span class="animate-spin text-lg">⏳</span>
+                <div>
+                    <strong class="block font-semibold">AI Analysis in Progress...</strong>
+                    <span class="text-blue-600">Extracting label regions, OCR text, and verifying statutory LMPC 2011 rules.</span>
+                </div>
+            </div>
+
+            <!-- Scan / Analysis Error Banner -->
+            <div id="scanErrorBanner" class="hidden p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs flex items-center gap-3">
+                <span class="material-symbols-outlined text-red-600">error</span>
+                <div id="scanErrorMessage">Scan not found or failed to load.</div>
+            </div>
+
+            <!-- Mandatory Declarations Audit Automation & Threshold Overview Card -->
+            <div id="automationThresholdCard" class="bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 shadow-sm space-y-3">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-gray-100">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-xl">tune</span>
+                        <div>
+                            <h3 class="font-['Hanken_Grotesk'] font-bold text-sm text-gray-900">Mandatory Declarations Audit — Automation & Verification Engine</h3>
+                            <p class="text-[11px] text-gray-500">Configurable automatic-confirmation decision engine</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span id="autoDecisionGlobalBadge" class="px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-gray-100 text-gray-700 border border-gray-200">
+                            PENDING
+                        </span>
+                        <button id="btnEditThresholdAdmin" onclick="openThresholdConfigModal()" type="button" class="hidden px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-primary rounded-lg text-[11px] font-bold transition-all items-center gap-1 border border-blue-200">
+                            <span class="material-symbols-outlined text-xs">settings</span>
+                            <span>Configure Threshold</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center">
+                    <div class="p-2.5 bg-emerald-50/70 rounded-xl border border-emerald-100">
+                        <span class="text-[10px] font-bold uppercase text-emerald-800 block">Auto-Confirmed</span>
+                        <span id="globalAutoConfirmedCount" class="text-base sm:text-lg font-extrabold text-emerald-700">0</span>
+                    </div>
+                    <div class="p-2.5 bg-amber-50/70 rounded-xl border border-amber-100">
+                        <span class="text-[10px] font-bold uppercase text-amber-900 block">Manual Review Required</span>
+                        <span id="globalManualReviewCount" class="text-base sm:text-lg font-extrabold text-amber-800">0</span>
+                    </div>
+                    <div class="p-2.5 bg-blue-50/60 rounded-xl border border-blue-100">
+                        <span class="text-[10px] font-bold uppercase text-primary block">Automatic Confirmation Threshold</span>
+                        <span id="globalThresholdVal" class="text-base sm:text-lg font-extrabold text-primary">80%</span>
+                    </div>
+                    <div class="p-2.5 bg-gray-50 rounded-xl border border-gray-100 col-span-2 sm:col-span-1">
+                        <span class="text-[10px] font-bold uppercase text-gray-500 block">Workflow Status</span>
+                        <span id="globalDecisionTextVal" class="text-xs sm:text-sm font-bold text-gray-800 block mt-0.5">Pending</span>
+                    </div>
+                </div>
+
+                <!-- Decision Reason & Compliance Notice Message -->
+                <div id="automationReasonBox" class="p-3 rounded-xl bg-gray-50 border border-gray-200 text-xs space-y-1">
+                    <div class="flex items-start gap-2">
+                        <span id="automationReasonIcon" class="material-symbols-outlined text-base mt-0.5 text-gray-500">info</span>
+                        <div>
+                            <p id="automationReasonMessage" class="text-gray-800 font-medium leading-snug">
+                                Analyzing mandatory declarations against configured automatic-confirmation threshold...
+                            </p>
+                            <p class="text-[10px] text-gray-500 italic mt-1">
+                                <strong>Safety Notice:</strong> Automated confirmation advances the inspection workflow only. Final statutory enforcement determinations remain solely under authorized human officer control.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Workflow Finalization Action Bar -->
+                <div id="workflowFinalizeActionBanner" class="p-3 rounded-xl bg-blue-50/50 border border-blue-100 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    <div class="flex items-center gap-2">
+                        <span id="workflowActionIcon" class="material-symbols-outlined text-primary text-lg">hourglass_empty</span>
+                        <div>
+                            <strong id="workflowActionTitle" class="font-bold text-gray-900 block text-xs">Inspection Workflow In Progress</strong>
+                            <span id="workflowActionDesc" class="text-gray-600 text-[11px]">Resolve manual-review declarations to complete inspection.</span>
+                        </div>
+                    </div>
+                    <button id="btnAutomationFinalize" onclick="promptFinalizeInspection()" class="hidden px-4 py-2 bg-primary hover:bg-blue-800 text-white rounded-xl font-bold text-xs shadow-md transition-all items-center gap-1.5 shrink-0">
+                        <span class="material-symbols-outlined text-sm">check_circle</span> Finalize Inspection
+                    </button>
+                </div>
+            </div>
+
+            <!-- Declarations List -->
+            <div id="declarationsList" class="space-y-3">
+                <div class="p-8 text-center text-gray-400 text-xs">Loading declarations...</div>
+            </div>
+
+            <!-- Batch Investigation & Traceability Intelligence Section -->
+            <div id="batchInvestigationSection" class="hidden bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 shadow-sm space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-gray-100">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-xl bg-blue-50 border border-blue-200 text-primary flex items-center justify-center font-bold">
+                            <span class="material-symbols-outlined text-lg">batch_prediction</span>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="font-['Hanken_Grotesk'] font-bold text-sm sm:text-base text-gray-900">Batch Investigation</h3>
+                                <span id="batchStatusBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-700 border border-gray-200">NORMAL</span>
+                            </div>
+                            <p class="text-[11px] text-gray-500">Related inspections for production batch: <strong class="font-mono text-gray-900 font-bold" id="batchNumberDisplay">...</strong></p>
+                        </div>
+                    </div>
+                    <a id="viewFullBatchLink" href="#" class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-primary rounded-xl font-bold text-xs transition-all flex items-center gap-1 self-start sm:self-auto border border-blue-200">
+                        <span>View Batch Overview</span>
+                        <span class="material-symbols-outlined text-xs">open_in_new</span>
+                    </a>
+                </div>
+
+                <!-- Batch Stats Row -->
+                <div class="grid grid-cols-3 gap-2 sm:gap-3 text-center">
+                    <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                        <span class="text-[10px] font-bold uppercase text-gray-500 block">Inspections in Batch</span>
+                        <span id="batchTotalInspections" class="text-lg font-bold text-gray-900">0</span>
+                    </div>
+                    <div class="p-3 bg-red-50 rounded-xl border border-red-100">
+                        <span class="text-[10px] font-bold uppercase text-red-600 block">Requiring Attention</span>
+                        <span id="batchAttentionCount" class="text-lg font-bold text-red-600">0</span>
+                    </div>
+                    <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+                        <span class="text-[10px] font-bold uppercase text-emerald-700 block">Compliant</span>
+                        <span id="batchCompliantCount" class="text-lg font-bold text-emerald-700">0</span>
+                    </div>
+                </div>
+
+                <!-- Batch Level Attention Alert Notice -->
+                <div id="batchAttentionAlertBanner" class="hidden p-3.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-950 text-xs flex items-start gap-2.5">
+                    <span class="material-symbols-outlined text-amber-600 text-lg shrink-0 mt-0.5">notification_important</span>
+                    <div class="leading-relaxed">
+                        <strong class="font-bold text-amber-900 block">Batch-Level Attention</strong>
+                        <span>This batch has a confirmed/verified issue associated with one or more inspections. Other inspections from the same batch should be reviewed according to the applicable inspection procedure.</span>
+                    </div>
+                </div>
+
+                <!-- Related Inspections Table -->
+                <div class="overflow-x-auto rounded-xl border border-gray-200">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-gray-50 text-gray-600 uppercase font-semibold border-b border-gray-200 text-[10px]">
+                            <tr>
+                                <th class="p-2.5">Inspection</th>
+                                <th class="p-2.5">Product</th>
+                                <th class="p-2.5">Date</th>
+                                <th class="p-2.5">Status</th>
+                                <th class="p-2.5">Findings</th>
+                                <th class="p-2.5 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="batchInspectionsTbody" class="divide-y divide-gray-100 text-gray-700 font-medium">
+                            <tr>
+                                <td colspan="6" class="p-4 text-center text-gray-400">Loading batch inspection history...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+
+            <!-- Audit Trail Section -->
+            <div class="bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 shadow-sm space-y-3">
+                <div class="flex items-center justify-between border-b border-gray-200 pb-2">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-gray-600 text-lg">history</span>
+                        <h3 class="font-['Hanken_Grotesk'] font-bold text-sm text-gray-900">Inspection Audit Trail</h3>
+                    </div>
+                    <span class="text-[10px] text-gray-400 font-semibold uppercase">Immutable Log</span>
+                </div>
+                <div id="auditTrailList" class="space-y-2 text-xs">
+                    <div class="p-3 text-center text-gray-400 text-xs">Loading audit records...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Evidence Viewer Modal -->
+    <div id="evidenceModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center hidden p-2 sm:p-4">
+        <div class="bg-gray-950 rounded-2xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-gray-800 overflow-hidden text-white">
+            <!-- Modal Header -->
+            <div class="p-3 sm:p-4 border-b border-gray-800 flex items-center justify-between gap-2 bg-gray-900">
+                <div class="flex items-center gap-2 min-w-0">
+                    <span class="material-symbols-outlined text-primary text-xl">image_search</span>
+                    <div>
+                        <h3 class="font-bold text-xs sm:text-sm text-white truncate" id="evidenceModalTitle">Declaration Evidence Inspection</h3>
+                        <p class="text-[10px] sm:text-[11px] text-gray-400 truncate" id="evidenceModalSubtitle">Source Image Verification</p>
+                    </div>
+                </div>
+                <!-- Zoom & Close Controls -->
+                <div class="flex items-center gap-1 sm:gap-2">
+                    <button onclick="zoomEvidence(0.2)" title="Zoom In" class="w-8 h-8 rounded-lg bg-gray-800 hover:bg-gray-700 text-white flex items-center justify-center text-sm">
+                        <span class="material-symbols-outlined text-base">zoom_in</span>
+                    </button>
+                    <button onclick="zoomEvidence(-0.2)" title="Zoom Out" class="w-8 h-8 rounded-lg bg-gray-800 hover:bg-gray-700 text-white flex items-center justify-center text-sm">
+                        <span class="material-symbols-outlined text-base">zoom_out</span>
+                    </button>
+                    <button onclick="resetEvidenceZoom()" title="Reset Zoom" class="w-8 h-8 rounded-lg bg-gray-800 hover:bg-gray-700 text-white flex items-center justify-center text-sm">
+                        <span class="material-symbols-outlined text-base">restart_alt</span>
+                    </button>
+                    <button onclick="closeEvidenceModal()" title="Close Viewer" class="w-8 h-8 rounded-lg bg-red-600 hover:bg-red-700 text-white flex items-center justify-center text-sm ml-1">
+                        <span class="material-symbols-outlined text-base">close</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Evidence Notice Bar -->
+            <div id="evidenceNoticeBar" class="bg-gray-900/90 px-4 py-2 border-b border-gray-800 text-[11px] flex items-center justify-between text-gray-300">
+                <span id="evidenceNoticeText">Source image — region localization active.</span>
+                <span id="evidenceZoomLevel" class="text-gray-400 font-mono text-[10px]">Zoom: 100%</span>
+            </div>
+
+            <!-- Modal Body (Image Canvas) -->
+            <div class="flex-1 overflow-auto p-4 flex items-center justify-center bg-black min-h-[280px] sm:min-h-[420px] max-h-[65vh] relative">
+                <div id="evidenceWrapper" class="relative inline-block evidence-img-container">
+                    <img id="evidenceModalImage" src="" alt="Evidence View" class="max-h-[58vh] w-auto max-w-full object-contain select-none block rounded shadow-lg"/>
+                    <div id="evidenceHighlightBox" class="absolute border-2 border-amber-400 bg-amber-400/25 rounded pointer-events-none hidden">
+                        <span id="evidenceHighlightTag" class="bg-amber-500 text-black text-[9px] font-bold px-1.5 py-0.5 rounded-br shadow block"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-3 bg-gray-900 border-t border-gray-800 flex items-center justify-between text-[11px] text-gray-400">
+                <span id="evidenceExtractedText" class="font-mono text-gray-300 truncate max-w-md"></span>
+                <button onclick="closeEvidenceModal()" class="px-4 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-semibold text-xs">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Review / Override Modal -->
+    <div id="reviewModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100 space-y-4">
+            <div class="flex items-center justify-between border-b border-gray-200 pb-2">
+                <h3 class="font-['Hanken_Grotesk'] font-bold text-base text-gray-900" id="reviewModalTitle">Review Declaration Finding</h3>
+                <button onclick="closeReviewModal()" class="text-gray-400 hover:text-gray-600">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            
+            <p class="text-xs text-gray-500">Record a legally defensible officer decision and explanation for the permanent inspection record.</p>
+            
+            <div class="space-y-3 text-xs">
+                <div class="bg-gray-50 p-2.5 rounded-lg border border-gray-200">
+                    <span class="text-gray-400 block text-[9px] font-bold uppercase">Original AI Assessment</span>
+                    <p id="reviewModalAiStatus" class="font-bold text-gray-800"></p>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Human Decision / Status</label>
+                    <select id="reviewModalStatus" class="w-full rounded-xl border-gray-300 text-xs p-2.5 focus:ring-primary focus:border-primary">
+                        <option value="compliant">COMPLIANT (Satisfies statutory requirements)</option>
+                        <option value="non_compliant">NON-COMPLIANT (Statutory violation)</option>
+                        <option value="needs_review">NEEDS MANUAL REVIEW (Uncertain / Requires physical check)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Inspector Verification Notes (Mandatory)</label>
+                    <textarea id="reviewModalNotes" rows="3" class="w-full rounded-xl border-gray-300 text-xs p-2.5 focus:ring-primary focus:border-primary" placeholder="State reason for decision (e.g. 'Verified manually on back panel', 'Font height verified physically with micrometer', etc.)..."></textarea>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeReviewModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-semibold">Cancel</button>
+                <button onclick="saveDeclarationReview()" class="px-5 py-2 bg-primary hover:bg-blue-800 text-white rounded-lg text-xs font-semibold">Save Decision</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Finalization Confirmation Modal -->
+    <div id="finalizeModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100 space-y-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-blue-100 text-primary flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-2xl">verified</span>
+                </div>
+                <div>
+                    <h3 class="font-['Hanken_Grotesk'] font-bold text-base text-gray-900">Confirm Inspection Finalization</h3>
+                    <p class="text-xs text-gray-500">Legal Metrology Statutory Determination</p>
+                </div>
+            </div>
+
+            <div class="text-xs bg-gray-50 p-3.5 rounded-xl border border-gray-200 space-y-2">
+                <div>
+                    <span class="text-gray-400 font-bold uppercase text-[9px] block">Derived Inspection Result:</span>
+                    <strong id="confirmDecisionLabel" class="text-sm font-bold block mt-0.5 text-emerald-700">VERIFIED COMPLIANT</strong>
+                </div>
+                <div>
+                    <span class="text-gray-400 font-bold uppercase text-[9px] block">Resolution Basis:</span>
+                    <span id="confirmDecisionBasis" class="text-gray-800 font-medium text-xs">All mandatory declarations resolved</span>
+                </div>
+                <div>
+                    <span class="text-gray-400 font-bold uppercase text-[9px] block">Inspecting Officer:</span>
+                    <span id="confirmOfficerName" class="text-gray-800 font-medium">Authorized Officer</span>
+                </div>
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-gray-700 block text-[10px] font-bold uppercase">Officer Remarks (Optional)</label>
+                <textarea id="finalizeOptionalRemarks" rows="2" class="w-full rounded-xl border-gray-300 text-xs p-2.5 focus:ring-primary focus:border-primary" placeholder="Optional inspector notes or comments (can be left blank)..."></textarea>
+            </div>
+
+            <p class="text-[11px] text-gray-500 leading-tight">
+                Once finalized, this derived statutory determination is permanently logged in the audit trail and locked into the official inspection report.
+            </p>
+
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeFinalizeModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-semibold">Cancel</button>
+                <button onclick="executeFinalize()" class="px-5 py-2 bg-primary hover:bg-blue-800 text-white rounded-lg text-xs font-bold shadow-md flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-sm">check_circle</span>
+                    <span>Confirm & Finalize</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- Threshold Configuration Modal (Admin only) -->
+    <div id="thresholdConfigModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-gray-100">
+            <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-xl">tune</span>
+                    <h3 class="font-['Hanken_Grotesk'] font-bold text-base text-gray-900">Compliance Automation Settings</h3>
+                </div>
+                <button type="button" onclick="closeThresholdConfigModal()" class="text-gray-400 hover:text-gray-700 p-1 rounded-lg">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div class="p-3 bg-blue-50/60 rounded-xl border border-blue-100 space-y-1">
+                    <span class="text-[10px] uppercase font-bold text-primary block">Configuration Rule</span>
+                    <p class="text-gray-700 leading-relaxed">
+                        Findings with a violation detection rate greater than or equal to this threshold are automatically confirmed for inspection workflow. Final regulatory decisions remain subject to authorized review.
+                    </p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">
+                        Automatic Violation Confirmation Threshold (%) <span class="text-red-500">*</span>
+                    </label>
+                    <div class="flex items-center gap-2">
+                        <input id="configThresholdInput" type="number" min="0" max="100" step="1" class="w-full text-xs rounded-xl border-gray-300 p-2.5 focus:ring-primary focus:border-primary font-bold text-gray-900" placeholder="e.g. 80"/>
+                        <span class="font-bold text-gray-600">%</span>
+                    </div>
+                    <span class="text-[10px] text-gray-500 block mt-1">Accepts percentage values between 0.0% and 100.0%.</span>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Audit Notes / Reason for Change</label>
+                    <textarea id="configThresholdNotes" rows="2" class="w-full text-xs rounded-xl border-gray-300 p-2.5 focus:ring-primary focus:border-primary" placeholder="Enter reason for threshold adjustment (e.g. 'Updated per Q3 compliance policy standard')..."></textarea>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+                <button type="button" onclick="closeThresholdConfigModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold text-xs transition-colors">
+                    Cancel
+                </button>
+                <button type="button" onclick="submitThresholdConfig()" id="btnSaveThresholdConfig" class="px-5 py-2 bg-primary hover:bg-blue-700 text-white rounded-xl font-semibold text-xs shadow-md transition-colors flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-sm">check_circle</span>
+                    <span>Save Threshold</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        let activeScanId = urlParams.get('id');
+        let currentScan = null;
+        let currentDeclarations = [];
+        let activeDeclId = null;
+        let pollCount = 0;
+        const MAX_POLLS = 25;
+        let evidenceZoom = 1.0;
+
+        const FIELD_TITLES = {
+            "common_name": "Generic or Common Name",
+            "manufacturer_details": "Manufacturer / Packer Details",
+            "country_of_origin": "Country of Origin",
+            "net_quantity": "Net Quantity & Units",
+            "mfg_date": "Date of Manufacture / Packing",
+            "mrp": "Maximum Retail Price (MRP)",
+            "unit_sale_price": "Unit Sale Price (USP)",
+            "consumer_care": "Consumer Care Redressal"
+        };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            PackCheck.syncNavigation('/analysis');
+            applyRoleUIState();
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            activeScanId = urlParams.get('id');
+
+            if (!activeScanId) {
+                const recent = await PackCheck.request('/scans?page_size=1');
+                if (recent.success && recent.data?.items?.length > 0) {
+                    activeScanId = recent.data.items[0].id;
+                }
+            }
+            if (activeScanId) {
+                loadScanDetails(activeScanId);
+            } else {
+                showScanNotFound('No scan ID provided or available in the system.');
+            }
+        });
+
+        function applyRoleUIState() {
+            const roleBadge = document.getElementById('roleNoticeBadge');
+            const btnReport = document.getElementById('btnGenReport');
+            const btnHeaderFinalize = document.getElementById('btnHeaderFinalize');
+            const btnEditThreshold = document.getElementById('btnEditThresholdAdmin');
+
+            if (roleBadge) roleBadge.classList.add('hidden');
+            if (btnReport) btnReport.classList.remove('hidden');
+            if (btnHeaderFinalize) btnHeaderFinalize.classList.remove('hidden');
+            if (btnEditThreshold) {
+                if (PackCheck.isAdmin()) {
+                    btnEditThreshold.classList.remove('hidden');
+                    btnEditThreshold.classList.add('flex');
+                } else {
+                    btnEditThreshold.classList.add('hidden');
+                    btnEditThreshold.classList.remove('flex');
+                }
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            renderBoundingBoxes();
+        });
+        function showScanNotFound(message) {
+            document.getElementById('headerProductTitle').textContent = 'Scan Not Found';
+            document.getElementById('headerScanMeta').textContent = 'Please check the scan ID or return to Dashboard.';
+            document.getElementById('scanErrorBanner').classList.remove('hidden');
+            document.getElementById('scanErrorMessage').textContent = message || 'Scan not found.';
+            document.getElementById('imageLoadingState').classList.add('hidden');
+            document.getElementById('imageErrorState').classList.remove('hidden');
+            document.getElementById('imageErrorMessage').textContent = 'Scan details could not be located';
+            document.getElementById('declarationsList').innerHTML = '<div class="p-8 text-center text-gray-400 text-xs">No declarations available.</div>';
+        }
+
+        async function loadScanDetails(scanId) {
+            const res = await PackCheck.request(`/scans/${scanId}`);
+            if (!res.success || !res.data) {
+                showScanNotFound(res.error?.message || 'Scan not found.');
+                return;
+            }
+
+            const s = res.data;
+            currentScan = s;
+            document.getElementById('scanErrorBanner').classList.add('hidden');
+            
+            const prodName = s.product?.name || 'Packaged Commodity Scan';
+            const prodBrand = s.product?.brand || '';
+            document.getElementById('headerProductTitle').textContent = prodName;
+            document.getElementById('headerScanMeta').textContent = `Scan ID: ${s.id.substring(0,8)}... • Location: ${s.location_name || 'Retail Market'} • Status: ${s.status.toUpperCase().replace('_', ' ')}`;
+
+            // Populate Metadata Bar
+            document.getElementById('metaProductName').textContent = prodBrand ? `${prodName} (${prodBrand})` : prodName;
+            document.getElementById('metaDate').textContent = new Date(s.created_at).toLocaleDateString();
+            document.getElementById('metaInspector').textContent = s.inspector?.name || 'Enforcement Inspector';
+
+            // Populate Batch Metadata Bar
+            const metaBatchNum = document.getElementById('metaBatchNumber');
+            const metaBatchBadge = document.getElementById('metaBatchSourceBadge');
+            const effectiveBatch = s.batch_number || s.batch_number_extracted;
+            
+            if (effectiveBatch) {
+                metaBatchNum.textContent = effectiveBatch;
+                if (s.batch_number_source === 'verified') {
+                    metaBatchBadge.textContent = 'Verified';
+                    metaBatchBadge.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800';
+                } else if (s.batch_number_source === 'ocr') {
+                    const confPct = Math.round((s.batch_number_confidence || 0) * 100);
+                    metaBatchBadge.textContent = confPct > 0 ? `OCR (${confPct}%)` : 'OCR';
+                    metaBatchBadge.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-100 text-primary';
+                } else {
+                    metaBatchBadge.textContent = 'Inspector Entered';
+                    metaBatchBadge.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold bg-gray-100 text-gray-700';
+                }
+            } else {
+                metaBatchNum.textContent = 'Not Specified';
+                metaBatchBadge.textContent = 'None';
+                metaBatchBadge.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold bg-gray-100 text-gray-400';
+            }
+
+            // Handle Batch Discrepancy Banner
+            const discBanner = document.getElementById('batchDiscrepancyBanner');
+            const discText = document.getElementById('batchDiscrepancyText');
+            if (s.batch_discrepancy) {
+                discBanner.classList.remove('hidden');
+                const confPct = Math.round((s.batch_number_confidence || 0) * 100);
+                discText.textContent = `Inspector entered "${s.batch_number}" while OCR extracted "${s.batch_number_extracted}" (Confidence: ${confPct}%). Please verify and confirm the statutory batch value.`;
+            } else {
+                discBanner.classList.add('hidden');
+            }
+
+            // Handle Batch Investigation Section
+            const batchSection = document.getElementById('batchInvestigationSection');
+            if (effectiveBatch) {
+                batchSection.classList.remove('hidden');
+                loadBatchInvestigation(effectiveBatch, s.id);
+            } else {
+                batchSection.classList.add('hidden');
+            }
+
+            // Handle scan processing status
+            const progressBanner = document.getElementById('analysisProgressBanner');
+            if (s.status === 'processing') {
+                progressBanner.classList.remove('hidden');
+                if (pollCount < MAX_POLLS) {
+                    pollCount++;
+                    setTimeout(() => loadScanDetails(scanId), 1500);
+                } else {
+                    progressBanner.classList.add('hidden');
+                    document.getElementById('scanErrorBanner').classList.remove('hidden');
+                    document.getElementById('scanErrorMessage').textContent = 'Analysis timed out. Please retry analysis.';
+                }
+            } else if (s.status === 'failed') {
+                progressBanner.classList.add('hidden');
+                document.getElementById('scanErrorBanner').classList.remove('hidden');
+                if (s.metadata_json?.analysis_blocked_reason === 'IMAGE_TOO_BLURRY' || (s.images?.length > 0 && !s.images[0].analysis_allowed)) {
+                    document.getElementById('scanErrorMessage').textContent = 'Analysis Blocked — Insufficient Image Quality. The uploaded packaging image is too blurry for reliable legal metrology text extraction. Please re-upload a clearer image or rescan the product.';
+                } else {
+                    document.getElementById('scanErrorMessage').textContent = 'AI Compliance analysis failed for this scan.';
+                }
+            } else {
+                progressBanner.classList.add('hidden');
+            }
+
+            // Deduplicate declarations
+            const rawDecls = s.declarations || [];
+            const seen = new Set();
+            currentDeclarations = [];
+            for (const d of rawDecls) {
+                const key = d.field_type.toLowerCase();
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    currentDeclarations.push(d);
+                }
+            }
+
+            renderDeclarations();
+            renderImage(s);
+            loadAuditTrail(scanId);
+        }
+
+        async function loadAuditTrail(scanId) {
+            const list = document.getElementById('auditTrailList');
+            const res = await PackCheck.request(`/scans/${scanId}/audit-trail`);
+            if (res.success && res.data && res.data.length > 0) {
+                list.innerHTML = res.data.map(item => {
+                    const dt = new Date(item.timestamp).toLocaleString();
+                    const actionClean = item.action.replace(/_/g, ' ');
+                    let badgeClass = 'bg-gray-100 text-gray-700';
+                    if (item.action.includes('CONFIRMED')) badgeClass = 'bg-emerald-100 text-emerald-800';
+                    if (item.action.includes('OVERRIDDEN')) badgeClass = 'bg-purple-100 text-purple-800';
+                    if (item.action.includes('REJECTED')) badgeClass = 'bg-red-100 text-red-800';
+                    if (item.action.includes('FINALIZED')) badgeClass = 'bg-blue-100 text-blue-800';
+
+                    const notes = item.metadata_json?.reviewer_notes || item.metadata_json?.remarks || item.metadata_json?.notes || 'System action completed.';
+
+                    return `
+                        <div class="p-2.5 rounded-xl border border-gray-100 bg-gray-50/70 space-y-1">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-gray-900">${item.user_name || 'System'} <span class="font-normal text-gray-500">(${item.user_role || 'Automated'})</span></span>
+                                <span class="text-[10px] text-gray-400 font-mono">${dt}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${badgeClass}">${actionClean}</span>
+                                <span class="text-[11px] text-gray-700 italic truncate">${notes}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                list.innerHTML = '<div class="p-3 text-center text-gray-400 text-xs">No audit events recorded yet.</div>';
+            }
+        }
+
+        function renderImage(scan) {
+            const labelImg = document.getElementById('labelImage');
+            const loadingState = document.getElementById('imageLoadingState');
+            const errorState = document.getElementById('imageErrorState');
+            const overlay = document.getElementById('boundingOverlay');
+
+            if (scan.images && scan.images.length > 0 && scan.images[0].image_url) {
+                const imgUrl = scan.images[0].image_url;
+                loadingState.classList.remove('hidden');
+                errorState.classList.add('hidden');
+                labelImg.classList.add('hidden');
+                overlay.classList.add('hidden');
+
+                labelImg.onload = () => {
+                    loadingState.classList.add('hidden');
+                    errorState.classList.add('hidden');
+                    labelImg.classList.remove('hidden');
+                    overlay.classList.remove('hidden');
+                    renderBoundingBoxes();
+                };
+
+                labelImg.onerror = () => {
+                    loadingState.classList.add('hidden');
+                    labelImg.classList.add('hidden');
+                    overlay.classList.add('hidden');
+                    errorState.classList.remove('hidden');
+                    document.getElementById('imageErrorMessage').textContent = 'Packaging image unavailable or failed to load';
+                };
+
+                labelImg.src = imgUrl;
+            } else {
+                loadingState.classList.add('hidden');
+                labelImg.classList.add('hidden');
+                overlay.classList.add('hidden');
+                errorState.classList.remove('hidden');
+                document.getElementById('imageErrorMessage').textContent = 'No packaging label image uploaded for this scan';
+            }
+        }
+
+        function renderBoundingBoxes() {
+            const labelImg = document.getElementById('labelImage');
+            const overlay = document.getElementById('boundingOverlay');
+            if (!labelImg || labelImg.classList.contains('hidden') || !labelImg.naturalWidth) {
+                overlay.innerHTML = '';
+                overlay.classList.add('hidden');
+                return;
+            }
+
+            overlay.style.top = `${labelImg.offsetTop}px`;
+            overlay.style.left = `${labelImg.offsetLeft}px`;
+            overlay.style.width = `${labelImg.clientWidth}px`;
+            overlay.style.height = `${labelImg.clientHeight}px`;
+            overlay.classList.remove('hidden');
+
+            const naturalW = labelImg.naturalWidth;
+            const naturalH = labelImg.naturalHeight;
+
+            overlay.innerHTML = currentDeclarations
+                .filter(d => d.bounding_box && (d.bounding_box.w > 0 || d.bounding_box.width > 0))
+                .map(d => {
+                    const bbox = d.bounding_box;
+                    const rawX = bbox.x ?? 0;
+                    const rawY = bbox.y ?? 0;
+                    const rawW = bbox.w ?? bbox.width ?? 0;
+                    const rawH = bbox.h ?? bbox.height ?? 0;
+
+                    let leftPct, topPct, widthPct, heightPct;
+                    if (rawX <= 1.0 && rawW <= 1.0 && naturalW > 0) {
+                        leftPct = rawX * 100;
+                        topPct = rawY * 100;
+                        widthPct = rawW * 100;
+                        heightPct = rawH * 100;
+                    } else {
+                        leftPct = (rawX / naturalW) * 100;
+                        topPct = (rawY / naturalH) * 100;
+                        widthPct = (rawW / naturalW) * 100;
+                        heightPct = (rawH / naturalH) * 100;
+                    }
+
+                    leftPct = Math.max(0, Math.min(leftPct, 95));
+                    topPct = Math.max(0, Math.min(topPct, 95));
+                    widthPct = Math.max(2, Math.min(widthPct, 100 - leftPct));
+                    heightPct = Math.max(2, Math.min(heightPct, 100 - topPct));
+
+                    let borderClass = 'border-emerald-400 bg-emerald-400/15';
+                    let badgeClass = 'bg-emerald-600';
+                    let labelText = `${d.field_type.replace(/_/g, ' ').toUpperCase()}: COMPLIANT`;
+
+                    if (d.reviewer_override) {
+                        borderClass = 'border-amber-400 bg-amber-400/20';
+                        badgeClass = 'bg-amber-600';
+                        labelText = `${d.field_type.replace(/_/g, ' ').toUpperCase()}: OVERRIDDEN`;
+                    } else if (d.severity === 'needs_review' || (d.confidence_score > 0 && d.confidence_score < 0.70)) {
+                        borderClass = 'border-amber-400 bg-amber-400/20';
+                        badgeClass = 'bg-amber-600';
+                        labelText = `${d.field_type.replace(/_/g, ' ').toUpperCase()}: REVIEW REQUIRED`;
+                    } else if (!d.is_compliant) {
+                        borderClass = 'border-red-500 bg-red-500/20';
+                        badgeClass = 'bg-red-600';
+                        labelText = `${d.field_type.replace(/_/g, ' ').toUpperCase()}: VIOLATION`;
+                    }
+
+                    return `
+                        <div class="absolute border-2 ${borderClass} rounded pointer-events-none flex items-start"
+                             style="top: ${topPct.toFixed(2)}%; left: ${leftPct.toFixed(2)}%; width: ${widthPct.toFixed(2)}%; height: ${heightPct.toFixed(2)}%;">
+                             <span class="${badgeClass} text-white text-[9px] font-bold px-1.5 py-0.5 rounded-br shadow-sm whitespace-nowrap overflow-hidden text-ellipsis max-w-full">
+                                 ${labelText}
+                             </span>
+                        </div>
+                    `;
+                }).join('');
+        }
+
+        function renderDeclarations() {
+            const container = document.getElementById('declarationsList');
+            if (currentDeclarations.length === 0) {
+                container.innerHTML = '<div class="p-8 text-center text-gray-400 text-xs">No declarations detected.</div>';
+                return;
+            }
+
+            let confirmedViolations = 0;
+            let reviewNeeded = 0;
+
+            currentDeclarations.forEach(d => {
+                const conf = d.confidence_score || 0;
+                if (!d.is_compliant) {
+                    if (d.severity === 'needs_review' || (conf > 0 && conf < 0.70 && !d.reviewer_override)) {
+                        reviewNeeded++;
+                    } else if (conf >= 0.70 || !d.is_present) {
+                        confirmedViolations++;
+                    } else {
+                        reviewNeeded++;
+                    }
+                } else if (d.severity === 'needs_review' || (conf > 0 && conf < 0.70)) {
+                    reviewNeeded++;
+                }
+            });
+
+            // Overall Status Badges
+            const badge = document.getElementById('overallBadge');
+            const metaVerdict = document.getElementById('metaOverallVerdict');
+            const reviewBanner = document.getElementById('manualReviewBanner');
+
+            if (confirmedViolations > 0) {
+                badge.textContent = `${confirmedViolations} VIOLATION(S) DETECTED`;
+                badge.className = 'px-3 py-1 bg-red-50 text-red-700 border border-red-200 rounded-full font-bold text-xs';
+                metaVerdict.textContent = 'NON-COMPLIANT';
+                metaVerdict.className = 'font-bold text-red-600 block';
+                reviewBanner.classList.add('hidden');
+            } else if (reviewNeeded > 0) {
+                badge.textContent = 'NEEDS MANUAL REVIEW';
+                badge.className = 'px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-full font-bold text-xs';
+                metaVerdict.textContent = 'NEEDS MANUAL REVIEW';
+                metaVerdict.className = 'font-bold text-amber-600 block';
+                reviewBanner.classList.remove('hidden');
+            } else {
+                badge.textContent = 'VERIFIED COMPLIANT';
+                badge.className = 'px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full font-bold text-xs';
+                metaVerdict.textContent = 'VERIFIED COMPLIANT';
+                metaVerdict.className = 'font-bold text-emerald-600 block';
+                reviewBanner.classList.add('hidden');
+            }
+
+            // Automation Threshold Card Global Population
+            const totalDecls = currentDeclarations.length;
+            const dSample = currentDeclarations.find(d => d.auto_confirm_threshold != null) || currentDeclarations[0];
+            const threshold = dSample?.auto_confirm_threshold ?? 80.0;
+            
+            const isDeclOfficerDecided = (d) => !!d.human_decision && d.human_decision !== 'NONE' && d.human_decision !== 'AUTO-ANALYZED';
+            const isDeclAuto = (d) => {
+                if (isDeclOfficerDecided(d)) return false;
+                const dRate = (d.violation_detection_rate != null) ? d.violation_detection_rate : ((d.confidence_score || 0) * 100);
+                const dThresh = (d.auto_confirm_threshold != null) ? d.auto_confirm_threshold : threshold;
+                return d.workflow_decision === 'AUTO_CONFIRMED' || d.workflow_decision === 'AUTOMATICALLY_CONFIRMED' || d.verification_status === 'AUTO_CONFIRMED' || (!d.workflow_decision && dRate >= dThresh && d.severity !== 'needs_review');
+            };
+
+            const autoConfirmedDecls = currentDeclarations.filter(d => isDeclAuto(d));
+            const manualReviewDecls = currentDeclarations.filter(d => !isDeclOfficerDecided(d) && !isDeclAuto(d));
+            const humanDecidedDecls = currentDeclarations.filter(d => isDeclOfficerDecided(d));
+
+            const autoConfirmedCount = autoConfirmedDecls.length;
+            const manualReviewCount = manualReviewDecls.length;
+            const humanDecidedCount = humanDecidedDecls.length;
+
+            const globalAutoEl = document.getElementById('globalAutoConfirmedCount');
+            const globalManualEl = document.getElementById('globalManualReviewCount');
+            const globalThreshEl = document.getElementById('globalThresholdVal');
+            const globalDecisionText = document.getElementById('globalDecisionTextVal');
+            const globalBadge = document.getElementById('autoDecisionGlobalBadge');
+            const reasonMsg = document.getElementById('automationReasonMessage');
+            const reasonIcon = document.getElementById('automationReasonIcon');
+            const reasonBox = document.getElementById('automationReasonBox');
+
+            if (globalAutoEl) globalAutoEl.textContent = `${autoConfirmedCount} / ${totalDecls}`;
+            if (globalManualEl) globalManualEl.textContent = `${manualReviewCount} / ${totalDecls}`;
+            if (globalThreshEl) globalThreshEl.textContent = `${Math.round(threshold)}%`;
+
+            const wfTitle = document.getElementById('workflowActionTitle');
+            const wfDesc = document.getElementById('workflowActionDesc');
+            const wfIcon = document.getElementById('workflowActionIcon');
+            const btnAutoFin = document.getElementById('btnAutomationFinalize');
+            const btnHeadFin = document.getElementById('btnHeaderFinalize');
+
+            const isScanFinalized = currentScan && (currentScan.status === 'finalized' || currentScan.status === 'closed' || currentScan.metadata_json?.finalized_at);
+            const hasAnyViolation = currentDeclarations.some(d => !d.is_compliant);
+
+            if (isScanFinalized) {
+                const finDec = (currentScan.metadata_json?.final_decision || (hasAnyViolation ? 'non_compliant' : 'compliant')).toUpperCase().replace('_', ' ');
+                const finBy = currentScan.metadata_json?.finalized_by || currentScan.inspector?.name || 'Officer';
+                if (globalBadge) {
+                    globalBadge.textContent = `FINALIZED (${finDec})`;
+                    globalBadge.className = hasAnyViolation 
+                        ? 'px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-red-100 text-red-800 border border-red-300'
+                        : 'px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300';
+                }
+                if (globalDecisionText) {
+                    globalDecisionText.textContent = `Finalized (${finDec})`;
+                    globalDecisionText.className = hasAnyViolation ? 'text-xs sm:text-sm font-bold text-red-700 block mt-0.5' : 'text-xs sm:text-sm font-bold text-emerald-700 block mt-0.5';
+                }
+                if (reasonMsg) {
+                    reasonMsg.innerHTML = `Inspection officially finalized as <strong class="${hasAnyViolation ? 'text-red-900' : 'text-emerald-900'}">${finDec}</strong> by <strong>${finBy}</strong> based on verified declaration findings.`;
+                }
+                if (reasonIcon) {
+                    reasonIcon.textContent = 'verified';
+                    reasonIcon.className = hasAnyViolation ? 'material-symbols-outlined text-base mt-0.5 text-red-600' : 'material-symbols-outlined text-base mt-0.5 text-emerald-600';
+                }
+                if (reasonBox) {
+                    reasonBox.className = hasAnyViolation ? 'p-3 rounded-xl bg-red-50/70 border border-red-200 text-xs space-y-1' : 'p-3 rounded-xl bg-emerald-50/70 border border-emerald-200 text-xs space-y-1';
+                }
+                if (wfTitle) wfTitle.textContent = `Inspection Finalized — ${finDec}`;
+                if (wfDesc) wfDesc.textContent = `Statutory determination officially recorded under ${finBy}.`;
+                if (wfIcon) {
+                    wfIcon.textContent = 'check_circle';
+                    wfIcon.className = hasAnyViolation ? 'material-symbols-outlined text-red-600 text-lg' : 'material-symbols-outlined text-emerald-600 text-lg';
+                }
+                if (btnAutoFin) {
+                    btnAutoFin.classList.add('hidden');
+                    btnAutoFin.classList.remove('flex');
+                }
+                if (btnHeadFin) {
+                    btnHeadFin.disabled = true;
+                    btnHeadFin.className = 'px-3.5 sm:px-4 py-2 bg-gray-400 text-white rounded-full font-semibold text-xs shadow-sm cursor-not-allowed flex items-center gap-1.5 opacity-75';
+                    btnHeadFin.innerHTML = '<span class="material-symbols-outlined text-sm">verified</span> Finalized';
+                }
+            } else if (manualReviewCount === 0 && totalDecls > 0) {
+                const derivedVerdict = hasAnyViolation ? 'NON-COMPLIANT (VIOLATION)' : 'VERIFIED COMPLIANT';
+                if (globalBadge) {
+                    globalBadge.textContent = 'READY FOR FINALIZATION';
+                    globalBadge.className = 'px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300';
+                }
+                if (globalDecisionText) {
+                    globalDecisionText.textContent = 'Ready for Finalization';
+                    globalDecisionText.className = 'text-xs sm:text-sm font-bold text-emerald-700 block mt-0.5';
+                }
+                if (reasonMsg) {
+                    reasonMsg.innerHTML = `All mandatory declarations resolved (${autoConfirmedCount} auto-confirmed, ${humanDecidedCount} inspector reviewed). Derived overall statutory status: <strong class="${hasAnyViolation ? 'text-red-700' : 'text-emerald-700'}">${derivedVerdict}</strong>. Ready for finalization without redundant dropdown selection.`;
+                }
+                if (reasonIcon) {
+                    reasonIcon.textContent = 'task_alt';
+                    reasonIcon.className = 'material-symbols-outlined text-base mt-0.5 text-emerald-600';
+                }
+                if (reasonBox) {
+                    reasonBox.className = 'p-3 rounded-xl bg-emerald-50/70 border border-emerald-200 text-xs space-y-1';
+                }
+                if (wfTitle) wfTitle.textContent = `All Declarations Resolved (${totalDecls}/${totalDecls}) — Ready to Finalize`;
+                if (wfDesc) wfDesc.textContent = `Derived overall inspection result: ${derivedVerdict}. Click Finalize Inspection to record determination.`;
+                if (wfIcon) {
+                    wfIcon.textContent = 'check_circle';
+                    wfIcon.className = 'material-symbols-outlined text-emerald-600 text-lg';
+                }
+                if (btnAutoFin) {
+                    btnAutoFin.classList.remove('hidden');
+                    btnAutoFin.classList.add('flex');
+                }
+                if (btnHeadFin) {
+                    btnHeadFin.disabled = false;
+                    btnHeadFin.className = 'px-3.5 sm:px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full font-semibold text-xs shadow-md transition-all flex items-center gap-1.5 cursor-pointer';
+                    btnHeadFin.innerHTML = '<span class="material-symbols-outlined text-sm">check_circle</span> Finalize Inspection';
+                }
+            } else {
+                if (globalBadge) {
+                    globalBadge.textContent = `${manualReviewCount} ITEM(S) REQUIRE MANUAL REVIEW`;
+                    globalBadge.className = 'px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300';
+                }
+                if (globalDecisionText) {
+                    globalDecisionText.textContent = `${manualReviewCount} Item(s) Require Review`;
+                    globalDecisionText.className = 'text-xs sm:text-sm font-bold text-amber-800 block mt-0.5';
+                }
+                if (reasonMsg) {
+                    reasonMsg.innerHTML = `<strong class="text-amber-950">${manualReviewCount} of ${totalDecls} declaration(s)</strong> have confidence below threshold (<strong class="text-amber-950">${Math.round(threshold)}%</strong>) or require manual verification. Resolve these items below before finalization.`;
+                }
+                if (reasonIcon) {
+                    reasonIcon.textContent = 'rule_settings';
+                    reasonIcon.className = 'material-symbols-outlined text-base mt-0.5 text-amber-600';
+                }
+                if (reasonBox) {
+                    reasonBox.className = 'p-3 rounded-xl bg-amber-50/70 border border-amber-200 text-xs space-y-1';
+                }
+                if (wfTitle) wfTitle.textContent = `${manualReviewCount} Manual Review Item(s) Pending`;
+                if (wfDesc) wfDesc.textContent = `Inspector decision (Confirm / Reject / Override) required for ${manualReviewCount} declaration(s) before finalization.`;
+                if (wfIcon) {
+                    wfIcon.textContent = 'hourglass_top';
+                    wfIcon.className = 'material-symbols-outlined text-amber-600 text-lg';
+                }
+                if (btnAutoFin) {
+                    btnAutoFin.classList.add('hidden');
+                    btnAutoFin.classList.remove('flex');
+                }
+                if (btnHeadFin) {
+                    btnHeadFin.disabled = false;
+                    btnHeadFin.className = 'px-3.5 sm:px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-full font-semibold text-xs shadow-md transition-all flex items-center gap-1.5 cursor-pointer';
+                    btnHeadFin.innerHTML = '<span class="material-symbols-outlined text-sm">fact_check</span> Finalize Inspection';
+                }
+            }
+
+            const canEdit = PackCheck.canReview();
+
+            container.innerHTML = currentDeclarations.map(d => {
+                const conf = d.confidence_score || 0;
+                let confLevel = 'HIGH';
+                let confClass = 'bg-emerald-100 text-emerald-800 border-emerald-200';
+                if (conf < 0.70) {
+                    confLevel = 'LOW';
+                    confClass = 'bg-red-100 text-red-800 border-red-200';
+                } else if (conf < 0.90) {
+                    confLevel = 'MEDIUM';
+                    confClass = 'bg-amber-100 text-amber-800 border-amber-200';
+                }
+
+                let statusPill = '';
+                if (d.is_compliant) {
+                    statusPill = '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold text-[10px]">COMPLIANT</span>';
+                } else if (d.severity === 'needs_review' || (conf > 0 && conf < 0.70 && !d.reviewer_override)) {
+                    statusPill = '<span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded font-bold text-[10px]">NEEDS MANUAL REVIEW</span>';
+                } else {
+                    statusPill = `<span class="px-2 py-0.5 bg-red-100 text-red-800 rounded font-bold text-[10px]">VIOLATION (${(d.severity || 'MAJOR').toUpperCase()})</span>`;
+                }
+
+                // Workflow decision badge
+                let wfPill = '';
+                const dRate = (d.violation_detection_rate != null) ? Math.round(d.violation_detection_rate) : Math.round(conf * 100);
+                const dThresh = (d.auto_confirm_threshold != null) ? Math.round(d.auto_confirm_threshold) : Math.round(threshold);
+                const isOfficerDecided = isDeclOfficerDecided(d);
+                const isAuto = isDeclAuto(d);
+                const isManualReq = !isOfficerDecided && !isAuto;
+
+                if (isAuto) {
+                    wfPill = `<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded font-bold text-[10px] flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">bolt</span> AUTO-CONFIRMED (${dRate}% &ge; ${dThresh}%)</span>`;
+                } else if (isManualReq) {
+                    wfPill = `<span class="px-2 py-0.5 bg-amber-100 text-amber-900 border border-amber-300 rounded font-bold text-[10px] flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">hourglass_top</span> MANUAL REVIEW REQUIRED (${dRate}% &lt; ${dThresh}%)</span>`;
+                } else if (isOfficerDecided) {
+                    wfPill = `<span class="px-2 py-0.5 bg-blue-100 text-blue-800 border border-blue-300 rounded font-bold text-[10px] flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">verified</span> FINALIZED (OFFICER ${d.human_decision.toUpperCase()})</span>`;
+                }
+
+                let humanTag = '';
+                if (d.human_decision === 'confirmed') {
+                    humanTag = '<span class="px-1.5 py-0.5 bg-blue-100 text-blue-800 rounded font-bold text-[9px] uppercase">Confirmed by Officer</span>';
+                } else if (d.human_decision === 'rejected') {
+                    humanTag = '<span class="px-1.5 py-0.5 bg-orange-100 text-orange-800 rounded font-bold text-[9px] uppercase">Rejected by Officer</span>';
+                } else if (d.reviewer_override || d.human_decision === 'overridden') {
+                    humanTag = '<span class="px-1.5 py-0.5 bg-purple-100 text-purple-800 rounded font-bold text-[9px] uppercase">Overridden</span>';
+                }
+
+                const fieldTitle = FIELD_TITLES[d.field_type] || d.field_type.replace(/_/g, ' ').toUpperCase();
+                const fontNotice = d.font_size_mm 
+                    ? `<span class="text-gray-500 font-medium block mt-0.5 text-[10px]">Estimated visual size: approximately ${d.font_size_mm} mm — subject to manual verification</span>`
+                    : '';
+
+                const reasonText = d.reviewer_notes || (d.is_compliant ? 'Statutory requirement met per LMPC Rules 2011.' : (d.decision_reason || 'Non-compliance identified against statutory standard.'));
+
+                let autoExplanatory = '';
+                if (isAuto) {
+                    autoExplanatory = `<div class="text-[10px] text-emerald-800 font-medium flex items-center gap-1 mt-1 bg-emerald-50/80 px-2 py-1 rounded border border-emerald-200/60"><span class="material-symbols-outlined text-[12px]">check_circle</span> This declaration exceeded the configured automatic-confirmation threshold (${dThresh}%). Automatically confirmed for inspection workflow.</div>`;
+                } else if (isManualReq) {
+                    autoExplanatory = `<div class="text-[10px] text-amber-900 font-medium flex items-center gap-1 mt-1 bg-amber-50/80 px-2 py-1 rounded border border-amber-200/60"><span class="material-symbols-outlined text-[12px]">info</span> Declaration confidence (${dRate}%) is below the configured automatic-confirmation threshold (${dThresh}%). Inspector verification is required.</div>`;
+                }
+
+                // Review action buttons
+                let reviewControls = '';
+                if (!canEdit) {
+                    reviewControls = `<div class="pt-1 text-[10px] text-gray-400 font-medium">Read-Only Mode</div>`;
+                } else if (isAuto) {
+                    // Auto-confirmed: NO green Confirm button! Only human correction controls (Reject, Override / Edit)
+                    reviewControls = `
+                        <div class="flex flex-wrap items-center justify-between gap-1.5 pt-1.5 border-t border-gray-100">
+                            <div class="flex items-center gap-1.5">
+                                <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded text-[10px] font-bold flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-xs">check_circle</span> Auto-Confirmed — System Threshold
+                                </span>
+                                <span class="text-[10px] text-gray-400 italic">No confirmation click required</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <button onclick="quickRejectFinding('${d.id}')" title="Reject AI Assessment" class="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-800 border border-red-200 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-colors">
+                                    <span class="material-symbols-outlined text-xs">close</span> Reject
+                                </button>
+                                <button onclick="openReviewModal('${d.id}')" title="Override / Enter Notes" class="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-primary border border-blue-200 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-colors">
+                                    <span class="material-symbols-outlined text-xs">edit_note</span> Override / Edit
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } else if (isManualReq) {
+                    // Manual review required: show Confirm, Reject, Override / Edit
+                    reviewControls = `
+                        <div class="flex flex-wrap items-center justify-between gap-1.5 pt-1.5 border-t border-gray-100">
+                            <div class="text-[10px] text-amber-800 font-semibold flex items-center gap-1">
+                                <span class="material-symbols-outlined text-xs">priority_high</span> Inspector Decision Required
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <button onclick="quickConfirmFinding('${d.id}')" title="Confirm Finding" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-colors">
+                                    <span class="material-symbols-outlined text-xs">check</span> Confirm
+                                </button>
+                                <button onclick="quickRejectFinding('${d.id}')" title="Reject AI Assessment" class="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-800 border border-red-200 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-colors">
+                                    <span class="material-symbols-outlined text-xs">close</span> Reject
+                                </button>
+                                <button onclick="openReviewModal('${d.id}')" title="Override / Enter Notes" class="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-primary border border-blue-200 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-colors">
+                                    <span class="material-symbols-outlined text-xs">edit_note</span> Override / Edit
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } else if (isOfficerDecided) {
+                    // Finalized / human decided
+                    const decLabel = d.human_decision.toUpperCase();
+                    reviewControls = `
+                        <div class="flex flex-wrap items-center justify-between gap-1.5 pt-1.5 border-t border-gray-100">
+                            <div class="text-[10px] text-blue-800 font-semibold flex items-center gap-1">
+                                <span class="material-symbols-outlined text-xs">verified_user</span> Officer Decided (${decLabel})
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <button onclick="quickRejectFinding('${d.id}')" title="Reject AI Assessment" class="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-800 border border-red-200 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-colors">
+                                    <span class="material-symbols-outlined text-xs">close</span> Reject
+                                </button>
+                                <button onclick="openReviewModal('${d.id}')" title="Re-review / Override" class="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-primary border border-blue-200 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-colors">
+                                    <span class="material-symbols-outlined text-xs">edit_note</span> Override / Edit
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                const decisionMethodText = isAuto || d.decision_method === 'SYSTEM_THRESHOLD' || d.decision_method === 'AUTOMATIC'
+                    ? 'Automatic Threshold Rule'
+                    : (isOfficerDecided ? `Manual Officer Determination (${d.human_decision.toUpperCase()})` : (d.decision_method === 'MANUAL' ? 'Manual Officer Determination' : 'Automated System'));
+
+                return `
+                    <div class="p-3.5 sm:p-4 rounded-xl border ${d.is_compliant ? 'border-gray-200 bg-white' : (d.severity === 'needs_review' ? 'border-amber-200 bg-amber-50/20' : 'border-red-200 bg-red-50/20')} shadow-sm space-y-2">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                                <span class="font-bold text-xs text-gray-900">${fieldTitle}</span>
+                                ${statusPill}
+                                ${wfPill}
+                                ${humanTag}
+                                <span class="px-1.5 py-0.5 rounded border text-[9px] font-bold ${confClass}">
+                                    ${dRate}% ${confLevel}
+                                </span>
+                            </div>
+                            <button onclick="openEvidenceModal('${d.id}')" class="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-[11px] font-semibold flex items-center gap-1 shrink-0">
+                                <span class="material-symbols-outlined text-xs">visibility</span> View Evidence
+                            </button>
+                        </div>
+                        
+                        <div class="bg-gray-50 p-2.5 rounded-lg border border-gray-100 text-xs space-y-1">
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-400 block text-[9px] font-bold uppercase">Extracted Value</span>
+                                ${d.normalized_numeric_value ? `<span class="text-[9px] font-mono text-gray-500 bg-gray-200/70 px-1.5 py-0.5 rounded">Norm: ${d.normalized_numeric_value} ${d.normalized_unit || ''}</span>` : ''}
+                            </div>
+                            <p class="text-gray-800 font-mono break-words font-medium">
+                                ${d.extracted_text ? `"${d.extracted_text}"` : '<span class="text-red-600 italic">[Field absent on packaging label]</span>'}
+                            </p>
+                            ${d.has_conflict ? `
+                                <div class="p-1.5 bg-red-50 border border-red-200 rounded text-red-700 text-[10px] font-semibold flex items-center gap-1 mt-1">
+                                    <span class="material-symbols-outlined text-xs text-red-600">warning</span>
+                                    <span>${d.conflict_details || 'Extraction Conflict — Inspector Verification Required'}</span>
+                                </div>
+                            ` : ''}
+                            ${fontNotice}
+                        </div>
+                        
+                        <div class="space-y-1 text-[11px] pt-1">
+                            <div class="text-gray-500 flex items-center justify-between text-[10px]">
+                                <span><strong>Rule Reference:</strong> ${d.rule_reference || 'Rule 6 of LMPC Rules 2011'}</span>
+                                <span><strong>Decision Method:</strong> ${decisionMethodText}</span>
+                            </div>
+                            <p class="text-gray-700 bg-blue-50/40 p-2 rounded border border-blue-100/60">
+                                <strong>Assessment / Finding:</strong> ${reasonText}
+                            </p>
+                            ${autoExplanatory}
+                        </div>
+
+                        ${reviewControls}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Evidence Viewer Modal Logic
+        function openEvidenceModal(declId) {
+            const d = currentDeclarations.find(item => item.id === declId);
+            if (!d || !currentScan) return;
+
+            const title = FIELD_TITLES[d.field_type] || d.field_type.replace(/_/g, ' ').toUpperCase();
+            document.getElementById('evidenceModalTitle').textContent = `Evidence Inspection — ${title}`;
+            document.getElementById('evidenceExtractedText').textContent = d.extracted_text ? `Extracted: "${d.extracted_text}"` : '[Field not localized]';
+
+            const modalImg = document.getElementById('evidenceModalImage');
+            const highlightBox = document.getElementById('evidenceHighlightBox');
+            const highlightTag = document.getElementById('evidenceHighlightTag');
+            const noticeText = document.getElementById('evidenceNoticeText');
+
+            resetEvidenceZoom();
+
+            if (currentScan.images && currentScan.images.length > 0 && currentScan.images[0].image_url) {
+                modalImg.src = currentScan.images[0].image_url;
+                
+                modalImg.onload = () => {
+                    const bbox = d.bounding_box || {};
+                    const hasBbox = (bbox.w > 0 || bbox.width > 0);
+
+                    if (hasBbox && modalImg.naturalWidth > 0) {
+                        const rawX = bbox.x ?? 0;
+                        const rawY = bbox.y ?? 0;
+                        const rawW = bbox.w ?? bbox.width ?? 0;
+                        const rawH = bbox.h ?? bbox.height ?? 0;
+
+                        let leftPct, topPct, widthPct, heightPct;
+                        if (rawX <= 1.0 && rawW <= 1.0) {
+                            leftPct = rawX * 100;
+                            topPct = rawY * 100;
+                            widthPct = rawW * 100;
+                            heightPct = rawH * 100;
+                        } else {
+                            leftPct = (rawX / modalImg.naturalWidth) * 100;
+                            topPct = (rawY / modalImg.naturalHeight) * 100;
+                            widthPct = (rawW / modalImg.naturalWidth) * 100;
+                            heightPct = (rawH / modalImg.naturalHeight) * 100;
+                        }
+
+                        highlightBox.style.left = `${Math.max(0, leftPct)}%`;
+                        highlightBox.style.top = `${Math.max(0, topPct)}%`;
+                        highlightBox.style.width = `${Math.max(2, widthPct)}%`;
+                        highlightBox.style.height = `${Math.max(2, heightPct)}%`;
+                        highlightTag.textContent = `${title} Region`;
+                        highlightBox.classList.remove('hidden');
+                        noticeText.textContent = `Region localized at [x=${rawX.toFixed(0)}, y=${rawY.toFixed(0)}, w=${rawW.toFixed(0)}, h=${rawH.toFixed(0)}]`;
+                    } else {
+                        highlightBox.classList.add('hidden');
+                        noticeText.textContent = 'Source image — region not automatically localized.';
+                    }
+                };
+            }
+
+            document.getElementById('evidenceModal').classList.remove('hidden');
+        }
+
+        function closeEvidenceModal() {
+            document.getElementById('evidenceModal').classList.add('hidden');
+        }
+
+        function zoomEvidence(delta) {
+            evidenceZoom = Math.max(0.5, Math.min(3.0, evidenceZoom + delta));
+            const wrapper = document.getElementById('evidenceWrapper');
+            if (wrapper) wrapper.style.transform = `scale(${evidenceZoom})`;
+            document.getElementById('evidenceZoomLevel').textContent = `Zoom: ${Math.round(evidenceZoom * 100)}%`;
+        }
+
+        function resetEvidenceZoom() {
+            evidenceZoom = 1.0;
+            const wrapper = document.getElementById('evidenceWrapper');
+            if (wrapper) wrapper.style.transform = 'scale(1)';
+            document.getElementById('evidenceZoomLevel').textContent = 'Zoom: 100%';
+        }
+
+        // Review Modal Logic
+        function openReviewModal(declId) {
+            activeDeclId = declId;
+            const d = currentDeclarations.find(item => item.id === declId);
+            if (d) {
+                const title = FIELD_TITLES[d.field_type] || d.field_type.replace(/_/g, ' ').toUpperCase();
+                document.getElementById('reviewModalTitle').textContent = `Review & Override: ${title}`;
+                document.getElementById('reviewModalAiStatus').textContent = `AI Finding: ${d.is_compliant ? 'COMPLIANT' : (d.severity === 'needs_review' ? 'NEEDS MANUAL REVIEW' : 'VIOLATION')} (Confidence: ${Math.round((d.confidence_score||0)*100)}%)`;
+                document.getElementById('reviewModalStatus').value = d.is_compliant ? 'compliant' : (d.severity === 'needs_review' ? 'needs_review' : 'non_compliant');
+                document.getElementById('reviewModalNotes').value = d.reviewer_notes || '';
+                document.getElementById('reviewModal').classList.remove('hidden');
+            }
+        }
+
+        function closeReviewModal() {
+            document.getElementById('reviewModal').classList.add('hidden');
+        }
+
+        async function saveDeclarationReview() {
+            const st = document.getElementById('reviewModalStatus').value;
+            const notes = document.getElementById('reviewModalNotes').value.trim();
+            if (!notes) {
+                alert('Please enter officer review notes explaining the decision.');
+                return;
+            }
+
+            const isCompliant = (st === 'compliant');
+            const sev = (st === 'needs_review') ? 'needs_review' : (st === 'compliant' ? 'none' : 'major');
+
+            const res = await PackCheck.request(`/scans/${activeScanId}/declarations/${activeDeclId}/review`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'override',
+                    is_compliant: isCompliant,
+                    severity: sev,
+                    reviewer_notes: notes
+                })
+            });
+
+            if (res.success) {
+                closeReviewModal();
+                loadScanDetails(activeScanId);
+            } else {
+                alert('Review update failed: ' + (res.error?.message || 'Error'));
+            }
+        }
+
+        async function quickConfirmFinding(declId) {
+            const d = currentDeclarations.find(item => item.id === declId);
+            const notes = prompt(`Confirm finding for ${FIELD_TITLES[d.field_type] || d.field_type}? Enter notes:`, `Confirmed by inspecting officer.`);
+            if (notes === null) return;
+
+            const res = await PackCheck.request(`/scans/${activeScanId}/declarations/${declId}/review`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'confirm',
+                    reviewer_notes: notes || 'Confirmed by officer.'
+                })
+            });
+
+            if (res.success) {
+                loadScanDetails(activeScanId);
+            } else {
+                alert('Failed to confirm finding: ' + (res.error?.message || 'Error'));
+            }
+        }
+
+        async function quickRejectFinding(declId) {
+            const d = currentDeclarations.find(item => item.id === declId);
+            const notes = prompt(`Reject AI finding for ${FIELD_TITLES[d.field_type] || d.field_type}? Enter mandatory reason:`, `Declaration verified manually on package.`);
+            if (!notes) {
+                if (notes !== null) alert('Mandatory notes required to reject finding.');
+                return;
+            }
+
+            const res = await PackCheck.request(`/scans/${activeScanId}/declarations/${declId}/review`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'reject',
+                    reviewer_notes: notes
+                })
+            });
+
+            if (res.success) {
+                loadScanDetails(activeScanId);
+            } else {
+                alert('Failed to reject finding: ' + (res.error?.message || 'Error'));
+            }
+        }
+
+        // Finalize Inspection
+        function scrollToFinalize() {
+            document.getElementById('finalDecisionSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function promptFinalizeInspection() {
+            if (!currentDeclarations || currentDeclarations.length === 0) {
+                alert('No declarations available to finalize.');
+                return;
+            }
+
+            const dSample = currentDeclarations.find(d => d.auto_confirm_threshold != null) || currentDeclarations[0];
+            const threshold = dSample?.auto_confirm_threshold ?? 80.0;
+            const isDeclOfficerDecided = (d) => !!d.human_decision && d.human_decision !== 'NONE' && d.human_decision !== 'AUTO-ANALYZED';
+            const isDeclAuto = (d) => {
+                if (isDeclOfficerDecided(d)) return false;
+                const dRate = (d.violation_detection_rate != null) ? d.violation_detection_rate : ((d.confidence_score || 0) * 100);
+                const dThresh = (d.auto_confirm_threshold != null) ? d.auto_confirm_threshold : threshold;
+                return d.workflow_decision === 'AUTO_CONFIRMED' || d.workflow_decision === 'AUTOMATICALLY_CONFIRMED' || d.verification_status === 'AUTO_CONFIRMED' || (!d.workflow_decision && dRate >= dThresh && d.severity !== 'needs_review');
+            };
+
+            const unresolvedCount = currentDeclarations.filter(d => !isDeclOfficerDecided(d) && !isDeclAuto(d)).length;
+            if (unresolvedCount > 0) {
+                alert(`Cannot finalize inspection: ${unresolvedCount} declaration(s) require manual officer review. Please resolve all pending items using Confirm, Reject, or Override before finalization.`);
+                return;
+            }
+
+            const hasViolation = currentDeclarations.some(d => !d.is_compliant);
+            const derivedVerdictText = hasViolation ? 'NON-COMPLIANT (STATUTORY VIOLATION)' : 'VERIFIED COMPLIANT';
+            const autoCount = currentDeclarations.filter(d => isDeclAuto(d)).length;
+            const officerCount = currentDeclarations.filter(d => isDeclOfficerDecided(d)).length;
+            const totalCount = currentDeclarations.length;
+
+            const labelEl = document.getElementById('confirmDecisionLabel');
+            labelEl.textContent = derivedVerdictText;
+            labelEl.className = hasViolation ? 'text-sm font-bold block mt-0.5 text-red-600' : 'text-sm font-bold block mt-0.5 text-emerald-700';
+
+            document.getElementById('confirmDecisionBasis').textContent = `${totalCount}/${totalCount} declarations resolved (${autoCount} Auto-Confirmed, ${officerCount} Inspector Reviewed)`;
+            document.getElementById('confirmOfficerName').textContent = PackCheck.getUser()?.name || 'Authorized Officer';
+            
+            const optionalRemarksEl = document.getElementById('finalizeOptionalRemarks');
+            if (optionalRemarksEl) optionalRemarksEl.value = '';
+
+            document.getElementById('finalizeModal').classList.remove('hidden');
+        }
+
+        function closeFinalizeModal() {
+            document.getElementById('finalizeModal').classList.add('hidden');
+        }
+
+        async function executeFinalize() {
+            const remarks = document.getElementById('finalizeOptionalRemarks')?.value?.trim() || '';
+
+            const res = await PackCheck.request(`/scans/${activeScanId}/finalize`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    remarks: remarks
+                })
+            });
+
+            if (res.success) {
+                closeFinalizeModal();
+                const decName = (res.data?.derived_status || 'completed').toUpperCase().replace('_', ' ');
+                alert(`Inspection successfully finalized as ${decName}!`);
+                loadScanDetails(activeScanId);
+            } else {
+                alert('Finalization failed: ' + (res.error?.message || 'Error'));
+            }
+        }
+
+        async function generateReport() {
+            const remarks = document.getElementById('finalizeOptionalRemarks')?.value?.trim() || '';
+            const res = await PackCheck.request(`/scans/${activeScanId}/report`, {
+                method: 'POST',
+                body: JSON.stringify({ notes: remarks || 'Statutory inspection finalized.' })
+            });
+            if (res.success && res.data) {
+                window.location.href = `/report?id=${res.data.id}`;
+            } else {
+                alert('Failed to generate report: ' + (res.error?.message || 'Error'));
+            }
+        }
+
+        // Batch Intelligence & Traceability Logic
+        async function loadBatchInvestigation(batchNumber, currentScanId) {
+            if (!batchNumber) return;
+            const batchNumDisplay = document.getElementById('batchNumberDisplay');
+            const batchStatusBadge = document.getElementById('batchStatusBadge');
+            const viewFullLink = document.getElementById('viewFullBatchLink');
+            const tbody = document.getElementById('batchInspectionsTbody');
+            const alertBanner = document.getElementById('batchAttentionAlertBanner');
+
+            batchNumDisplay.textContent = batchNumber;
+            viewFullLink.href = `/batch/${encodeURIComponent(batchNumber)}`;
+
+            const res = await PackCheck.request(`/batches/${encodeURIComponent(batchNumber)}`);
+            if (res.success && res.data) {
+                const b = res.data;
+                document.getElementById('batchTotalInspections').textContent = b.total_inspections;
+                document.getElementById('batchAttentionCount').textContent = b.non_compliant_inspections;
+                document.getElementById('batchCompliantCount').textContent = b.compliant_inspections;
+
+                // Set status badge
+                const st = b.status || 'normal';
+                batchStatusBadge.textContent = st.replace(/_/g, ' ').toUpperCase();
+                if (st === 'under_investigation') {
+                    batchStatusBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-100 text-red-800 border border-red-300 animate-pulse';
+                } else if (st === 'attention_required') {
+                    batchStatusBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300';
+                } else if (st === 'resolved') {
+                    batchStatusBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-purple-100 text-purple-800 border border-purple-300';
+                } else {
+                    batchStatusBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300';
+                }
+
+                // Show alert banner if batch is under attention or non-compliant inspections exist
+                if (st === 'attention_required' || st === 'under_investigation' || b.non_compliant_inspections > 0) {
+                    alertBanner.classList.remove('hidden');
+                } else {
+                    alertBanner.classList.add('hidden');
+                }
+
+                // Render related inspections table
+                if (b.inspections && b.inspections.length > 0) {
+                    tbody.innerHTML = b.inspections.map(item => {
+                        const isCurrent = (item.id === currentScanId);
+                        const dt = new Date(item.created_at).toLocaleDateString();
+                        let stClass = 'bg-gray-100 text-gray-700';
+                        if (item.compliance_status === 'Compliant') stClass = 'bg-emerald-100 text-emerald-800';
+                        if (item.compliance_status === 'Non-Compliant') stClass = 'bg-red-100 text-red-800 font-bold';
+                        if (item.compliance_status === 'Needs Review') stClass = 'bg-amber-100 text-amber-800';
+
+                        return `
+                            <tr class="${isCurrent ? 'bg-blue-50/50 font-bold' : 'hover:bg-gray-50/80'} transition-colors">
+                                <td class="p-2.5 font-mono text-[11px]">
+                                    ${item.id.substring(0, 8)}...
+                                    ${isCurrent ? '<span class="ml-1.5 px-1.5 py-0.2 text-[9px] font-bold rounded bg-blue-100 text-primary uppercase">Current</span>' : ''}
+                                </td>
+                                <td class="p-2.5 truncate max-w-[140px]" title="${item.product_name}">${item.product_name}</td>
+                                <td class="p-2.5 whitespace-nowrap text-gray-500 text-[11px]">${dt}</td>
+                                <td class="p-2.5">
+                                    <span class="px-2 py-0.5 rounded-full text-[9px] ${stClass}">${item.compliance_status}</span>
+                                </td>
+                                <td class="p-2.5">
+                                    ${item.non_compliant_count > 0 ? `<span class="text-red-600 font-bold">${item.non_compliant_count} non-compliant</span>` : `<span class="text-gray-500">${item.findings_count} total</span>`}
+                                </td>
+                                <td class="p-2.5 text-right whitespace-nowrap">
+                                    <a href="/analysis?id=${item.id}" class="px-2.5 py-1 bg-white border border-gray-200 hover:border-primary hover:text-primary rounded-lg text-xs font-semibold shadow-xs transition-colors">
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-400">No other inspections recorded for this batch.</td></tr>';
+                }
+            } else {
+                tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-400">Unable to load batch details.</td></tr>';
+            }
+        }
+
+        // Batch Verify Modal Handlers
+        function openBatchVerifyModal() {
+            if (!currentScan) return;
+            const modal = document.getElementById('batchVerifyModal');
+            const manualVal = currentScan.batch_number || 'None';
+            const ocrVal = currentScan.batch_number_extracted ? `${currentScan.batch_number_extracted} (Confidence: ${Math.round((currentScan.batch_number_confidence || 0) * 100)}%)` : 'Not Detected';
+
+            document.getElementById('modalManualBatch').textContent = manualVal;
+            document.getElementById('modalOcrBatch').textContent = ocrVal;
+            document.getElementById('modalBatchInput').value = currentScan.batch_number || currentScan.batch_number_extracted || '';
+            document.getElementById('modalBatchNotes').value = '';
+
+            modal.classList.remove('hidden');
+            document.getElementById('modalBatchInput').focus();
+        }
+
+        function closeBatchVerifyModal() {
+            document.getElementById('batchVerifyModal').classList.add('hidden');
+        }
+
+        function setModalBatchFromOCR() {
+            if (currentScan?.batch_number_extracted) {
+                document.getElementById('modalBatchInput').value = currentScan.batch_number_extracted;
+            }
+        }
+
+        function setModalBatchFromManual() {
+            if (currentScan?.batch_number) {
+                document.getElementById('modalBatchInput').value = currentScan.batch_number;
+            }
+        }
+
+        async function submitBatchVerification() {
+            const btn = document.getElementById('btnSaveBatchVerify');
+            const newBatch = document.getElementById('modalBatchInput').value.trim();
+            const notes = document.getElementById('modalBatchNotes').value.trim();
+
+            if (!newBatch) {
+                alert('Please enter a valid batch or lot number.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="animate-spin text-xs">⏳</span> Saving...';
+
+            const res = await PackCheck.request(`/scans/${activeScanId}/batch`, {
+                method: 'PATCH',
+                body: JSON.stringify({
+                    batch_number: newBatch,
+                    notes: notes || `Batch number confirmed/verified by ${PackCheck.getUser()?.name || 'officer'}.`
+                })
+            });
+
+            btn.disabled = false;
+            btn.innerHTML = '<span class="material-symbols-outlined text-sm">check_circle</span><span>Confirm & Save</span>';
+
+            if (res.success) {
+                closeBatchVerifyModal();
+                loadScanDetails(activeScanId);
+            } else {
+                alert('Batch verification failed: ' + (res.error?.message || 'Error'));
+            }
+        }
+
+        // Threshold Configuration Modal Logic (Admin Only)
+        async function openThresholdConfigModal() {
+            const res = await PackCheck.request('/config/automation');
+            if (res.success && res.data) {
+                document.getElementById('configThresholdInput').value = res.data.auto_confirm_threshold_percent;
+                document.getElementById('configThresholdNotes').value = '';
+            }
+            document.getElementById('thresholdConfigModal').classList.remove('hidden');
+            document.getElementById('configThresholdInput').focus();
+        }
+
+        function closeThresholdConfigModal() {
+            document.getElementById('thresholdConfigModal').classList.add('hidden');
+        }
+
+        async function submitThresholdConfig() {
+            const val = parseFloat(document.getElementById('configThresholdInput').value);
+            const notes = document.getElementById('configThresholdNotes').value.trim();
+            if (isNaN(val) || val < 0 || val > 100) {
+                alert('Please enter a valid threshold percentage between 0.0% and 100.0%.');
+                return;
+            }
+
+            const btn = document.getElementById('btnSaveThresholdConfig');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="animate-spin text-xs">⏳</span> Saving...';
+
+            const res = await PackCheck.request('/config/automation', {
+                method: 'PATCH',
+                body: JSON.stringify({
+                    auto_confirm_threshold_percent: val,
+                    notes: notes || 'Threshold adjusted via Inspection Analysis page'
+                })
+            });
+
+            btn.disabled = false;
+            btn.innerHTML = '<span class="material-symbols-outlined text-sm">check_circle</span><span>Save Threshold</span>';
+
+            if (res.success) {
+                closeThresholdConfigModal();
+                alert(`Automatic confirmation threshold successfully updated to ${val}%!`);
+                if (activeScanId) {
+                    loadScanDetails(activeScanId);
+                }
+            } else {
+                alert('Failed to update threshold: ' + (res.error?.message || 'Error'));
+            }
+        }
+    </script>
+
+    <!-- Batch Verify / Correction Modal -->
+    <div id="batchVerifyModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 border border-gray-100">
+            <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-xl">fact_check</span>
+                    <h3 class="font-['Hanken_Grotesk'] font-bold text-base text-gray-900">Verify Batch / Lot Number</h3>
+                </div>
+                <button type="button" onclick="closeBatchVerifyModal()" class="text-gray-400 hover:text-gray-700 p-1 rounded-lg">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="space-y-3.5 text-xs">
+                <div class="p-3 bg-blue-50/60 rounded-xl border border-blue-100 space-y-1.5">
+                    <span class="text-[10px] uppercase font-bold text-gray-500 block">Candidate Values</span>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">Manual Entry:</span>
+                        <div class="flex items-center gap-2">
+                            <strong class="font-mono text-gray-900" id="modalManualBatch">-</strong>
+                            <button type="button" onclick="setModalBatchFromManual()" class="text-[10px] text-primary hover:underline font-semibold">Use</button>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">OCR Extracted:</span>
+                        <div class="flex items-center gap-2">
+                            <span class="font-mono font-bold text-primary" id="modalOcrBatch">-</span>
+                            <button type="button" onclick="setModalBatchFromOCR()" class="text-[10px] text-primary hover:underline font-semibold">Use</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Confirmed Statutory Batch Number <span class="text-red-500">*</span></label>
+                    <input id="modalBatchInput" type="text" class="w-full text-xs rounded-xl border-gray-300 p-2.5 focus:ring-primary focus:border-primary font-mono uppercase" placeholder="Enter confirmed batch number"/>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Verification Remarks / Audit Notes</label>
+                    <textarea id="modalBatchNotes" rows="2" class="w-full text-xs rounded-xl border-gray-300 p-2.5 focus:ring-primary focus:border-primary" placeholder="State reason for verification/correction..."></textarea>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+                <button type="button" onclick="closeBatchVerifyModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold text-xs transition-colors">
+                    Cancel
+                </button>
+                <button type="button" onclick="submitBatchVerification()" id="btnSaveBatchVerify" class="px-5 py-2 bg-primary hover:bg-blue-700 text-white rounded-xl font-semibold text-xs shadow-md transition-colors flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-sm">check_circle</span>
+                    <span>Confirm & Save</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

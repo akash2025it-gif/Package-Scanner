@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PackCheck Legal Metrology Compliance Report</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 18mm 14mm 18mm 14mm;
+            @bottom-right {
+                content: "Page " counter(page) " of " counter(pages);
+                font-family: 'Inter', sans-serif;
+                font-size: 8pt;
+                color: #737687;
+            }
+            @bottom-left {
+                content: "PackCheck • Legal Metrology (Packaged Commodities) Rules, 2011";
+                font-family: 'Inter', sans-serif;
+                font-size: 8pt;
+                color: #737687;
+            }
+        }
+
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            color: #181c21;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+            font-size: 9.5pt;
+            line-height: 1.4;
+        }
+
+        .header-container {
+            border-bottom: 2px solid #0051d5;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .header-table td {
+            vertical-align: middle;
+        }
+
+        .govt-title {
+            font-size: 15pt;
+            font-weight: 800;
+            color: #0051d5;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: -0.01em;
+        }
+
+        .govt-subtitle {
+            font-size: 8.5pt;
+            color: #424655;
+            margin: 2px 0 0 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .report-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 9999px;
+            font-weight: 700;
+            font-size: 9pt;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .badge-compliant {
+            background-color: #e0f8f2;
+            color: #006b5c;
+            border: 1px solid #65fade;
+        }
+
+        .badge-non-compliant {
+            background-color: #ffdad6;
+            color: #ba1a1a;
+            border: 1px solid #ffb4ab;
+        }
+
+        .badge-needs-review {
+            background-color: #fff1d6;
+            color: #b25e00;
+            border: 1px solid #ffd599;
+        }
+
+        .section-title {
+            font-size: 11pt;
+            font-weight: 700;
+            color: #0051d5;
+            margin-top: 16px;
+            margin-bottom: 6px;
+            border-bottom: 1px solid #e0e2e9;
+            padding-bottom: 3px;
+        }
+
+        .meta-grid {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 12px;
+            background-color: #f8f9ff;
+            border-radius: 6px;
+            border: 1px solid #e6e8ef;
+        }
+
+        .meta-grid td {
+            padding: 6px 10px;
+            border-bottom: 1px solid #e6e8ef;
+            font-size: 8.5pt;
+        }
+
+        .meta-label {
+            font-weight: 600;
+            color: #424655;
+            width: 22%;
+            text-transform: uppercase;
+            font-size: 7.5pt;
+        }
+
+        .meta-val {
+            color: #181c21;
+            font-weight: 500;
+        }
+
+        table.declaration-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+            margin-bottom: 16px;
+        }
+
+        table.declaration-table th {
+            background-color: #0051d5;
+            color: #ffffff;
+            font-weight: 600;
+            text-align: left;
+            padding: 7px 8px;
+            font-size: 8pt;
+            text-transform: uppercase;
+        }
+
+        table.declaration-table td {
+            padding: 7px 8px;
+            border-bottom: 1px solid #e0e2e9;
+            font-size: 8pt;
+            vertical-align: top;
+        }
+
+        table.declaration-table tr:nth-child(even) {
+            background-color: #f8f9ff;
+        }
+
+        .status-pill {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 7pt;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .pill-pass {
+            background-color: #e0f8f2;
+            color: #006b5c;
+        }
+
+        .pill-fail {
+            background-color: #ffdad6;
+            color: #ba1a1a;
+        }
+
+        .pill-review {
+            background-color: #fff1d6;
+            color: #b25e00;
+        }
+
+        .pill-override {
+            background-color: #f1f3fa;
+            color: #555869;
+            border: 1px solid #dcdfe8;
+        }
+
+        .conf-badge {
+            display: inline-block;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 6.5pt;
+            font-weight: 700;
+        }
+
+        .conf-high {
+            background-color: #e2f8eb;
+            color: #0f7b3c;
+        }
+
+        .conf-med {
+            background-color: #fef4e5;
+            color: #b45309;
+        }
+
+        .conf-low {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .notes-box {
+            background-color: #f1f3fa;
+            border-left: 3px solid #0051d5;
+            padding: 9px 12px;
+            font-size: 8.5pt;
+            margin-top: 12px;
+            border-radius: 0 5px 5px 0;
+            line-height: 1.4;
+        }
+
+        .signature-section {
+            margin-top: 30px;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .signature-box {
+            width: 45%;
+            border-top: 1px solid #737687;
+            padding-top: 5px;
+            font-size: 8pt;
+            color: #424655;
+            text-align: center;
+        }
+
+        .citation-text {
+            font-size: 7.5pt;
+            color: #555869;
+            font-weight: 600;
+        }
+
+        .evidence-subtext {
+            font-size: 7pt;
+            color: #737687;
+            margin-top: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <table class="header-table">
+            <tr>
+                <td>
+                    <h1 class="govt-title">PackCheck Compliance Verification Report</h1>
+                    <div class="govt-subtitle">Department of Legal Metrology • Packaged Commodities Rules, 2011</div>
+                </td>
+                <td style="text-align: right;">
+                    
+                        <div class="report-badge badge-non-compliant">NON-COMPLIANT (VIOLATION)</div>
+                    
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <table class="meta-grid">
+        <tr>
+            <td class="meta-label">Report ID:</td>
+            <td class="meta-val">2ff84e82-088a-41ff-bc0f-22922a29b97f</td>
+            <td class="meta-label">Scan ID:</td>
+            <td class="meta-val">c66eed57-c78c-4327-8b46-3f0895d18019</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Inspection Date:</td>
+            <td class="meta-val">2026-09-07 06:51:36 UTC</td>
+            <td class="meta-label">Enforcement Officer:</td>
+            <td class="meta-val">Inspector Vikram Sharma (Inspector)</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Product Name:</td>
+            <td class="meta-val"><strong>Yoga bar</strong></td>
+            <td class="meta-label">Brand & Category:</td>
+            <td class="meta-val">oats (food)</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Manufacturer / Packer:</td>
+            <td class="meta-val" colspan="3">None - None</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Inspection Location:</td>
+            <td class="meta-val">Reliance Retail Mart, Sector 29, Gurugram</td>
+            <td class="meta-label">Origin Country:</td>
+            <td class="meta-val">India</td>
+        </tr>
+        
+        <tr>
+            <td class="meta-label">Batch / Lot Number:</td>
+            <td class="meta-val"><strong>11106</strong> (Source: Manual)</td>
+            <td class="meta-label">Batch Investigation Status:</td>
+            <td class="meta-val">
+                <span class="status-pill pill-fail">
+                    ATTENTION REQUIRED
+                </span>
+                
+                    <span style="font-size: 7.5pt; color: #555869; margin-left: 4px;">(1 recorded / 1 attention)</span>
+                
+            </td>
+        </tr>
+        
+    </table>
+
+    
+    <div class="notes-box" style="margin-top: -6px; margin-bottom: 12px; background-color: #f1f5fd; border-left: 3px solid #0051d5; font-size: 8pt; color: #374151;">
+        <strong>Batch Traceability & Investigation Notice:</strong> Batch-level information is provided to support inspection and investigation. Presence of an issue in one inspected package does not by itself establish that all products in the batch are non-compliant. Further verification is subject to the competent authority&#39;s procedures.
+    </div>
+    
+
+    <div class="section-title">Mandatory Declaration Findings (LMPC Rules, 2011)</div>
+    <table class="declaration-table">
+        <thead>
+            <tr>
+                <th style="width: 17%;">Declaration Field</th>
+                <th style="width: 27%;">Extracted Value & Evidence</th>
+                <th style="width: 16%;">Detection Rate & Threshold</th>
+                <th style="width: 16%;">Workflow & Decision</th>
+                <th style="width: 24%;">Rule Citation & Reason</th>
+            </tr>
+        </thead>
+        <tbody>
+            
+            <tr>
+                <td>
+                    <strong>Generic or Common Name</strong>
+                    
+                </td>
+                <td>
+                    
+                        "<strong>Cow Milk PROTem OATS Total salt (g) Jaggery Date sugar Jaggery, Dato Sugar Refined Sugar, Ret hed Sugar, Ingredients: Instant oats (50.6%), Protein Source etend (26.6%) Ingredients: Instant oats (50.6%). protein source (266%) Dehydrated Fruits, seeds &amp; Nuts (14.4%) (Raisins, pumpkin seeds, Chla Dehydrated Fruits, seeds &amp; Nuts (144%) (Raisins, Pumpkin seeds. Chla Almonds), Fructo-oligosaccharide, Skimmed Milk Powder, Natural Flavours, Rice gran 011, Himalayan Pink Salt. Probiotics (Bacillus Flavours, Rice gran Oil, Himalayan Pink salt, Probiotics (Bacillus •For every sog o: oats, add 2SOmI (approx. a cup) of milk_ -For every Sog of oats, add 2SOm1 (approx. a cup) of milk. eoth dairy and plant-based options (oat / almond drink) work well. Allergen Advice: CONTAINS OATS, soy, NUTS &amp; MILK. Processed Both dairy and plant-based options (oat / almond drink) work Well. dairy products. For non-milk basod options try our savory Korean Fire &amp; Mum&#39;s Masala flavors! For non-milk baßd option If you care about our tumm , this protein oats will If you care about ur tummy, this protein oats Will</strong>"
+                        
+                            <br><span style="font-size: 7pt; color: #424655;">Estimated visual size: approximately 44.7 mm — subject to manual verification</span>
+                        
+                        
+                            <div class="evidence-subtext">Label text: &#34;Cow Milk PROTem OATS Total salt (g) Jaggery Date sugar Jaggery, Dato Sugar Refined Sugar, Ret hed Sugar, Ingredients: Instant oats (50.6%), Protein Source etend (26.6%) Ingredients: Instant oats (50.6%). protein source (266%) Dehydrated Fruits, seeds &amp; Nuts (14.4%) (Raisins, pumpkin seeds, Chla Dehydrated Fruits, seeds &amp; Nuts (144%) (Raisins, Pumpkin seeds. Chla Almonds), Fructo-oligosaccharide, Skimmed Milk Powder, Natural Flavours, Rice gran 011, Himalayan Pink Salt. Probiotics (Bacillus Flavours, Rice gran Oil, Himalayan Pink salt, Probiotics (Bacillus •For every sog o: oats, add 2SOmI (approx. a cup) of milk_ -For every Sog of oats, add 2SOm1 (approx. a cup) of milk. eoth dairy and plant-based options (oat / almond drink) work well. Allergen Advice: CONTAINS OATS, soy, NUTS &amp; MILK. Processed Both dairy and plant-based options (oat / almond drink) work Well. dairy products. For non-milk basod options try our savory Korean Fire &amp; Mum&#39;s Masala flavors! For non-milk baßd option If you care about our tumm , this protein oats will If you care about ur tummy, this protein oats Will&#34; [Region: x=527, y=522, w=876, h=754]</div>
+                        
+                    
+                </td>
+                <td>
+                    
+                    
+                        <strong style="color: #181c21;">96.0%</strong>
+                        <div style="font-size: 7pt; color: #555869;">Threshold: 80.0%</div>
+                        <div class="evidence-subtext">System Auto-Confirmation</div>
+                    
+                </td>
+                <td>
+                    
+                        <span class="status-pill pill-pass">COMPLIANT</span>
+                    
+
+                    
+                </td>
+                <td>
+                    <div class="citation-text">Rule 6(1)(a) of Legal Metrology (Packaged Commodities) Rules, 2011</div>
+                    
+                        <div style="font-size: 7.5pt; margin-top: 2px; color: #181c21;">Statutory generic or common name &#39;Cow Milk PROTem OATS Total salt (g) Jaggery Date sugar Jaggery, Dato Sugar Refined Sugar, Ret hed Sugar, Ingredients: Instant oats (50.6%), Protein Source etend (26.6%) Ingredients: Instant oats (50.6%). protein source (266%) Dehydrated Fruits, seeds &amp; Nuts (14.4%) (Raisins, pumpkin seeds, Chla Dehydrated Fruits, seeds &amp; Nuts (144%) (Raisins, Pumpkin seeds. Chla Almonds), Fructo-oligosaccharide, Skimmed Milk Powder, Natural Flavours, Rice gran 011, Himalayan Pink Salt. Probiotics (Bacillus Flavours, Rice gran Oil, Himalayan Pink salt, Probiotics (Bacillus •For every sog o: oats, add 2SOmI (approx. a cup) of milk_ -For every Sog of oats, add 2SOm1 (approx. a cup) of milk. eoth dairy and plant-based options (oat / almond drink) work well. Allergen Advice: CONTAINS OATS, soy, NUTS &amp; MILK. Processed Both dairy and plant-based options (oat / almond drink) work Well. dairy products. For non-milk basod options try our savory Korean Fire &amp; Mum&#39;s Masala flavors! For non-milk baßd option If you care about our tumm , this protein oats will If you care about ur tummy, this protein oats Will&#39; clearly declared per Rule 6(1)(a).</div>
+                    
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                    <strong>Manufacturer / Packer / Importer Details</strong>
+                    
+                </td>
+                <td>
+                    
+                        "<strong>Manufactured &amp; Marketed by : LIC. NO. 11222999000656</strong>"
+                        
+                            <br><span style="font-size: 7pt; color: #424655;">Estimated visual size: approximately 11.1 mm — subject to manual verification</span>
+                        
+                        
+                            <div class="evidence-subtext">Label text: &#34;Manufactured &amp; Marketed by : LIC. NO. 11222999000656&#34; [Region: x=518, y=1353, w=224, h=188]</div>
+                        
+                    
+                </td>
+                <td>
+                    
+                    
+                        <strong style="color: #181c21;">96.0%</strong>
+                        <div style="font-size: 7pt; color: #555869;">Threshold: 80.0%</div>
+                        <div class="evidence-subtext">System Auto-Confirmation</div>
+                    
+                </td>
+                <td>
+                    
+                        <span class="status-pill pill-pass">COMPLIANT</span>
+                    
+
+                    
+                </td>
+                <td>
+                    <div class="citation-text">Rule 6(1)(b) of Legal Metrology (Packaged Commodities) Rules, 2011</div>
+                    
+                        <div style="font-size: 7.5pt; margin-top: 2px; color: #181c21;">Valid statutory declaration for &#39;Manufacturer / Packer / Importer Details&#39; detected.</div>
+                    
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                    <strong>Country of Origin</strong>
+                    
+                </td>
+                <td>
+                    
+                        <span style="color: #ba1a1a; font-style: italic;">[Field Absent on Package]</span>
+                        
+                            <div class="evidence-subtext">[Field absent on packaging label]</div>
+                        
+                    
+                </td>
+                <td>
+                    
+                    
+                        <strong style="color: #181c21;">0%</strong>
+                        <div style="font-size: 7pt; color: #555869;">Threshold: 80.0%</div>
+                        <div class="evidence-subtext">Manual Inspector Review Required</div>
+                    
+                </td>
+                <td>
+                    
+                        <span class="status-pill pill-review">MANUAL REVIEW</span>
+                        <br><span style="font-size: 6.5pt; color: #b25e00; font-weight: 600;">INSPECTOR REQ.</span>
+                    
+
+                    
+                </td>
+                <td>
+                    <div class="citation-text">Rule 6(1)(c) of Legal Metrology (Packaged Commodities) Rules, 2011</div>
+                    
+                        <div style="font-size: 7.5pt; margin-top: 2px; color: #181c21;">Mandatory declaration &#39;Country of Origin&#39; is not detected on the package label.</div>
+                    
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                    <strong>Net Quantity &amp; Unit of Measurement</strong>
+                    
+                </td>
+                <td>
+                    
+                        "<strong>1 kg</strong>"
+                        
+                            <br><span style="font-size: 7pt; color: #424655;">Estimated visual size: approximately 2.1 mm — subject to manual verification</span>
+                        
+                        
+                            <div class="evidence-subtext">Label text: &#34;1 kg&#34; [Region: x=1033, y=1383, w=212, h=36]</div>
+                        
+                    
+                </td>
+                <td>
+                    
+                    
+                        <strong style="color: #181c21;">96.0%</strong>
+                        <div style="font-size: 7pt; color: #555869;">Threshold: 80.0%</div>
+                        <div class="evidence-subtext">System Auto-Confirmation</div>
+                    
+                </td>
+                <td>
+                    
+                        <span class="status-pill pill-pass">COMPLIANT</span>
+                    
+
+                    
+                </td>
+                <td>
+                    <div class="citation-text">Rule 6(1)(d) read with Rule 8 of LMPC Rules, 2011</div>
+                    
+                        <div style="font-size: 7.5pt; margin-top: 2px; color: #181c21;">Valid net quantity declaration: 1 kg. Estimated visual size: approximately 2.1 mm — subject to manual verification by physical scale.</div>
+                    
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                    <strong>Month &amp; Year of Manufacture / Packing</strong>
+                    
+                </td>
+                <td>
+                    
+                        <span style="color: #ba1a1a; font-style: italic;">[Field Absent on Package]</span>
+                        
+                            <div class="evidence-subtext">[Field absent on packaging label]</div>
+                        
+                    
+                </td>
+                <td>
+                    
+                    
+                        <strong style="color: #181c21;">0%</strong>
+                        <div style="font-size: 7pt; color: #555869;">Threshold: 80.0%</div>
+                        <div class="evidence-subtext">Manual Inspector Review Required</div>
+                    
+                </td>
+                <td>
+                    
+                        <span class="status-pill pill-review">MANUAL REVIEW</span>
+                        <br><span style="font-size: 6.5pt; color: #b25e00; font-weight: 600;">INSPECTOR REQ.</span>
+                    
+
+                    
+                </td>
+                <td>
+                    <div class="citation-text">Rule 6(1)(e) of Legal Metrology (Packaged Commodities) Rules, 2011</div>
+                    
+                        <div style="font-size: 7.5pt; margin-top: 2px; color: #181c21;">Mandatory declaration &#39;Month &amp; Year of Manufacture / Packing&#39; is not detected on the package label.</div>
+                    
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                    <strong>Maximum Retail Price (MRP)</strong>
+                    
+                </td>
+                <td>
+                    
+                        "<strong>MRP Z: MRP</strong>"
+                        
+                            <br><span style="font-size: 7pt; color: #424655;">Estimated visual size: approximately 0.8 mm — subject to manual verification</span>
+                        
+                        
+                            <div class="evidence-subtext">Label text: &#34;MRP Z: MRP&#34; [Region: x=1033, y=1474, w=46, h=13]</div>
+                        
+                    
+                </td>
+                <td>
+                    
+                    
+                        <strong style="color: #181c21;">96.0%</strong>
+                        <div style="font-size: 7pt; color: #555869;">Threshold: 80.0%</div>
+                        <div class="evidence-subtext">System Auto-Confirmation</div>
+                    
+                </td>
+                <td>
+                    
+                        <span class="status-pill pill-pass" style="background-color: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;">AUTO-CONFIRMED</span>
+                        <br><span style="font-size: 6.5pt; color: #0284c7; font-weight: 700;">WORKFLOW PASS</span>
+                    
+
+                    
+                </td>
+                <td>
+                    <div class="citation-text">Rule 6(1)(f) of Legal Metrology (Packaged Commodities) Rules, 2011</div>
+                    
+                        <div style="font-size: 7.5pt; margin-top: 2px; color: #181c21;">MRP text is present on label but does not contain a clear numeric price.</div>
+                    
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                    <strong>Unit Sale Price (USP)</strong>
+                    
+                </td>
+                <td>
+                    
+                        "<strong>USP e:</strong>"
+                        
+                            <br><span style="font-size: 7pt; color: #424655;">Estimated visual size: approximately 0.8 mm — subject to manual verification</span>
+                        
+                        
+                            <div class="evidence-subtext">Label text: &#34;USP e:&#34; [Region: x=1032, y=1530, w=44, h=13]</div>
+                        
+                    
+                </td>
+                <td>
+                    
+                    
+                        <strong style="color: #181c21;">96.0%</strong>
+                        <div style="font-size: 7pt; color: #555869;">Threshold: 80.0%</div>
+                        <div class="evidence-subtext">System Auto-Confirmation</div>
+                    
+                </td>
+                <td>
+                    
+                        <span class="status-pill pill-pass" style="background-color: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;">AUTO-CONFIRMED</span>
+                        <br><span style="font-size: 6.5pt; color: #0284c7; font-weight: 700;">WORKFLOW PASS</span>
+                    
+
+                    
+                </td>
+                <td>
+                    <div class="citation-text">Rule 6(1)(g) of Legal Metrology (Packaged Commodities) Rules, 2011</div>
+                    
+                        <div style="font-size: 7.5pt; margin-top: 2px; color: #181c21;">Unit Sale Price text &#39;USP e:&#39; does not specify valid price per unit measure.</div>
+                    
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                    <strong>Consumer Care Grievance Redressal</strong>
+                    
+                </td>
+                <td>
+                    
+                        "<strong>Customer Care Details: In case of any consumer feedback, queries or complaints, please write to Customer</strong>"
+                        
+                            <br><span style="font-size: 7pt; color: #424655;">Estimated visual size: approximately 2.5 mm — subject to manual verification</span>
+                        
+                        
+                            <div class="evidence-subtext">Label text: &#34;Customer Care Details: In case of any consumer feedback, queries or complaints, please write to Customer&#34; [Region: x=517, y=1569, w=282, h=43]</div>
+                        
+                    
+                </td>
+                <td>
+                    
+                    
+                        <strong style="color: #181c21;">96.0%</strong>
+                        <div style="font-size: 7pt; color: #555869;">Threshold: 80.0%</div>
+                        <div class="evidence-subtext">System Auto-Confirmation</div>
+                    
+                </td>
+                <td>
+                    
+                        <span class="status-pill pill-pass" style="background-color: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;">AUTO-CONFIRMED</span>
+                        <br><span style="font-size: 6.5pt; color: #0284c7; font-weight: 700;">WORKFLOW PASS</span>
+                    
+
+                    
+                </td>
+                <td>
+                    <div class="citation-text">Rule 6(1)(h) of Legal Metrology (Packaged Commodities) Rules, 2011</div>
+                    
+                        <div style="font-size: 7.5pt; margin-top: 2px; color: #181c21;">Consumer care details do not include a valid telephone number, toll-free helpline, or email address.</div>
+                    
+                </td>
+            </tr>
+            
+        </tbody>
+    </table>
+
+    <div class="notes-box" style="margin-top: -6px; margin-bottom: 12px; background-color: #f8fafc; border-left: 3px solid #0051d5; font-size: 7.5pt; color: #475569;">
+        <strong>Compliance Workflow Notice:</strong> Automated confirmation is a workflow routing mechanism based on the configured automatic-confirmation threshold. Final statutory compliance determinations, violation citations, and legal enforcement actions remain exclusively under the jurisdiction of authorized Legal Metrology officers.
+    </div>
+
+    <div class="section-title">Overall Statutory Inspection Result & Verification Basis</div>
+    <table class="meta-grid">
+        <tr>
+            <td class="meta-label">Overall Result:</td>
+            <td class="meta-val">
+                <strong style="color: #ba1a1a;">
+                    NON-COMPLIANT (STATUTORY VIOLATION)
+                </strong>
+                <span style="font-size: 7.5pt; color: #555869; display: block; margin-top: 2px;">Derived from Verified Individual Declaration Findings</span>
+            </td>
+            <td class="meta-label">Decision Basis:</td>
+            <td class="meta-val">
+                <strong>8/8 declarations resolved (6 Auto-Confirmed, 0 Inspector Reviewed, 2 Unresolved)</strong>
+                <div style="font-size: 7pt; color: #555869; margin-top: 2px;">
+                    Auto-Confirmed: <strong>6</strong> | 
+                    Inspector Reviewed: <strong>0</strong> | 
+                    Unresolved: <strong>2</strong>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td class="meta-label">Finalized By:</td>
+            <td class="meta-val">
+                Inspector Vikram Sharma (Inspector)
+            </td>
+            <td class="meta-label">Finalized Date:</td>
+            <td class="meta-val">
+                2026-09-07 06:51:36 UTC
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="meta-label">Officer Remarks:</td>
+            <td class="meta-val" colspan="3">Statutory inspection finalized.</td>
+        </tr>
+        
+    </table>
+
+    <div class="notes-box">
+        <strong>Statutory Assessment:</strong> Potential non-compliance identified based on verified declaration findings. Final enforcement action is subject to verification and decision by the competent Legal Metrology authority.
+    </div>
+
+    
+    <div class="section-title">Inspection Audit Trail & Manual Reviews</div>
+    <table class="declaration-table" style="margin-bottom: 8px;">
+        <thead>
+            <tr>
+                <th style="width: 22%;">Timestamp</th>
+                <th style="width: 24%;">Officer / Authority</th>
+                <th style="width: 22%;">Action / Decision</th>
+                <th style="width: 32%;">Notes / Explanation</th>
+            </tr>
+        </thead>
+        <tbody>
+            
+            <tr>
+                <td style="font-size: 7.5pt;">2026-09-07 06:50:06 UTC</td>
+                <td style="font-size: 7.5pt;"><strong>Inspector Vikram Sharma</strong> (Inspector)</td>
+                <td style="font-size: 7.5pt;"><span class="status-pill pill-override">AI ANALYSIS COMPLETED</span></td>
+                <td style="font-size: 7.5pt; color: #424655;">System event logged.</td>
+            </tr>
+            
+            <tr>
+                <td style="font-size: 7.5pt;">2026-09-07 06:50:00 UTC</td>
+                <td style="font-size: 7.5pt;"><strong>Inspector Vikram Sharma</strong> (Inspector)</td>
+                <td style="font-size: 7.5pt;"><span class="status-pill pill-override">AI ANALYSIS TRIGGERED</span></td>
+                <td style="font-size: 7.5pt; color: #424655;">System event logged.</td>
+            </tr>
+            
+            <tr>
+                <td style="font-size: 7.5pt;">2026-09-07 06:50:00 UTC</td>
+                <td style="font-size: 7.5pt;"><strong>Inspector Vikram Sharma</strong> (Inspector)</td>
+                <td style="font-size: 7.5pt;"><span class="status-pill pill-override">IMAGES UPLOADED</span></td>
+                <td style="font-size: 7.5pt; color: #424655;">System event logged.</td>
+            </tr>
+            
+            <tr>
+                <td style="font-size: 7.5pt;">2026-09-07 06:50:00 UTC</td>
+                <td style="font-size: 7.5pt;"><strong>Inspector Vikram Sharma</strong> (Inspector)</td>
+                <td style="font-size: 7.5pt;"><span class="status-pill pill-override">IMAGE QUALITY CHECKED</span></td>
+                <td style="font-size: 7.5pt; color: #424655;">System event logged.</td>
+            </tr>
+            
+            <tr>
+                <td style="font-size: 7.5pt;">2026-09-07 06:49:59 UTC</td>
+                <td style="font-size: 7.5pt;"><strong>Inspector Vikram Sharma</strong> (Inspector)</td>
+                <td style="font-size: 7.5pt;"><span class="status-pill pill-override">SCAN CREATED</span></td>
+                <td style="font-size: 7.5pt; color: #424655;">System event logged.</td>
+            </tr>
+            
+        </tbody>
+    </table>
+    
+
+    <table class="signature-section">
+        <tr>
+            <td class="signature-box" style="float: left;">
+                <br><br>
+                <strong>Inspector Vikram Sharma</strong><br>
+                Enforcement Inspector / Legal Metrology Officer<br>
+                Department of Legal Metrology
+            </td>
+            <td style="width: 10%;"></td>
+            <td class="signature-box" style="float: right;">
+                <br><br>
+                <strong>Authorized Controller of Legal Metrology</strong><br>
+                Digital Verification Seal<br>
+                Date: 2026-09-07 06:51:36 UTC
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

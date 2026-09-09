@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>PackCheck - New Compliance Scan</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+</head>
+<body class="bg-[#f8f9ff] font-['Inter'] text-[#181c21] min-h-screen flex">
+    <!-- Left Navigation Rail -->
+    <aside class="w-64 bg-[#0051d5] text-white flex flex-col justify-between p-5 shadow-xl hidden md:flex shrink-0">
+        <div>
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[#65fade] text-2xl">verified_user</span>
+                </div>
+                <div>
+                    <h2 class="font-['Hanken_Grotesk'] font-bold text-lg leading-tight">PackCheck</h2>
+                    <span class="text-xs text-[#65fade] tracking-wider uppercase font-semibold">LMPC Enforcement</span>
+                </div>
+            </div>
+
+            <nav class="space-y-1.5 text-sm font-medium">
+                <a href="/dashboard" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white/90 rounded-xl transition-all">
+                    <span class="material-symbols-outlined">dashboard</span> Dashboard
+                </a>
+                <a href="/scan/new" class="flex items-center gap-3 px-4 py-3 bg-white/20 text-white rounded-xl font-semibold transition-all">
+                    <span class="material-symbols-outlined">add_photo_alternate</span> New Scan
+                </a>
+                <a href="/products-ui" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white/90 rounded-xl transition-all">
+                    <span class="material-symbols-outlined">inventory_2</span> Product Catalog
+                </a>
+                <a href="/enforcement" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white/90 rounded-xl transition-all">
+                    <span class="material-symbols-outlined">map</span> Regional Heatmap
+                </a>
+                <a href="/team" class="flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white/90 rounded-xl transition-all">
+                    <span class="material-symbols-outlined">group</span> Manage Team
+                </a>
+            </nav>
+        </div>
+
+        <div class="pt-4 border-t border-white/10">
+            <a href="/" onclick="PackCheck.clearAuth()" class="flex items-center gap-2 text-xs text-white/80 hover:text-white">
+                <span class="material-symbols-outlined text-sm">logout</span> Sign Out
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+        <header class="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between sticky top-0 z-20">
+            <div class="flex items-center gap-3">
+                <a href="/dashboard" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors">
+                    <span class="material-symbols-outlined text-xl">arrow_back</span>
+                </a>
+                <div>
+                    <h1 class="font-['Hanken_Grotesk'] font-bold text-lg sm:text-xl text-gray-900">New Compliance Inspection</h1>
+                    <p class="text-[11px] sm:text-xs text-gray-500">Capture label photograph or enter e-commerce URL</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="p-3 sm:p-6 max-w-4xl mx-auto w-full">
+            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-6 space-y-6">
+                <form id="scanForm" onsubmit="handleScanSubmit(event)" class="space-y-6">
+                    <!-- Inspection Source Selection -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Inspection Source</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <label class="flex items-center gap-3 p-3.5 border border-blue-500 bg-blue-50/40 rounded-xl cursor-pointer">
+                                <input type="radio" name="source" value="physical_store" checked class="text-primary focus:ring-primary"/>
+                                <div>
+                                    <span class="block text-xs font-bold text-gray-900">Physical Store / Market Inspection</span>
+                                    <span class="block text-[11px] text-gray-500">Upload or capture on-site label photo</span>
+                                </div>
+                            </label>
+                            <label class="flex items-center gap-3 p-3.5 border border-gray-200 rounded-xl cursor-pointer hover:border-gray-300">
+                                <input type="radio" name="source" value="ecommerce" class="text-primary focus:ring-primary"/>
+                                <div>
+                                    <span class="block text-xs font-bold text-gray-900">E-Commerce Listing Surveillance</span>
+                                    <span class="block text-[11px] text-gray-500">Online portal product card</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Location & Store Info -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Store / Inspection Location</label>
+                            <input id="locationName" type="text" required value="Reliance Retail Mart, Sector 29, Gurugram" class="w-full text-xs rounded-xl border-gray-300 p-3 focus:border-primary focus:ring-primary" placeholder="e.g. Big Bazaar, Delhi"/>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">GPS Coordinates (Optional)</label>
+                            <input id="gpsCoords" type="text" value="28.4595, 77.0266" class="w-full text-xs rounded-xl border-gray-300 p-3 focus:border-primary focus:ring-primary" placeholder="e.g. 28.6139, 77.2090"/>
+                        </div>
+                    </div>
+
+                    <!-- Product Details (Inline) -->
+                    <div class="border-t border-gray-100 pt-5 space-y-4">
+                        <h3 class="text-sm font-bold font-['Hanken_Grotesk'] text-gray-900">Packaged Product Details</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Product Name</label>
+                                <input id="productName" type="text" required placeholder="e.g. Lay's India's Magic Masala Chips 50g" class="w-full text-xs rounded-xl border-gray-300 p-3 focus:border-primary focus:ring-primary"/>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Brand Name</label>
+                                <input id="productBrand" type="text" required placeholder="e.g. Lay's" class="w-full text-xs rounded-xl border-gray-300 p-3 focus:border-primary focus:ring-primary"/>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Category</label>
+                                <input id="productCategory" type="text" required placeholder="e.g. Packaged Snacks & Chips" class="w-full text-xs rounded-xl border-gray-300 p-3 focus:border-primary focus:ring-primary"/>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1 flex items-center justify-between">
+                                    <span>Batch Number / Lot Number</span>
+                                    <span class="text-[10px] text-gray-400 font-normal">Optional / OCR</span>
+                                </label>
+                                <input id="batchNumber" type="text" placeholder="Enter batch or lot number" class="w-full text-xs rounded-xl border-gray-300 p-3 focus:border-primary focus:ring-primary font-mono uppercase"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Packaging Label Photograph (Dual Options: 📷 Scan/Capture Package OR 📁 Upload Image) -->
+                    <div class="border-t border-gray-100 pt-5 space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-gray-700">Packaging Label Photograph <span class="text-red-500">*</span></label>
+                            <p class="text-xs text-gray-500 mt-0.5">Select a capture method or upload an image of the packaged commodity for AI compliance verification</p>
+                        </div>
+
+                        <!-- Side-by-Side Dual Option Cards with OR Divider -->
+                        <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-4">
+                            <!-- Card 1: 📷 Scan / Capture Package -->
+                            <button type="button" id="cameraCaptureBtn" onclick="openCameraModal()" class="w-full h-full group p-5 sm:p-6 rounded-2xl border-2 border-dashed border-blue-400 bg-blue-50/40 hover:bg-blue-50/80 hover:border-[#0051d5] transition-all text-left flex flex-col justify-between space-y-3 sm:space-y-4 cursor-pointer shadow-sm hover:shadow-md active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-[#0051d5]/40">
+                                <div class="flex items-center justify-between w-full">
+                                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[#0051d5] text-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                                        <span class="material-symbols-outlined text-xl sm:text-2xl">photo_camera</span>
+                                    </div>
+                                    <span class="px-2.5 py-1 bg-blue-100 text-[#0051d5] rounded-full text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">Device Camera</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-['Hanken_Grotesk'] font-bold text-sm sm:text-base text-gray-900 group-hover:text-[#0051d5] transition-colors">Scan / Capture Package</h4>
+                                    <p class="text-xs text-gray-500 mt-1 leading-relaxed">Use device camera</p>
+                                </div>
+                                <div class="flex items-center gap-1.5 text-xs font-bold text-[#0051d5] pt-1">
+                                    <span>Open Camera Scanner</span>
+                                    <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                                </div>
+                            </button>
+
+                            <!-- OR Divider -->
+                            <div class="flex md:flex-col items-center justify-center gap-2 py-1 md:py-0">
+                                <div class="hidden md:block w-px h-8 bg-gray-200"></div>
+                                <span class="px-3 py-1 bg-gray-100 border border-gray-200 text-gray-500 rounded-full text-[10px] sm:text-xs font-bold tracking-wider uppercase">OR</span>
+                                <div class="hidden md:block w-px h-8 bg-gray-200"></div>
+                            </div>
+
+                            <!-- Card 2: 📁 Upload Image -->
+                            <div id="dropZone" class="w-full h-full group p-5 sm:p-6 rounded-2xl border-2 border-dashed border-gray-300 hover:border-emerald-600 bg-gray-50/60 hover:bg-emerald-50/40 transition-all text-left flex flex-col justify-between space-y-3 sm:space-y-4 cursor-pointer shadow-sm hover:shadow-md">
+                                <input id="fileInput" type="file" accept="image/*" class="hidden" onchange="handleFileSelected(event)"/>
+                                <div class="flex items-center justify-between w-full">
+                                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                                        <span class="material-symbols-outlined text-xl sm:text-2xl">upload_file</span>
+                                    </div>
+                                    <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">File Upload</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-['Hanken_Grotesk'] font-bold text-sm sm:text-base text-gray-900 group-hover:text-emerald-700 transition-colors">Upload Image</h4>
+                                    <p class="text-xs text-gray-500 mt-1 leading-relaxed" id="filePrompt">Select from your device</p>
+                                </div>
+                                <div class="flex items-center gap-1.5 text-xs font-bold text-emerald-700 pt-1">
+                                    <span>Browse Files or Drag & Drop</span>
+                                    <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">folder_open</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quality Validation Loading State -->
+                        <div id="validatingImageCard" class="hidden p-4 bg-blue-50 border border-blue-200 rounded-2xl flex items-center gap-3 text-xs text-blue-800 shadow-sm animate-pulse">
+                            <span class="animate-spin text-xl">⏳</span>
+                            <div>
+                                <span class="font-bold block">Analyzing Image Quality & Sharpness...</span>
+                                <span class="text-blue-600 text-[11px]">Computing 2D Laplacian variance to verify OCR suitability before inspection</span>
+                            </div>
+                        </div>
+
+                        <!-- Active Selected Image Confirmation Card (For CLEAR Image) -->
+                        <div id="selectedImageCard" class="hidden p-3.5 sm:p-4 bg-emerald-50 border-2 border-emerald-400 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-sm transition-all">
+                            <div class="flex items-center gap-3.5 min-w-0">
+                                <div id="selectedImageThumbWrapper" class="w-12 h-12 rounded-xl bg-gray-950 overflow-hidden border border-emerald-500 flex items-center justify-center shrink-0 shadow-inner">
+                                    <img id="selectedImageThumb" src="" alt="Thumbnail" class="w-full h-full object-cover hidden"/>
+                                    <span id="selectedImageThumbIcon" class="material-symbols-outlined text-emerald-400 text-2xl">image</span>
+                                </div>
+                                <div class="min-w-0 space-y-1">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="font-bold text-gray-900 text-xs sm:text-sm truncate" id="selectedImageName">label_image.jpg</span>
+                                        <span id="qualityBadgeClear" class="px-2 py-0.5 bg-emerald-600 text-white rounded-full text-[10px] font-bold tracking-wider uppercase flex items-center gap-1 shadow-sm">
+                                            <span class="material-symbols-outlined text-[12px]">verified</span> CLEAR
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-[11px] text-emerald-800 font-medium flex-wrap">
+                                        <span id="qualityScoreText">Sharpness Score: 245.8</span>
+                                        <span class="text-emerald-400">•</span>
+                                        <span id="qualityThresholdText">Threshold: 100.0</span>
+                                        <span class="text-emerald-400">•</span>
+                                        <span class="text-emerald-700 font-semibold flex items-center gap-0.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Ready for Analysis</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" onclick="clearSelectedImage()" class="self-end sm:self-center px-3.5 py-2 bg-white border border-gray-200 hover:border-red-300 hover:bg-red-50 text-gray-700 hover:text-red-600 rounded-xl font-semibold transition-all flex items-center gap-1.5 text-xs shadow-sm" title="Remove selected image">
+                                <span class="material-symbols-outlined text-sm">delete</span>
+                                <span>Remove</span>
+                            </button>
+                        </div>
+
+                        <!-- BLURRY IMAGE ALERT CARD (Blocks Analysis) -->
+                        <div id="blurryImageAlertCard" class="hidden p-4 sm:p-5 bg-gradient-to-br from-amber-50 to-red-50/60 border-2 border-amber-400 rounded-2xl text-xs shadow-md space-y-3 transition-all">
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-md">
+                                    <span class="material-symbols-outlined text-2xl">blur_on</span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h4 class="font-['Hanken_Grotesk'] font-bold text-sm sm:text-base text-amber-950">Image Too Blurry</h4>
+                                        <span class="px-2 py-0.5 bg-red-600 text-white rounded-full text-[10px] font-bold tracking-wider uppercase flex items-center gap-0.5">
+                                            <span class="material-symbols-outlined text-[12px]">block</span> BLURRY
+                                        </span>
+                                    </div>
+                                    <p class="text-xs text-amber-900 mt-1 font-medium leading-relaxed">
+                                        The uploaded image is too blurry for reliable text extraction and compliance analysis.
+                                    </p>
+                                    <p class="text-[11px] text-amber-800/90 mt-0.5" id="batchPreservedNote">
+                                        Please re-upload a clearer image or rescan the product.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Diagnostic Metrics Bar -->
+                            <div class="bg-white/80 rounded-xl p-2.5 border border-amber-200 flex flex-wrap items-center justify-between gap-2 text-[11px]">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="text-gray-500">Image Quality: <strong class="text-red-700 uppercase" id="blurDiagQuality">BLURRY</strong></span>
+                                    <span class="text-gray-300">•</span>
+                                    <span class="text-gray-500">Sharpness Score: <strong class="text-amber-800 font-mono" id="blurDiagScore">38.5</strong></span>
+                                    <span class="text-gray-300">•</span>
+                                    <span class="text-gray-500">Required Threshold: <strong class="text-gray-700 font-mono" id="blurDiagThreshold">100.0</strong></span>
+                                </div>
+                                <span class="px-2 py-0.5 bg-red-100 text-red-800 rounded font-bold uppercase tracking-wider text-[10px]">
+                                    Analysis Blocked
+                                </span>
+                            </div>
+
+                            <!-- User Action Buttons: Re-upload Image OR Rescan -->
+                            <div class="pt-1 flex flex-wrap items-center gap-2.5">
+                                <button type="button" onclick="reuploadFromBlur()" class="px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl shadow-sm text-xs transition-all flex items-center gap-1.5 active:scale-95">
+                                    <span class="material-symbols-outlined text-sm">upload_file</span>
+                                    <span>Re-upload Image</span>
+                                </button>
+                                <button type="button" onclick="rescanFromBlur()" class="px-4 py-2.5 bg-[#0051d5] hover:bg-[#0041ab] text-white font-bold rounded-xl shadow-sm text-xs transition-all flex items-center gap-1.5 active:scale-95">
+                                    <span class="material-symbols-outlined text-sm">photo_camera</span>
+                                    <span>Rescan</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="pt-4 flex flex-col sm:flex-row justify-end items-center gap-3">
+                        <span id="submitBlockedNotice" class="hidden text-xs font-semibold text-red-600 flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">error</span> Provide a clear packaging image to proceed
+                        </span>
+                        <button id="submitBtn" type="submit" class="w-full sm:w-auto px-8 py-3.5 sm:py-3 bg-[#cd4729] hover:bg-[#aa2f13] text-white font-semibold rounded-full shadow-lg text-sm transition-all flex items-center justify-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none">
+                            <span id="submitBtnText">Run AI Compliance Inspection</span>
+                            <span class="material-symbols-outlined text-sm" id="submitBtnIcon">arrow_forward</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Camera Modal Overlay -->
+    <div id="cameraModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-2 sm:p-4">
+        <div class="bg-gray-900 border border-gray-700 rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl flex flex-col max-h-[92vh] mx-auto">
+            <!-- Modal Header -->
+            <div class="px-4 sm:px-6 py-3 sm:py-4 bg-gray-800/80 border-b border-gray-700/80 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-2.5 sm:gap-3">
+                    <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#0051d5] text-white flex items-center justify-center">
+                        <span class="material-symbols-outlined text-lg sm:text-xl">photo_camera</span>
+                    </div>
+                    <div>
+                        <h3 class="font-['Hanken_Grotesk'] font-bold text-white text-sm sm:text-base">Live Camera Package Scanner</h3>
+                        <p class="text-[11px] sm:text-xs text-gray-400">Position package label clearly inside the frame</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeCameraModal()" class="text-gray-400 hover:text-white p-1.5 rounded-xl hover:bg-gray-700/60 transition-all" aria-label="Close camera">
+                    <span class="material-symbols-outlined text-xl">close</span>
+                </button>
+            </div>
+
+            <!-- Modal Body / Viewfinder & Captured Image -->
+            <div class="p-2 sm:p-6 flex-1 flex flex-col items-center justify-center overflow-hidden bg-black relative min-h-[220px] sm:min-h-[340px]">
+                <!-- Live Viewfinder Feed -->
+                <div id="modalCameraLiveContainer" class="relative w-full aspect-video max-h-[42vh] sm:max-h-[380px] flex items-center justify-center overflow-hidden rounded-xl sm:rounded-2xl bg-black">
+                    <video id="modalCameraVideo" autoplay playsinline muted class="w-full h-full object-cover"></video>
+                    
+                    <!-- HUD Guidelines Reticle -->
+                    <div class="absolute inset-0 pointer-events-none p-2 sm:p-4 sm:p-6 flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2.5 py-0.5 sm:px-3 sm:py-1 bg-black/60 backdrop-blur-md rounded-full text-[10px] sm:text-[11px] font-bold text-[#65fade] border border-[#65fade]/30 flex items-center gap-1.5 shadow">
+                                <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500 animate-pulse"></span>
+                                LIVE FEED • HD
+                            </span>
+                            <span class="text-[9px] sm:text-[11px] text-white/90 bg-black/60 backdrop-blur-md px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full border border-white/20 truncate max-w-[170px] sm:max-w-none">
+                                Position packaging label inside frame
+                            </span>
+                        </div>
+
+                        <!-- Target Focus Frame Reticle -->
+                        <div class="w-4/5 max-w-md h-3/5 mx-auto border-2 border-dashed border-[#65fade]/80 rounded-xl sm:rounded-2xl relative flex items-center justify-center shadow-[0_0_25px_rgba(101,250,222,0.2)]">
+                            <div class="absolute -top-1 -left-1 w-3 h-3 sm:w-4 sm:h-4 border-t-2 border-l-2 border-[#65fade]"></div>
+                            <div class="absolute -top-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 border-t-2 border-r-2 border-[#65fade]"></div>
+                            <div class="absolute -bottom-1 -left-1 w-3 h-3 sm:w-4 sm:h-4 border-b-2 border-l-2 border-[#65fade]"></div>
+                            <div class="absolute -bottom-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 border-b-2 border-r-2 border-[#65fade]"></div>
+                            <span class="text-[9px] sm:text-[11px] font-semibold text-white/90 bg-black/60 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full backdrop-blur-sm shadow text-center mx-2">Align MRP, Net Qty & Mfg Declarations</span>
+                        </div>
+
+                        <div class="text-center">
+                            <span class="text-[9px] sm:text-[11px] text-white/70 bg-black/50 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full">Ensure good lighting and avoid glare</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Captured Image Preview State (hidden initially) -->
+                <div id="modalCameraCapturedContainer" class="hidden relative w-full aspect-video max-h-[42vh] sm:max-h-[380px] flex items-center justify-center overflow-hidden rounded-xl sm:rounded-2xl bg-gray-950 border border-gray-800">
+                    <img id="modalCapturedPhotoImg" src="" alt="Captured Label" class="max-h-[40vh] sm:max-h-[360px] w-auto max-w-full object-contain rounded-lg sm:rounded-xl shadow-lg"/>
+                    
+                    <!-- Real-time Image Quality HUD in Modal -->
+                    <div class="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between gap-2 pointer-events-none">
+                        <span id="modalQualityBadge" class="px-3 py-1 bg-black/80 backdrop-blur-md rounded-full text-[11px] font-bold text-white border border-white/20 flex items-center gap-1.5 shadow">
+                            <span class="material-symbols-outlined text-[14px]">hourglass_empty</span> Validating Quality...
+                        </span>
+                        <span id="modalQualityScorePill" class="px-2.5 py-1 bg-black/70 backdrop-blur-md rounded-full text-[10px] text-white/90 border border-white/10 font-mono">
+                            Score: --
+                        </span>
+                    </div>
+
+                    <!-- Blurry Photo Warning Banner in Modal -->
+                    <div id="modalBlurWarningBox" class="hidden absolute bottom-3 left-3 right-3 p-3 bg-red-950/90 border border-red-500 rounded-xl text-white text-xs shadow-xl flex items-start gap-2.5 backdrop-blur-md">
+                        <span class="material-symbols-outlined text-red-400 text-xl shrink-0">blur_on</span>
+                        <div class="min-w-0">
+                            <strong class="font-bold text-sm block text-red-200">Image is too blurry</strong>
+                            <p class="text-[11px] text-red-300 mt-0.5">Please hold the device steady and capture again.</p>
+                        </div>
+                    </div>
+
+                    <div class="absolute bottom-2.5 left-2.5 sm:bottom-3 sm:left-3 px-2.5 py-0.5 sm:px-3 sm:py-1 bg-black/70 backdrop-blur-md rounded-full text-[10px] sm:text-xs text-white border border-white/20 font-medium" id="modalCapturedMeta">
+                        1920 × 1080 px • Ready
+                    </div>
+                </div>
+
+                <!-- Error State Box (hidden initially) -->
+                <div id="modalCameraErrorBox" class="hidden p-4 sm:p-6 rounded-2xl bg-amber-950/40 border border-amber-500/50 text-amber-200 text-xs text-center space-y-3 max-w-md mx-auto">
+                    <span class="material-symbols-outlined text-amber-400 text-3xl sm:text-4xl">warning</span>
+                    <h4 class="font-bold text-sm text-white" id="modalCameraErrorTitle">Camera Permission Required</h4>
+                    <p id="modalCameraErrorMessage" class="text-amber-300 leading-relaxed text-[11px] sm:text-xs">
+                        Camera access was denied. Please allow camera permissions in your browser or use the Upload Image option.
+                    </p>
+                    <div class="pt-2 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+                        <button type="button" onclick="startCameraStream()" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-full shadow text-xs transition-all">
+                            Try Again
+                        </button>
+                        <button type="button" onclick="closeCameraModal(); document.getElementById('fileInput').click();" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white font-semibold rounded-full border border-gray-600 text-xs transition-all">
+                            Use File Upload
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer Controls -->
+            <div class="px-3 sm:px-6 py-2.5 sm:py-4 bg-gray-800/90 border-t border-gray-700/80 flex items-center justify-between gap-1.5 sm:gap-3 shrink-0">
+                <!-- Left cancel / retake -->
+                <div id="modalControlsLeft">
+                    <button type="button" id="modalCancelBtn" onclick="closeCameraModal()" class="px-3.5 sm:px-5 py-2 sm:py-2.5 bg-gray-700 hover:bg-gray-600 text-gray-200 font-semibold rounded-full text-xs transition-all flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">close</span>
+                        <span>Cancel</span>
+                    </button>
+                    <button type="button" id="modalRetakeBtn" onclick="retakeModalPhoto()" class="hidden px-3.5 sm:px-5 py-2 sm:py-2.5 bg-gray-700 hover:bg-gray-600 text-gray-200 font-semibold rounded-full text-xs transition-all flex items-center gap-1 active:scale-95">
+                        <span class="material-symbols-outlined text-sm">refresh</span>
+                        <span class="hidden xs:inline">Retake</span><span class="xs:hidden">Retake</span>
+                    </button>
+                </div>
+
+                <!-- Middle Capture / Use Photo -->
+                <div id="modalControlsCenter">
+                    <button type="button" id="modalCaptureBtn" onclick="captureModalPhoto()" class="px-4 sm:px-7 py-2.5 sm:py-3 bg-[#cd4729] hover:bg-[#aa2f13] text-white font-bold rounded-full text-xs sm:text-sm shadow-xl transition-all flex items-center gap-1.5 sm:gap-2 transform active:scale-95">
+                        <span class="material-symbols-outlined text-lg sm:text-xl">photo_camera</span>
+                        <span>Capture Photo</span>
+                    </button>
+                    <button type="button" id="modalUsePhotoBtn" onclick="confirmModalPhoto()" class="hidden px-4 sm:px-7 py-2.5 sm:py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full text-xs sm:text-sm shadow-xl transition-all flex items-center gap-1.5 sm:gap-2 transform active:scale-95">
+                        <span class="material-symbols-outlined text-lg sm:text-xl">done_all</span>
+                        <span>Use Photo</span>
+                    </button>
+                </div>
+
+                <!-- Right Flip Camera -->
+                <div id="modalControlsRight">
+                    <button type="button" id="modalFlipBtn" onclick="flipModalCamera()" class="px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-700 hover:bg-gray-600 text-gray-200 font-semibold rounded-full text-xs transition-all flex items-center gap-1" title="Switch between front and rear camera">
+                        <span class="material-symbols-outlined text-sm">flip_camera_ios</span>
+                        <span class="hidden sm:inline">Flip</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+    <script>
+        let selectedFile = null;
+        let selectedFileQuality = null;
+        let activeMediaStream = null;
+        let currentFacingMode = 'environment';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // If no active session exists, initialize default inspector demo session
+            if (!PackCheck.getToken()) {
+                try {
+                    const res = await fetch('/api/v1/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: 'inspector.sharma@packcheck.gov.in', password: 'inspector123' })
+                    });
+                    const data = await res.json();
+                    if (data.success && data.data?.access_token) {
+                        PackCheck.setToken(data.data.access_token);
+                        PackCheck.setUser(data.data.user);
+                    }
+                } catch (e) {
+                    console.error('Demo auth init failed:', e);
+                }
+            }
+
+            PackCheck.syncNavigation('/scan/new');
+
+            // RBAC verification for New Scan page
+            if (!PackCheck.canScan()) {
+                const mainContainer = document.querySelector('main .p-6');
+                if (mainContainer) {
+                    mainContainer.innerHTML = `
+                        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-12 text-center max-w-xl mx-auto space-y-4">
+                            <div class="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto">
+                                <span class="material-symbols-outlined text-3xl">shield_lock</span>
+                            </div>
+                            <h2 class="font-['Hanken_Grotesk'] font-bold text-lg text-gray-900">Inspection Authority Required</h2>
+                            <p class="text-xs text-gray-500 leading-relaxed">
+                                Your account has <strong class="text-gray-800">${PackCheck.getRoleDisplayName()}</strong> permissions. In accordance with Legal Metrology RBAC policy, scan creation and label photograph ingestion are restricted to Field Enforcement Inspectors and Administrators.
+                            </p>
+                            <div class="pt-3 flex items-center justify-center gap-3">
+                                <button onclick="switchToInspectorDemo()" type="button" class="px-5 py-2.5 bg-primary hover:bg-primary-container text-white rounded-full text-xs font-semibold shadow-md transition-all flex items-center gap-1.5 active:scale-95">
+                                    <span class="material-symbols-outlined text-sm">badge</span> Switch to Inspector Demo
+                                </button>
+                                <a href="/dashboard" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-xs font-semibold transition-all">
+                                    Return to Dashboard
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                }
+                return;
+            }
+
+            // Drop zone click setup
+            const dropZone = document.getElementById('dropZone');
+            if (dropZone) {
+                dropZone.addEventListener('click', () => {
+                    document.getElementById('fileInput').click();
+                });
+
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    dropZone.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        dropZone.classList.add('border-emerald-600', 'bg-emerald-50/50');
+                    }, false);
+                });
+                ['dragleave', 'drop'].forEach(eventName => {
+                    dropZone.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        dropZone.classList.remove('border-emerald-600', 'bg-emerald-50/50');
+                    }, false);
+                });
+                dropZone.addEventListener('drop', async (e) => {
+                    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                        const file = e.dataTransfer.files[0];
+                        await processSelectedFile(file, 'File Upload');
+                    }
+                });
+            }
+
+            // Stream cleanup on page navigation/unload
+            window.addEventListener('beforeunload', stopActiveMediaStream);
+            window.addEventListener('pagehide', stopActiveMediaStream);
+        });
+
+        // Image Quality API Validator
+        async function validateQuality(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            try {
+                const res = await PackCheck.request('/scans/quality-check', {
+                    method: 'POST',
+                    body: formData,
+                });
+                if (res.success && res.data) {
+                    return res.data;
+                }
+                return {
+                    image_quality: 'FAILED',
+                    sharpness_score: 0.0,
+                    threshold: 100.0,
+                    can_analyze: false,
+                    message: res.error?.message || 'Could not validate image quality.'
+                };
+            } catch (err) {
+                return {
+                    image_quality: 'FAILED',
+                    sharpness_score: 0.0,
+                    threshold: 100.0,
+                    can_analyze: false,
+                    message: 'Network error validating quality: ' + err.message
+                };
+            }
+        }
+
+        // Camera Modal Operations
+        function openCameraModal() {
+            const modal = document.getElementById('cameraModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                resetModalState();
+                startCameraStream();
+            }
+        }
+
+        function closeCameraModal() {
+            stopActiveMediaStream();
+            const modal = document.getElementById('cameraModal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function resetModalState() {
+            document.getElementById('modalCameraLiveContainer').classList.remove('hidden');
+            document.getElementById('modalCameraCapturedContainer').classList.add('hidden');
+            document.getElementById('modalCameraErrorBox').classList.add('hidden');
+            document.getElementById('modalBlurWarningBox')?.classList.add('hidden');
+
+            document.getElementById('modalCancelBtn').classList.remove('hidden');
+            document.getElementById('modalRetakeBtn').classList.add('hidden');
+
+            document.getElementById('modalCaptureBtn').classList.remove('hidden');
+            document.getElementById('modalUsePhotoBtn').classList.add('hidden');
+            document.getElementById('modalFlipBtn').classList.remove('hidden');
+        }
+
+        async function startCameraStream() {
+            resetModalState();
+            const video = document.getElementById('modalCameraVideo');
+
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showModalCameraError('Camera API is not supported in this browser context. Please use the Upload Image option.');
+                return;
+            }
+
+            try {
+                const constraints = {
+                    video: {
+                        facingMode: { ideal: currentFacingMode },
+                        width: { ideal: 1920, min: 1280 },
+                        height: { ideal: 1080, min: 720 }
+                    },
+                    audio: false
+                };
+
+                try {
+                    activeMediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+                } catch (cErr) {
+                    activeMediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                }
+
+                video.srcObject = activeMediaStream;
+                await video.play();
+            } catch (err) {
+                showModalCameraError(err);
+            }
+        }
+
+        function stopActiveMediaStream() {
+            if (activeMediaStream) {
+                activeMediaStream.getTracks().forEach(track => {
+                    try { track.stop(); } catch (e) {}
+                });
+                activeMediaStream = null;
+            }
+            const video = document.getElementById('modalCameraVideo');
+            if (video) {
+                video.srcObject = null;
+            }
+        }
+
+        function flipModalCamera() {
+            currentFacingMode = (currentFacingMode === 'environment') ? 'user' : 'environment';
+            stopActiveMediaStream();
+            startCameraStream();
+        }
+
+        function captureModalPhoto() {
+            const video = document.getElementById('modalCameraVideo');
+            if (!video || !video.videoWidth) {
+                alert('Camera stream is still initializing. Please wait a moment.');
+                return;
+            }
+
+            const canvas = document.createElement('canvas');
+            const width = video.videoWidth;
+            const height = video.videoHeight;
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, width, height);
+
+            canvas.toBlob(async (blob) => {
+                if (!blob) {
+                    alert('Could not capture frame from camera stream.');
+                    return;
+                }
+
+                const filename = `label_camera_${Date.now()}.jpg`;
+                const capturedFile = new File([blob], filename, { type: 'image/jpeg' });
+                selectedFile = capturedFile;
+
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+                document.getElementById('modalCapturedPhotoImg').src = dataUrl;
+                document.getElementById('modalCapturedMeta').textContent = `${width} × ${height} px • ${(blob.size / 1024).toFixed(1)} KB JPEG`;
+
+                // Switch UI to captured review state
+                document.getElementById('modalCameraLiveContainer').classList.add('hidden');
+                document.getElementById('modalCameraCapturedContainer').classList.remove('hidden');
+
+                document.getElementById('modalCancelBtn').classList.remove('hidden');
+                document.getElementById('modalRetakeBtn').classList.remove('hidden');
+                document.getElementById('modalCaptureBtn').classList.add('hidden');
+                document.getElementById('modalFlipBtn').classList.add('hidden');
+
+                // Initial validating state on HUD
+                const qualityBadge = document.getElementById('modalQualityBadge');
+                const scorePill = document.getElementById('modalQualityScorePill');
+                const blurBox = document.getElementById('modalBlurWarningBox');
+                const useBtn = document.getElementById('modalUsePhotoBtn');
+
+                if (qualityBadge) {
+                    qualityBadge.innerHTML = '<span class="material-symbols-outlined text-[14px] animate-spin">hourglass_empty</span> Validating Quality...';
+                }
+                if (scorePill) scorePill.textContent = 'Score: Analyzing...';
+                if (blurBox) blurBox.classList.add('hidden');
+                if (useBtn) useBtn.classList.add('hidden');
+
+                // Stop live stream immediately to conserve resources
+                stopActiveMediaStream();
+
+                // Run actual Image Quality / Blur Validation
+                const qResult = await validateQuality(capturedFile);
+                selectedFileQuality = qResult;
+
+                if (qResult.can_analyze && qResult.image_quality === 'CLEAR') {
+                    // CLEAR Image
+                    if (qualityBadge) {
+                        qualityBadge.innerHTML = '<span class="material-symbols-outlined text-[14px] text-emerald-400">verified</span> <span class="text-emerald-300 font-bold">CLEAR</span>';
+                    }
+                    if (scorePill) {
+                        scorePill.textContent = `Score: ${qResult.sharpness_score} (Threshold: ${qResult.threshold})`;
+                    }
+                    if (blurBox) blurBox.classList.add('hidden');
+                    if (useBtn) useBtn.classList.remove('hidden'); // Enable Use Photo
+                } else {
+                    // BLURRY Image -> Block Use Photo!
+                    if (qualityBadge) {
+                        qualityBadge.innerHTML = '<span class="material-symbols-outlined text-[14px] text-red-400">block</span> <span class="text-red-300 font-bold">BLURRY</span>';
+                    }
+                    if (scorePill) {
+                        scorePill.textContent = `Score: ${qResult.sharpness_score} (Min: ${qResult.threshold})`;
+                    }
+                    if (blurBox) blurBox.classList.remove('hidden');
+                    if (useBtn) useBtn.classList.add('hidden'); // STRICTLY BLOCK
+                }
+            }, 'image/jpeg', 0.92);
+        }
+
+        function retakeModalPhoto() {
+            selectedFile = null;
+            selectedFileQuality = null;
+            startCameraStream();
+        }
+
+        function confirmModalPhoto() {
+            if (selectedFile && selectedFileQuality && selectedFileQuality.can_analyze) {
+                updateSelectedImageDisplay(selectedFile, selectedFileQuality, 'Live Camera Capture');
+                closeCameraModal();
+
+                // Smoothly scroll to inspection submit button
+                const submitBtn = document.getElementById('submitBtn');
+                if (submitBtn) {
+                    submitBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            } else {
+                alert('The captured image is too blurry. Please retake a clearer photo before proceeding.');
+            }
+        }
+
+        function showModalCameraError(err) {
+            stopActiveMediaStream();
+            document.getElementById('modalCameraLiveContainer').classList.add('hidden');
+            document.getElementById('modalCameraCapturedContainer').classList.add('hidden');
+            const errorBox = document.getElementById('modalCameraErrorBox');
+            if (errorBox) errorBox.classList.remove('hidden');
+
+            const titleEl = document.getElementById('modalCameraErrorTitle');
+            const msgEl = document.getElementById('modalCameraErrorMessage');
+
+            const errorName = (typeof err === 'object' && err !== null) ? (err.name || '') : '';
+            const rawMessage = (typeof err === 'object' && err !== null) ? (err.message || '') : String(err);
+
+            if (errorName === 'NotAllowedError' || errorName === 'PermissionDeniedError') {
+                if (titleEl) titleEl.textContent = 'Camera Permission Denied';
+                if (msgEl) msgEl.textContent = 'Camera access was blocked by your browser permissions. Please allow camera permissions in your browser address bar settings or use the Upload Image option.';
+            } else if (errorName === 'NotFoundError' || errorName === 'DevicesNotFoundError') {
+                if (titleEl) titleEl.textContent = 'No Camera Device Detected';
+                if (msgEl) msgEl.textContent = 'No webcam or mobile camera hardware was found on this system. Please use the Upload Image option.';
+            } else if (errorName === 'NotReadableError' || errorName === 'TrackStartError') {
+                if (titleEl) titleEl.textContent = 'Camera Hardware In Use';
+                if (msgEl) msgEl.textContent = 'The camera is currently locked or in use by another application. Please close other camera apps or use Upload Image.';
+            } else {
+                if (titleEl) titleEl.textContent = 'Camera Access Notice';
+                if (msgEl) msgEl.textContent = rawMessage || 'Unable to access camera. Please use the Upload Image option instead.';
+            }
+        }
+
+        // Image Selection & Display Handlers
+        async function handleFileSelected(e) {
+            if (e.target.files && e.target.files[0]) {
+                const file = e.target.files[0];
+                await processSelectedFile(file, 'File Upload');
+            }
+        }
+
+        async function processSelectedFile(file, sourceLabel = 'Packaging Label') {
+            selectedFile = file;
+
+            // Show validating indicator
+            const validatingCard = document.getElementById('validatingImageCard');
+            const clearCard = document.getElementById('selectedImageCard');
+            const blurCard = document.getElementById('blurryImageAlertCard');
+
+            if (validatingCard) validatingCard.classList.remove('hidden');
+            if (clearCard) clearCard.classList.add('hidden');
+            if (blurCard) blurCard.classList.add('hidden');
+
+            // Call Quality Check API
+            const qualityData = await validateQuality(file);
+            selectedFileQuality = qualityData;
+
+            if (validatingCard) validatingCard.classList.add('hidden');
+
+            updateSelectedImageDisplay(file, qualityData, sourceLabel);
+        }
+
+        function updateSelectedImageDisplay(file, quality, sourceLabel = 'Packaging Label') {
+            const clearCard = document.getElementById('selectedImageCard');
+            const blurCard = document.getElementById('blurryImageAlertCard');
+            const submitBtn = document.getElementById('submitBtn');
+            const submitBtnText = document.getElementById('submitBtnText');
+            const submitBlockedNotice = document.getElementById('submitBlockedNotice');
+
+            if (!file || !quality) return;
+
+            const isClear = quality.can_analyze && quality.image_quality === 'CLEAR';
+
+            if (isClear) {
+                // Render CLEAR state
+                if (blurCard) blurCard.classList.add('hidden');
+                if (clearCard) {
+                    const nameEl = document.getElementById('selectedImageName');
+                    const scoreText = document.getElementById('qualityScoreText');
+                    const threshText = document.getElementById('qualityThresholdText');
+                    const thumbImg = document.getElementById('selectedImageThumb');
+                    const thumbIcon = document.getElementById('selectedImageThumbIcon');
+
+                    if (nameEl) nameEl.textContent = file.name;
+                    if (scoreText) scoreText.textContent = `Sharpness Score: ${quality.sharpness_score}`;
+                    if (threshText) threshText.textContent = `Threshold: ${quality.threshold}`;
+
+                    if (file.type && file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            if (thumbImg) {
+                                thumbImg.src = e.target.result;
+                                thumbImg.classList.remove('hidden');
+                            }
+                            if (thumbIcon) thumbIcon.classList.add('hidden');
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                    clearCard.classList.remove('hidden');
+                }
+
+                // Enable submit button
+                if (submitBtn) submitBtn.disabled = false;
+                if (submitBtnText) submitBtnText.textContent = 'Run AI Compliance Inspection';
+                if (submitBlockedNotice) submitBlockedNotice.classList.add('hidden');
+            } else {
+                // Render BLURRY / LOW_QUALITY state -> BLOCK
+                if (clearCard) clearCard.classList.add('hidden');
+                if (blurCard) {
+                    const diagQuality = document.getElementById('blurDiagQuality');
+                    const diagScore = document.getElementById('blurDiagScore');
+                    const diagThresh = document.getElementById('blurDiagThreshold');
+                    const batchNote = document.getElementById('batchPreservedNote');
+
+                    if (diagQuality) diagQuality.textContent = quality.image_quality || 'BLURRY';
+                    if (diagScore) diagScore.textContent = quality.sharpness_score || '0.0';
+                    if (diagThresh) diagThresh.textContent = quality.threshold || '100.0';
+
+                    // Check if batch number was entered by user to reassure preservation
+                    const enteredBatch = document.getElementById('batchNumber')?.value.trim();
+                    if (batchNote) {
+                        if (enteredBatch) {
+                            batchNote.textContent = `Batch number saved (${enteredBatch}). Please provide a clearer product image to continue analysis.`;
+                        } else {
+                            batchNote.textContent = 'Please re-upload a clearer image or rescan the product.';
+                        }
+                    }
+
+                    blurCard.classList.remove('hidden');
+                }
+
+                // Disable submit button (defense in depth)
+                if (submitBtn) submitBtn.disabled = true;
+                if (submitBtnText) submitBtnText.textContent = 'Analysis Blocked — Image Too Blurry';
+                if (submitBlockedNotice) submitBlockedNotice.classList.remove('hidden');
+            }
+        }
+
+        function reuploadFromBlur() {
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput) {
+                fileInput.value = '';
+                fileInput.click();
+            }
+        }
+
+        function rescanFromBlur() {
+            openCameraModal();
+        }
+
+        function clearSelectedImage() {
+            selectedFile = null;
+            selectedFileQuality = null;
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput) fileInput.value = '';
+            const clearCard = document.getElementById('selectedImageCard');
+            if (clearCard) clearCard.classList.add('hidden');
+            const blurCard = document.getElementById('blurryImageAlertCard');
+            if (blurCard) blurCard.classList.add('hidden');
+            const validatingCard = document.getElementById('validatingImageCard');
+            if (validatingCard) validatingCard.classList.add('hidden');
+
+            const submitBtn = document.getElementById('submitBtn');
+            const submitBtnText = document.getElementById('submitBtnText');
+            const submitBlockedNotice = document.getElementById('submitBlockedNotice');
+            if (submitBtn) submitBtn.disabled = false;
+            if (submitBtnText) submitBtnText.textContent = 'Run AI Compliance Inspection';
+            if (submitBlockedNotice) submitBlockedNotice.classList.add('hidden');
+        }
+
+        async function switchToInspectorDemo() {
+            try {
+                const res = await fetch('/api/v1/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: 'inspector.sharma@packcheck.gov.in', password: 'inspector123' })
+                });
+                const data = await res.json();
+                if (data.success && data.data?.access_token) {
+                    PackCheck.setToken(data.data.access_token);
+                    PackCheck.setUser(data.data.user);
+                    window.location.reload();
+                } else {
+                    alert('Failed to switch to Inspector: ' + (data.error?.message || 'Error'));
+                }
+            } catch (err) {
+                alert('Network error: ' + err.message);
+            }
+        }
+
+        async function handleScanSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const originalBtnHtml = btn.innerHTML;
+
+            const isPhysical = document.querySelector('input[name="source"]:checked').value === 'physical_store';
+            if (isPhysical && !selectedFile) {
+                alert('Please capture a photo or upload a packaging label image for inspection.');
+                return;
+            }
+
+            // Quality Gate Validation Check
+            if (isPhysical && selectedFile) {
+                if (!selectedFileQuality || !selectedFileQuality.can_analyze || selectedFileQuality.image_quality !== 'CLEAR') {
+                    alert('The uploaded image is too blurry for reliable text extraction and compliance analysis. Please re-upload a clearer image or rescan the product.');
+                    return;
+                }
+            }
+
+            try {
+                // 1. Create Scan
+                btn.innerHTML = '<span class="animate-spin mr-2">⏳</span> Initializing Compliance Scan...';
+                btn.disabled = true;
+
+                const batchVal = document.getElementById('batchNumber')?.value.trim() || null;
+                const createPayload = {
+                    source: document.querySelector('input[name="source"]:checked').value,
+                    location_name: document.getElementById('locationName').value,
+                    gps_coordinates: document.getElementById('gpsCoords').value,
+                    batch_number: batchVal,
+                    product_data: {
+                        name: document.getElementById('productName').value.trim(),
+                        brand: document.getElementById('productBrand').value.trim(),
+                        category: document.getElementById('productCategory').value.trim()
+                    }
+                };
+
+                const scanRes = await PackCheck.request('/scans', {
+                    method: 'POST',
+                    body: JSON.stringify(createPayload)
+                });
+
+                if (!scanRes.success || !scanRes.data) {
+                    throw new Error(scanRes.error?.message || 'Failed to initialize scan');
+                }
+
+                const scanId = scanRes.data.id;
+
+                // 2. Upload image (works identically for Camera Capture and File Upload)
+                if (selectedFile) {
+                    btn.innerHTML = '<span class="animate-spin mr-2">⏳</span> Uploading Packaging Label Image...';
+                    const formData = new FormData();
+                    formData.append('files', selectedFile);
+                    formData.append('image_type', 'front');
+                    const uploadRes = await PackCheck.request(`/scans/${scanId}/images`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    if (!uploadRes.success) {
+                        throw new Error(uploadRes.error?.message || 'Failed to upload label image');
+                    }
+                }
+
+                // 3. Trigger AI Compliance Inspection Pipeline
+                btn.innerHTML = '<span class="animate-spin mr-2">⏳</span> Queuing AI Analysis Pipeline...';
+                const analyzeRes = await PackCheck.request(`/scans/${scanId}/analyze`, { method: 'POST' });
+                if (!analyzeRes.success) {
+                    throw new Error(analyzeRes.error?.message || 'Failed to trigger AI analysis');
+                }
+
+                // Redirect to review/analysis screen for this scan
+                window.location.href = `/analysis?id=${scanId}`;
+            } catch (err) {
+                alert('Error submitting scan: ' + (err.message || 'Unknown error'));
+                btn.innerHTML = originalBtnHtml;
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

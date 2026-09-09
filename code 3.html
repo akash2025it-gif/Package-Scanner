@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PackCheck - Compliance Report</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "outline-variant": "#c3c6d8",
+                      "error": "#ba1a1a",
+                      "surface-bright": "#f8f9ff",
+                      "on-secondary-fixed-variant": "#005045",
+                      "on-primary-fixed-variant": "#003ea7",
+                      "surface-container-low": "#f1f3fa",
+                      "on-surface": "#181c21",
+                      "primary": "#0051d5",
+                      "secondary-container": "#65fade",
+                      "surface-dim": "#d8dae1",
+                      "on-primary-container": "#fefcff",
+                      "background": "#f8f9ff",
+                      "tertiary-fixed": "#ffdad2",
+                      "on-tertiary-container": "#fffbff",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-variant": "#e0e2e9",
+                      "on-error": "#ffffff",
+                      "on-tertiary-fixed-variant": "#8c1900",
+                      "on-tertiary-fixed": "#3d0600",
+                      "tertiary-container": "#cd4729",
+                      "surface-container-high": "#e6e8ef",
+                      "on-surface-variant": "#424655",
+                      "primary-container": "#276afa",
+                      "on-error-container": "#93000a",
+                      "primary-fixed": "#dbe1ff",
+                      "on-primary": "#ffffff",
+                      "surface-container": "#eceef5",
+                      "secondary": "#006b5c",
+                      "on-tertiary": "#ffffff",
+                      "on-primary-fixed": "#00174b",
+                      "on-secondary-fixed": "#00201b",
+                      "inverse-primary": "#b4c5ff",
+                      "secondary-fixed": "#65fade",
+                      "on-secondary": "#ffffff",
+                      "tertiary-fixed-dim": "#ffb4a3",
+                      "surface-tint": "#0053da",
+                      "inverse-on-surface": "#eef1f7",
+                      "error-container": "#ffdad6",
+                      "secondary-fixed-dim": "#41ddc2",
+                      "on-background": "#181c21",
+                      "primary-fixed-dim": "#b4c5ff",
+                      "outline": "#737687",
+                      "tertiary": "#aa2f13",
+                      "inverse-surface": "#2d3136",
+                      "surface": "#f8f9ff",
+                      "surface-container-highest": "#e0e2e9",
+                      "on-secondary-container": "#007262"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-mobile": "16px",
+                      "xs": "4px",
+                      "md": "24px",
+                      "base": "8px",
+                      "xl": "64px",
+                      "gutter": "16px",
+                      "margin-desktop": "32px",
+                      "lg": "40px",
+                      "max-width": "1280px",
+                      "sm": "12px"
+              },
+              "fontFamily": {
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Hanken Grotesk"
+                      ],
+                      "headline-lg-mobile": [
+                              "Hanken Grotesk"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Hanken Grotesk"
+                      ],
+                      "caption": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Hanken Grotesk"
+                      ]
+              },
+              "fontSize": {
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "36px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "caption": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .soft-shadow {
+            box-shadow: 0px 10px 30px rgba(47, 111, 255, 0.08);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col md:flex-row">
+<!-- NavigationDrawer (Desktop) -->
+<nav class="hidden md:flex flex-col h-screen fixed left-0 top-0 z-50 py-base bg-surface border-r border-outline-variant shadow-md w-72 rounded-r-xl transition-all duration-300 ease-in-out">
+<div class="px-md mb-8 flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary text-[32px]">verified_user</span>
+<span class="font-headline-md text-headline-md text-primary font-bold">PackCheck</span>
+</div>
+<div class="px-md mb-8 flex items-center gap-sm">
+<img class="w-12 h-12 rounded-full object-cover border border-outline-variant" data-alt="A professional headshot of a legal metrology officer in a clean, modern office setting. Soft, natural lighting highlights the officer's confident expression. The background is slightly blurred, emphasizing the subject. High-quality corporate portrait style with a cool, tech-forward color grade." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCiwT2yyDTRO5keJ0Q7t0WO32gJMwB8yHImj0kRCqb5XeHVNiV-3E689mJDFc7BdxGPYvANCbiqiVMumyYl4C4LzlbdjLo0m7FBxQ4nKqpVbBeUDWNG53etZKo_riH79eKawekR4F24QZKksjBUWQzDeChFVZIJ1cWn5tEJwXRjZOW4QdzyMjqFp0UeZAjh5NxFJA7mDw9ZGHMYz3E1TuRu_CGKQvg-51fsjOEIo5_4uoOnxP3PAv4"/>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">PackCheck AI</span>
+<span class="font-caption text-caption text-on-surface-variant">Compliance Officer</span>
+<span class="font-caption text-caption text-outline text-[10px]">v2.1.0</span>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto flex flex-col gap-xs px-2">
+<a class="flex items-center gap-sm px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-full mx-2 font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-sm px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-full mx-2 font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">barcode_scanner</span>
+                New Scan
+            </a>
+<a class="flex items-center gap-sm px-4 py-3 bg-primary-container text-on-primary-container font-bold rounded-full mx-2 font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">description</span>
+                Reports
+            </a>
+<a class="flex items-center gap-sm px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-full mx-2 font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">inventory_2</span>
+                Repository
+            </a>
+<a class="flex items-center gap-sm px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-full mx-2 font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">insights</span>
+                Analytics
+            </a>
+<a class="flex items-center gap-sm px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-full mx-2 font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">group</span>
+                Users
+            </a>
+</div>
+<div class="mt-auto px-2 pb-md">
+<a class="flex items-center gap-sm px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-full mx-2 font-label-md text-label-md transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+                Settings
+            </a>
+</div>
+</nav>
+<!-- TopAppBar (Mobile & Desktop Content Header) -->
+<header class="md:hidden flex justify-between items-center px-margin-mobile h-16 w-full z-40 bg-surface border-b border-outline-variant shadow-sm sticky top-0">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">verified_user</span>
+<span class="font-headline-md text-headline-md font-bold text-primary">PackCheck</span>
+</div>
+<img class="w-8 h-8 rounded-full object-cover" data-alt="A professional headshot of a legal metrology officer in a clean, modern office setting. Soft, natural lighting highlights the officer's confident expression. The background is slightly blurred, emphasizing the subject. High-quality corporate portrait style with a cool, tech-forward color grade." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAi5Rw27H0DlHcoqdG_XiFDLRwQmnRYXZAdNwN1ToyW6llvzyrsC3kxQm8SNl9-pvSUzbm6eg_W8-tbH07gL3iUKJW1vGYlzfKflR8Hg12dVZmA9cu_QMGcCA1eQA6mDGsEDYq1cJtpJ3AQGCeujKYhokk1n6W5Ni-2mnVOXEyCPXRqOr4j7eiuXonF3ni_AZcnNgGYoXysX8ZAKM2H3z9xhhn2PX640vRWDHvhoRprIHaZOoRyGtU"/>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-72 flex flex-col pb-24 md:pb-0 min-h-screen">
+<!-- Header Section -->
+<div class="px-margin-mobile md:px-margin-desktop py-lg max-w-[max-width] mx-auto w-full">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-md mb-xl">
+<div>
+<h1 class="font-display-lg text-display-lg text-on-surface mb-2">Compliance Report</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Report ID: #RPT-2023-8842</p>
+</div>
+<div class="flex items-center gap-sm">
+<span class="flex items-center gap-xs px-3 py-1 bg-error-container text-on-error-container rounded-full font-label-md text-label-md">
+<span class="material-symbols-outlined text-sm">warning</span>
+                        Non-Compliant
+                    </span>
+</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-md">
+<!-- Product Summary (Spans 12 cols on mobile, 4 on desktop) -->
+<div class="lg:col-span-4 bg-surface-container-lowest rounded-[20px] p-md soft-shadow border border-surface-variant flex flex-col gap-md">
+<h2 class="font-headline-md text-headline-md text-on-surface border-b border-surface-variant pb-xs">Product Details</h2>
+<div class="aspect-square w-full rounded-xl overflow-hidden bg-surface-container-low flex items-center justify-center relative group">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A crisp, high-resolution product photography shot of a modern, eco-friendly snack packaging box on an isolated white background. The packaging features bold typography and vibrant colors. The lighting is bright and even, casting soft shadows, typical of premium e-commerce product imagery." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAO3ZnJaOv06HRmmyPFBna6gfjvml-qf88KYA7IcEo9lMj7PZmBA9ywH7PirbbZqe7ywWhzgiMkg8i11NDs6nw9l9cBr4GOhSwhTU0XFNMP4TAOpnFuvUZiiHdoBi8QURchiX-Q4ctJM0KTFGu_W9F_O-FifIWZENL76QNdbJ2dTzsdkRqUiCaM-ULNlnUAqU4giNkZghcMflDA3r3LZIpbJoT6-4cypNvZPccsGmfzHEhyGJcXqyo"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-sm">
+<span class="material-symbols-outlined text-white">zoom_in</span>
+</div>
+</div>
+<div class="flex flex-col gap-sm">
+<div>
+<p class="font-caption text-caption text-outline uppercase tracking-wider">Brand Name</p>
+<p class="font-body-lg text-body-lg text-on-surface font-semibold">Nature's Crunch</p>
+</div>
+<div>
+<p class="font-caption text-caption text-outline uppercase tracking-wider">Manufacturer</p>
+<p class="font-body-md text-body-md text-on-surface-variant">EcoSnacks Pvt Ltd.<br/>123 Green Way, Indus Estate.</p>
+</div>
+<div class="grid grid-cols-2 gap-sm mt-2">
+<div>
+<p class="font-caption text-caption text-outline uppercase tracking-wider">Inspected By</p>
+<p class="font-label-md text-label-md text-on-surface">Officer A. Sharma</p>
+</div>
+<div>
+<p class="font-caption text-caption text-outline uppercase tracking-wider">Date</p>
+<p class="font-label-md text-label-md text-on-surface">Oct 24, 2023</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Violation Details (Spans 12 cols on mobile, 8 on desktop) -->
+<div class="lg:col-span-8 flex flex-col gap-md">
+<!-- Analytics Summary Cards -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-sm">
+<div class="bg-surface-container-lowest rounded-[20px] p-sm soft-shadow flex flex-col items-center justify-center text-center">
+<span class="font-display-lg text-display-lg text-primary">4</span>
+<span class="font-caption text-caption text-on-surface-variant">Total Violations</span>
+</div>
+<div class="bg-error-container rounded-[20px] p-sm soft-shadow flex flex-col items-center justify-center text-center border border-error/20">
+<span class="font-display-lg text-display-lg text-on-error-container">1</span>
+<span class="font-caption text-caption text-on-error-container">Critical</span>
+</div>
+<div class="bg-[#FFEFC9] rounded-[20px] p-sm soft-shadow flex flex-col items-center justify-center text-center border border-[#FFB82E]/20">
+<span class="font-display-lg text-display-lg text-[#996600]">2</span>
+<span class="font-caption text-caption text-[#996600]">Major</span>
+</div>
+<div class="bg-[#E5F6EE] rounded-[20px] p-sm soft-shadow flex flex-col items-center justify-center text-center border border-[#00A859]/20">
+<span class="font-display-lg text-display-lg text-[#006B39]">1</span>
+<span class="font-caption text-caption text-[#006B39]">Minor</span>
+</div>
+</div>
+<!-- Violation Table/List -->
+<div class="bg-surface-container-lowest rounded-[20px] p-md soft-shadow border border-surface-variant flex-1 flex flex-col">
+<div class="flex items-center justify-between mb-md pb-xs border-b border-surface-variant">
+<h2 class="font-headline-md text-headline-md text-on-surface">Violation Breakdown</h2>
+<button class="text-primary font-label-md text-label-md flex items-center gap-xs hover:bg-surface-container-low px-2 py-1 rounded-md transition-colors">
+<span class="material-symbols-outlined text-sm">filter_list</span> Filter
+                             </button>
+</div>
+<div class="flex flex-col gap-sm overflow-y-auto flex-1">
+<!-- Violation Item 1: Critical -->
+<div class="flex items-start gap-md p-sm rounded-xl hover:bg-surface-container-low transition-colors group relative border border-transparent hover:border-error/30 cursor-pointer">
+<div class="w-1.5 h-full absolute left-0 top-0 bg-error rounded-l-xl"></div>
+<div class="mt-1">
+<span class="material-symbols-outlined text-error">cancel</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<p class="font-label-md text-label-md text-on-surface">Rule 12 - Consumer Care Details Missing</p>
+<span class="px-2 py-0.5 rounded text-[10px] font-bold tracking-widest uppercase bg-error text-on-error">Critical</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">The package fails to display mandatory consumer care contact information (phone number or email address) clearly.</p>
+<div class="mt-2 glass-panel p-2 rounded-lg border-l-2 border-primary-container flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary text-sm">smart_toy</span>
+<p class="font-caption text-caption text-on-surface-variant">AI detected a phone icon, but no recognizable number format followed.</p>
+</div>
+</div>
+</div>
+<!-- Violation Item 2: Major -->
+<div class="flex items-start gap-md p-sm rounded-xl hover:bg-surface-container-low transition-colors group relative border border-transparent hover:border-[#FFB82E]/30 cursor-pointer">
+<div class="w-1.5 h-full absolute left-0 top-0 bg-[#FFB82E] rounded-l-xl"></div>
+<div class="mt-1">
+<span class="material-symbols-outlined text-[#FFB82E]">warning</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<p class="font-label-md text-label-md text-on-surface">Rule 6 - Net Quantity Ambiguity</p>
+<span class="px-2 py-0.5 rounded text-[10px] font-bold tracking-widest uppercase bg-[#FFB82E] text-white">Major</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Net quantity declared as "approx. 500g", which violates strict standard measurement rules.</p>
+</div>
+</div>
+<!-- Violation Item 3: Major -->
+<div class="flex items-start gap-md p-sm rounded-xl hover:bg-surface-container-low transition-colors group relative border border-transparent hover:border-[#FFB82E]/30 cursor-pointer">
+<div class="w-1.5 h-full absolute left-0 top-0 bg-[#FFB82E] rounded-l-xl"></div>
+<div class="mt-1">
+<span class="material-symbols-outlined text-[#FFB82E]">warning</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<p class="font-label-md text-label-md text-on-surface">Rule 18 - MRP Contrast Issue</p>
+<span class="px-2 py-0.5 rounded text-[10px] font-bold tracking-widest uppercase bg-[#FFB82E] text-white">Major</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">The Maximum Retail Price (MRP) text contrast ratio against the background is below the required 4.5:1.</p>
+</div>
+</div>
+<!-- Violation Item 4: Minor -->
+<div class="flex items-start gap-md p-sm rounded-xl hover:bg-surface-container-low transition-colors group relative border border-transparent hover:border-[#00A859]/30 cursor-pointer">
+<div class="w-1.5 h-full absolute left-0 top-0 bg-[#00A859] rounded-l-xl"></div>
+<div class="mt-1">
+<span class="material-symbols-outlined text-[#00A859]">info</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<p class="font-label-md text-label-md text-on-surface">Rule 4 - Font Size Irregularity</p>
+<span class="px-2 py-0.5 rounded text-[10px] font-bold tracking-widest uppercase bg-[#00A859] text-white">Minor</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Ingredient list font size is marginally smaller than the prescribed 1.5mm minimum height.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Footer -->
+<div class="mt-lg pt-md border-t border-surface-variant flex flex-col sm:flex-row justify-end gap-sm">
+<button class="flex items-center justify-center gap-xs px-6 py-4 rounded-full font-label-md text-label-md border-2 border-primary text-primary hover:bg-primary/5 transition-colors">
+<span class="material-symbols-outlined text-[18px]">share</span>
+                    Share
+                </button>
+<button class="flex items-center justify-center gap-xs px-6 py-4 rounded-full font-label-md text-label-md bg-secondary text-on-secondary hover:bg-secondary/90 shadow-md transition-all active:scale-95">
+<span class="material-symbols-outlined text-[18px]">save</span>
+                    Save to Repository
+                </button>
+<button class="flex items-center justify-center gap-xs px-6 py-4 rounded-full font-label-md text-label-md bg-tertiary-container text-on-tertiary-container hover:bg-tertiary-container/90 shadow-md transition-all active:scale-95">
+<span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+                    Export PDF
+                </button>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 pb-safe bg-surface/80 backdrop-blur-md shadow-lg border-t border-outline-variant rounded-t-xl transition-transform duration-200">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-highest rounded-lg p-2 transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">home</span>
+<span class="font-label-md text-[10px] mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-highest rounded-lg p-2 transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">add_circle</span>
+<span class="font-label-md text-[10px] mt-1">Scan</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">assessment</span>
+<span class="font-label-md text-[10px] mt-1">Reports</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-highest rounded-lg p-2 transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">database</span>
+<span class="font-label-md text-[10px] mt-1">Store</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-highest rounded-lg p-2 transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">more_horiz</span>
+<span class="font-label-md text-[10px] mt-1">More</span>
+</a>
+</nav>
+</body></html>
