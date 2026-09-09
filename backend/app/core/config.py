@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
     # Database
-    DATABASE_URL: str = "sqlite+aiosqlite:///./packcheck.db"
+    DATABASE_URL: str = "sqlite+aiosqlite:////tmp/packcheck.db" if os.environ.get("VERCEL") else "sqlite+aiosqlite:///./packcheck.db"
     DB_ECHO: bool = False
 
     # CORS
@@ -38,8 +38,8 @@ class Settings(BaseSettings):
 
     # Storage
     STORAGE_PROVIDER: str = "local"  # "local", "s3", "minio"
-    LOCAL_STORAGE_DIR: str = "./uploads"
-    REPORTS_DIR: str = "./reports"
+    LOCAL_STORAGE_DIR: str = "/tmp/uploads" if os.environ.get("VERCEL") else "./uploads"
+    REPORTS_DIR: str = "/tmp/reports" if os.environ.get("VERCEL") else "./reports"
 
     # S3 / MinIO
     S3_ENDPOINT_URL: Optional[str] = "http://localhost:9000"
