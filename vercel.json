@@ -1,13 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/api/index"
-    }
-  ],
   "functions": {
-    "api/index.py": {
+    "index.py": {
       "includeFiles": "backend/app/**",
       "excludeFiles": "{backend/tests/**,backend/scratch/**,backend/uploads/**,backend/app/**/__pycache__/**}"
     }
