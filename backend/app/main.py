@@ -19,14 +19,19 @@ ASSETS_DIR = os.path.join(FRONTEND_DIST, "assets")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Initialize database tables
-    await init_db()
-    await seed_demo_users()
+    # Initialize database tables and seed demo users safely
+    try:
+        await init_db()
+        await seed_demo_users()
+    except Exception as e:
+        print(f"Database initialization warning: {e}")
     
-    # Ensure upload, static & reports directories exist
-    os.makedirs(settings.LOCAL_STORAGE_DIR, exist_ok=True)
-    os.makedirs(settings.REPORTS_DIR, exist_ok=True)
-    os.makedirs(STATIC_DIR, exist_ok=True)
+    # Ensure upload, static & reports directories exist safely
+    for directory in [settings.LOCAL_STORAGE_DIR, settings.REPORTS_DIR, STATIC_DIR]:
+        try:
+            os.makedirs(directory, exist_ok=True)
+        except Exception:
+            pass
     yield
 
 

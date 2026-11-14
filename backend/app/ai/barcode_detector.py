@@ -101,7 +101,7 @@ class BarcodeQRDetector:
             }
 
     @staticmethod
-    def _points_to_bbox(points: np.ndarray, img_w: int, img_h: int) -> Dict[str, float]:
+    def _points_to_bbox(points: Any, img_w: int, img_h: int) -> Dict[str, float]:
         """Converts OpenCV corner points to normalized or pixel bounding box."""
         if points is None or len(points) == 0:
             return {"x": 0.0, "y": 0.0, "w": 0.0, "h": 0.0}

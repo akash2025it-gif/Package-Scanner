@@ -26,7 +26,7 @@ class ImagePreprocessor:
     """
 
     @staticmethod
-    def deskew_image(cv_img: np.ndarray) -> Tuple[np.ndarray, float]:
+    def deskew_image(cv_img: Any) -> Tuple[Any, float]:
         """
         Detects text skew angle and rotates image to align text horizontally.
         Returns: (deskewed_image, angle_degrees)

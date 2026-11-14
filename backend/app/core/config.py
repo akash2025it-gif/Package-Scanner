@@ -12,11 +12,21 @@ DEFAULT_SQLITE_URL = f"sqlite+aiosqlite:///{DEFAULT_DB_FILE.replace(chr(92), '/'
 if os.environ.get("VERCEL"):
     system_tmp = tempfile.gettempdir()
     tmp_db = os.path.join(system_tmp, "packcheck.db")
-    if not os.path.exists(tmp_db) and os.path.exists(DEFAULT_DB_FILE):
-        try:
-            shutil.copyfile(DEFAULT_DB_FILE, tmp_db)
-        except Exception:
-            pass
+    if not os.path.exists(tmp_db):
+        candidates = [
+            DEFAULT_DB_FILE,
+            os.path.join(os.getcwd(), "backend", "packcheck.db"),
+            os.path.join(os.getcwd(), "packcheck.db"),
+            "/var/task/backend/packcheck.db",
+            "/var/task/packcheck.db",
+        ]
+        for cand in candidates:
+            if os.path.exists(cand):
+                try:
+                    shutil.copyfile(cand, tmp_db)
+                    break
+                except Exception:
+                    pass
     DEFAULT_SQLITE_URL = f"sqlite+aiosqlite:///{tmp_db.replace(chr(92), '/')}"
 
 
