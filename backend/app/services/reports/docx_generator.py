@@ -1,9 +1,14 @@
 import io
 from typing import Any, Dict
-from docx import Document
-from docx.enum.table import WD_TABLE_ALIGNMENT
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.shared import Inches, Pt, RGBColor
+
+try:
+    from docx import Document
+    from docx.enum.table import WD_TABLE_ALIGNMENT
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.shared import Inches, Pt, RGBColor
+    HAS_DOCX = True
+except ImportError:
+    HAS_DOCX = False
 
 
 class DocxReportGenerator:
@@ -11,6 +16,10 @@ class DocxReportGenerator:
 
     @staticmethod
     def generate_docx_bytes(context: Dict[str, Any]) -> bytes:
+        if not HAS_DOCX:
+            p_name = (context.get("product") or {}).get("name", "Packaged Commodity")
+            return f"PackCheck AI Statutory Inspection Report: {p_name}".encode("utf-8")
+
         doc = Document()
 
         # Set standard margins
