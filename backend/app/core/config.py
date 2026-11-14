@@ -1,5 +1,6 @@
 import os
 import shutil
+import tempfile
 from typing import List, Optional, Union
 from pydantic import AnyHttpUrl, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -9,13 +10,14 @@ DEFAULT_DB_FILE = os.path.join(BACKEND_DIR, "packcheck.db")
 DEFAULT_SQLITE_URL = f"sqlite+aiosqlite:///{DEFAULT_DB_FILE.replace(chr(92), '/')}"
 
 if os.environ.get("VERCEL"):
-    tmp_db = "/tmp/packcheck.db"
+    system_tmp = tempfile.gettempdir()
+    tmp_db = os.path.join(system_tmp, "packcheck.db")
     if not os.path.exists(tmp_db) and os.path.exists(DEFAULT_DB_FILE):
         try:
             shutil.copyfile(DEFAULT_DB_FILE, tmp_db)
         except Exception:
             pass
-    DEFAULT_SQLITE_URL = f"sqlite+aiosqlite:///{tmp_db}"
+    DEFAULT_SQLITE_URL = f"sqlite+aiosqlite:///{tmp_db.replace(chr(92), '/')}"
 
 
 class Settings(BaseSettings):
@@ -52,8 +54,8 @@ class Settings(BaseSettings):
 
     # Storage
     STORAGE_PROVIDER: str = "local"  # "local", "s3", "minio"
-    LOCAL_STORAGE_DIR: str = "/tmp/uploads" if os.environ.get("VERCEL") else os.path.join(BACKEND_DIR, "uploads")
-    REPORTS_DIR: str = "/tmp/reports" if os.environ.get("VERCEL") else os.path.join(BACKEND_DIR, "reports")
+    LOCAL_STORAGE_DIR: str = os.path.join(tempfile.gettempdir(), "uploads") if os.environ.get("VERCEL") else os.path.join(BACKEND_DIR, "uploads")
+    REPORTS_DIR: str = os.path.join(tempfile.gettempdir(), "reports") if os.environ.get("VERCEL") else os.path.join(BACKEND_DIR, "reports")
 
     # S3 / MinIO
     S3_ENDPOINT_URL: Optional[str] = "http://localhost:9000"
@@ -89,5 +91,8 @@ class Settings(BaseSettings):
 settings = Settings()
 
 # Ensure local directories exist if local storage is used
-os.makedirs(settings.LOCAL_STORAGE_DIR, exist_ok=True)
-os.makedirs(settings.REPORTS_DIR, exist_ok=True)
+try:
+    os.makedirs(settings.LOCAL_STORAGE_DIR, exist_ok=True)
+    os.makedirs(settings.REPORTS_DIR, exist_ok=True)
+except Exception:
+    pass

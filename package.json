@@ -1,0 +1,13 @@
+{
+  "name": "packcheck-ai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PackCheck AI - Legal Metrology (LMPC 2011) Compliance Inspection Platform",
+  "workspaces": [
+    "frontend"
+  ],
+  "scripts": {
+    "build": "npm run build --prefix frontend",
+    "dev": "npm run dev --prefix frontend"
+  }
+}

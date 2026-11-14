@@ -8,6 +8,7 @@ from app.api.v1.reports import router as reports_router
 from app.api.v1.scans import check_image_quality, router as scans_router
 from app.api.v1.storage import router as storage_router
 from app.api.v1.users import router as users_router
+from app.rules.config_loader import RuleConfigLoader
 from app.schemas.common import APIResponse
 
 api_router = APIRouter()
@@ -26,6 +27,28 @@ async def health_check():
             "version": "1.0.0",
             "status": "healthy",
         },
+    )
+
+# Statutory LMPC 2011 Compliance Rules
+@api_router.get("/rules", tags=["Compliance Rules"])
+async def get_compliance_rules():
+    loader = RuleConfigLoader.get_instance()
+    return APIResponse(
+        success=True,
+        message="Statutory LMPC 2011 compliance rules retrieved",
+        data=[
+            {
+                "id": r.id,
+                "field_type": r.field_type,
+                "name": r.name,
+                "description": r.description,
+                "rule_reference": r.rule_reference,
+                "validation_type": r.validation_type,
+                "severity": r.severity,
+                "enabled": r.enabled,
+            }
+            for r in loader.rules
+        ],
     )
 
 api_router.include_router(auth_router)
