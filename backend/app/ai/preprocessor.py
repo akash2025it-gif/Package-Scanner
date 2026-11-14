@@ -1,8 +1,15 @@
 import io
 import math
 from typing import Tuple, Dict, Any, Optional
-import cv2
-import numpy as np
+try:
+    import cv2
+except ImportError:
+    cv2 = None
+
+try:
+    import numpy as np
+except ImportError:
+    np = None
 from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 
 
@@ -77,6 +84,16 @@ class ImagePreprocessor:
                 pil_img = pil_img.convert("RGB")
 
             orig_w, orig_h = pil_img.size
+
+            if cv2 is None or np is None:
+                out_buf = io.BytesIO()
+                pil_img.save(out_buf, format="JPEG", quality=94)
+                return out_buf.getvalue(), orig_w, orig_h, {
+                    "original_dimensions": {"width": orig_w, "height": orig_h},
+                    "processed_dimensions": {"width": orig_w, "height": orig_h},
+                    "skew_angle_deg": 0.0,
+                    "scale_factor": 1.0
+                }
 
             # 2. Convert to OpenCV BGR
             cv_img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)

@@ -9,6 +9,7 @@ export interface User {
   region?: string;
   phone?: string;
   is_active: boolean;
+  created_at?: string;
 }
 
 export type ComplianceStatus = 'compliant' | 'non_compliant' | 'needs_review' | 'reviewed' | 'closed' | 'failed' | 'processing';

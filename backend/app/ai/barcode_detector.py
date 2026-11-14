@@ -1,8 +1,15 @@
 import re
 import urllib.parse
 from typing import Any, Dict, List, Optional, Tuple
-import cv2
-import numpy as np
+try:
+    import cv2
+except ImportError:
+    cv2 = None
+
+try:
+    import numpy as np
+except ImportError:
+    np = None
 
 
 class BarcodeQRDetector:
@@ -13,10 +20,14 @@ class BarcodeQRDetector:
     """
 
     def __init__(self):
-        self.qr_detector = cv2.QRCodeDetector()
-        try:
-            self.barcode_detector = cv2.barcode.BarcodeDetector()
-        except Exception:
+        if cv2 is not None:
+            self.qr_detector = cv2.QRCodeDetector()
+            try:
+                self.barcode_detector = cv2.barcode.BarcodeDetector()
+            except Exception:
+                self.barcode_detector = None
+        else:
+            self.qr_detector = None
             self.barcode_detector = None
 
     @staticmethod

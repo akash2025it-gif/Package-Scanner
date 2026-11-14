@@ -65,8 +65,9 @@ app.add_middleware(
 # Register custom exception handler
 app.add_exception_handler(PackCheckException, packcheck_exception_handler)
 
-# Include v1 API Router
+# Include v1 API Router (both with and without /api prefix for Vercel serverless compatibility)
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)
+app.include_router(api_router, prefix="/v1")
 
 # Mount static and SPA asset files
 if os.path.exists(ASSETS_DIR):
