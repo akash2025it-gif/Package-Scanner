@@ -44,16 +44,11 @@ from app.core.security import create_access_token, hash_password
 from app.main import app
 from app.models import User, Product, Scan, ScanImage, Declaration, ComplianceReport, AuditLog
 
-# Test async engine pointing to shared file
-test_engine = create_async_engine(TEST_DB_URL, connect_args={"check_same_thread": False}, echo=False)
+from sqlalchemy.pool import NullPool
+
+# Test async engine pointing to shared file with NullPool to prevent event-loop deadlocks
+test_engine = create_async_engine(TEST_DB_URL, poolclass=NullPool, connect_args={"check_same_thread": False}, echo=False)
 TestSessionLocal = async_sessionmaker(bind=test_engine, class_=AsyncSession, expire_on_commit=False)
-
-
-@pytest.fixture(scope="session")
-def event_loop():
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
 
 
 @pytest_asyncio.fixture(scope="function")

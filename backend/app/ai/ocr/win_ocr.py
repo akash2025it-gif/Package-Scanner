@@ -58,7 +58,16 @@ class WindowsMediaOCRProvider(OCRProvider):
                 scan_img = orig_img.resize(new_size, Image.Resampling.LANCZOS)
 
             try:
-                ocr_output = await winocr.recognize_pil(scan_img, lang=self.default_lang)
+                if hasattr(winocr, "to_coroutine"):
+                    ocr_output = await asyncio.wait_for(
+                        winocr.to_coroutine(winocr.recognize_pil(scan_img, lang=self.default_lang)),
+                        timeout=3.0,
+                    )
+                else:
+                    ocr_output = await asyncio.wait_for(
+                        asyncio.to_thread(winocr.recognize_pil_sync, scan_img, self.default_lang),
+                        timeout=3.0,
+                    )
             except Exception:
                 continue
 

@@ -268,6 +268,8 @@ async def _execute_analysis(db: AsyncSession, scan_id: str) -> Dict[str, Any]:
         meta["auto_confirmed_findings_count"] = auto_confirmed_count
         meta["manual_review_findings_count"] = manual_review_count
         meta["total_declarations_count"] = len(analysis_result.get("declarations", []))
+        meta["barcode_info"] = analysis_result.get("barcode_info", {})
+        meta["preprocessing"] = analysis_result.get("preprocessing", {})
 
         # OCR Batch Extraction & Discrepancy Detection
         import re

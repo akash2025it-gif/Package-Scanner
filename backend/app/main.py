@@ -12,6 +12,9 @@ from app.core.exceptions import PackCheckException, packcheck_exception_handler
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "static")
+ROOT_DIR = os.path.dirname(os.path.dirname(BASE_DIR))
+FRONTEND_DIST = os.path.join(ROOT_DIR, "frontend", "dist")
+ASSETS_DIR = os.path.join(FRONTEND_DIST, "assets")
 
 
 @asynccontextmanager
@@ -65,7 +68,10 @@ app.add_exception_handler(PackCheckException, packcheck_exception_handler)
 # Include v1 API Router
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 
-# Mount static files
+# Mount static and SPA asset files
+if os.path.exists(ASSETS_DIR):
+    app.mount("/assets", StaticFiles(directory=ASSETS_DIR), name="assets")
+
 if os.path.exists(STATIC_DIR):
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
@@ -73,6 +79,9 @@ if os.path.exists(STATIC_DIR):
 # Interactive UI Routes
 @app.get("/", response_class=FileResponse)
 async def serve_root():
+    spa_index = os.path.join(FRONTEND_DIST, "index.html")
+    if os.path.exists(spa_index):
+        return FileResponse(spa_index)
     login_path = os.path.join(STATIC_DIR, "login.html")
     if os.path.exists(login_path):
         return FileResponse(login_path)
@@ -86,27 +95,98 @@ async def serve_root():
 
 @app.get("/login", response_class=FileResponse)
 async def serve_login():
+    spa_index = os.path.join(FRONTEND_DIST, "index.html")
+    if os.path.exists(spa_index):
+        return FileResponse(spa_index)
     return FileResponse(os.path.join(STATIC_DIR, "login.html"))
 
 
 @app.get("/dashboard", response_class=FileResponse)
 async def serve_dashboard():
+    spa_index = os.path.join(FRONTEND_DIST, "index.html")
+    if os.path.exists(spa_index):
+        return FileResponse(spa_index)
     return FileResponse(os.path.join(STATIC_DIR, "dashboard.html"))
 
 
 @app.get("/scan/new", response_class=FileResponse)
 async def serve_scan_new():
+    spa_index = os.path.join(FRONTEND_DIST, "index.html")
+    if os.path.exists(spa_index):
+        return FileResponse(spa_index)
     return FileResponse(os.path.join(STATIC_DIR, "scan_new.html"))
+
+
+@app.get("/scan/{id}", response_class=FileResponse)
+async def serve_scan_detail(id: str):
+    spa_index = os.path.join(FRONTEND_DIST, "index.html")
+    if os.path.exists(spa_index):
+        return FileResponse(spa_index)
+    return FileResponse(os.path.join(STATIC_DIR, "analysis.html"))
+
+
+@app.get("/scan/{id}/processing", response_class=FileResponse)
+async def serve_scan_processing(id: str):
+    spa_index = os.path.join(FRONTEND_DIST, "index.html")
+    if os.path.exists(spa_index):
+        return FileResponse(spa_index)
+    return FileResponse(os.path.join(STATIC_DIR, "analysis.html"))
 
 
 @app.get("/analysis", response_class=FileResponse)
 async def serve_analysis():
+    spa_index = os.path.join(FRONTEND_DIST, "index.html")
+    if os.path.exists(spa_index):
+        return FileResponse(spa_index)
     return FileResponse(os.path.join(STATIC_DIR, "analysis.html"))
 
 
-@app.get("/report", response_class=FileResponse)
-async def serve_report():
+@app.get("/history", response_class=FileResponse)
+async def serve_history():
+    spa_index = os.path.join(FRONTEND_DIST, "index.html")
+    if os.path.exists(spa_index):
+        return FileResponse(spa_index)
+    return FileResponse(os.path.join(STATIC_DIR, "dashboard.html"))
+
+
+@app.get("/review-queue", response_class=FileResponse)
+async def serve_review_queue():
+    spa_index = os.path.join(FRONTEND_DIST, "index.html")
+    if os.path.exists(spa_index):
+        return FileResponse(spa_index)
+    return FileResponse(os.path.join(STATIC_DIR, "dashboard.html"))
+
+
+@app.get("/reports", response_class=FileResponse)
+async def serve_reports():
+    spa_index = os.path.join(FRONTEND_DIST, "index.html")
+    if os.path.exists(spa_index):
+        return FileResponse(spa_index)
     return FileResponse(os.path.join(STATIC_DIR, "report.html"))
+
+
+@app.get("/rules", response_class=FileResponse)
+async def serve_rules():
+    spa_index = os.path.join(FRONTEND_DIST, "index.html")
+    if os.path.exists(spa_index):
+        return FileResponse(spa_index)
+    return FileResponse(os.path.join(STATIC_DIR, "dashboard.html"))
+
+
+@app.get("/analytics", response_class=FileResponse)
+async def serve_analytics():
+    spa_index = os.path.join(FRONTEND_DIST, "index.html")
+    if os.path.exists(spa_index):
+        return FileResponse(spa_index)
+    return FileResponse(os.path.join(STATIC_DIR, "enforcement.html"))
+
+
+@app.get("/settings", response_class=FileResponse)
+async def serve_settings():
+    spa_index = os.path.join(FRONTEND_DIST, "index.html")
+    if os.path.exists(spa_index):
+        return FileResponse(spa_index)
+    return FileResponse(os.path.join(STATIC_DIR, "team.html"))
 
 
 @app.get("/products-ui", response_class=FileResponse)
@@ -132,6 +212,17 @@ async def serve_batch_detail(batch_number: str):
 @app.get("/batches-ui", response_class=FileResponse)
 async def serve_batches_ui():
     return FileResponse(os.path.join(STATIC_DIR, "batch_detail.html"))
+
+
+@app.get("/api/health")
+@app.get("/health")
+async def health():
+    return {
+        "status": "healthy",
+        "service": settings.APP_NAME,
+        "version": "1.0.0",
+        "database": "connected",
+    }
 
 
 @app.get("/api/info")
