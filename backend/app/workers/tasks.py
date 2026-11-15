@@ -65,6 +65,14 @@ async def _execute_analysis(db: AsyncSession, scan_id: str) -> Dict[str, Any]:
                 image_bytes = await storage_service.get_file_bytes(primary_image.storage_key)
             except Exception:
                 image_bytes = b""
+            if not image_bytes and getattr(primary_image, "quality_details_json", None):
+                b64 = (primary_image.quality_details_json or {}).get("image_base64")
+                if b64:
+                    try:
+                        import base64
+                        image_bytes = base64.b64decode(b64)
+                    except Exception:
+                        pass
 
         # Prepare product info
         product_info = {}

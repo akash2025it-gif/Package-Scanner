@@ -158,10 +158,25 @@ class RealHybridOCRProvider(OCRProvider):
         blocks: List[TextBlock] = []
         for line in lines:
             line_words = line.get("Words", [])
-            for w in line_words:
+            valid_words = [w for w in line_words if (w.get("WordText") or "").strip()]
+            line_str = " ".join((w.get("WordText") or "").strip() for w in valid_words)
+            
+            if valid_words and line_str:
+                min_l = min(float(w.get("Left", 0)) for w in valid_words)
+                min_t = min(float(w.get("Top", 0)) for w in valid_words)
+                max_r = max(float(w.get("Left", 0)) + float(w.get("Width", 40)) for w in valid_words)
+                max_b = max(float(w.get("Top", 0)) + float(w.get("Height", 20)) for w in valid_words)
+                blocks.append(
+                    TextBlock(
+                        text=line_str,
+                        bounding_box={"x": min_l, "y": min_t, "w": max_r - min_l, "h": max_b - min_t},
+                        confidence=0.95,
+                        font_size_px=max_b - min_t,
+                    )
+                )
+
+            for w in valid_words:
                 w_text = (w.get("WordText") or "").strip()
-                if not w_text:
-                    continue
                 left = float(w.get("Left", 0))
                 top = float(w.get("Top", 0))
                 height = float(w.get("Height", 20))

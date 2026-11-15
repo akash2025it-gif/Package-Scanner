@@ -1,3 +1,4 @@
+import base64
 from datetime import datetime, timezone
 from typing import List, Optional
 import uuid
@@ -302,6 +303,8 @@ async def upload_scan_images(
 
         # Real mathematical blur and image quality analysis
         quality_eval = ImageQualityValidator.validate_image_bytes(file_bytes, threshold=threshold)
+        # Store base64 representation to ensure cross-serverless container accessibility
+        quality_eval["image_base64"] = base64.b64encode(file_bytes).decode("ascii")
         w = quality_eval.get("width")
         h = quality_eval.get("height")
         q_quality = quality_eval.get("image_quality", "CLEAR")
