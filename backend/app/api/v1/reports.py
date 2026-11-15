@@ -36,6 +36,34 @@ async def generate_scan_report(
     )
 
 
+@router.get("/scans/{id}/report", response_model=APIResponse[ComplianceReportResponse])
+async def get_or_create_scan_report(
+    id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """Retrieves existing report for a scan, or generates one on-demand."""
+    result = await db.execute(
+        select(ComplianceReport)
+        .where(ComplianceReport.scan_id == id)
+        .order_by(ComplianceReport.created_at.desc())
+        .limit(1)
+    )
+    report = result.scalar_one_or_none()
+    if not report:
+        coordinator = ReportCoordinator()
+        report = await coordinator.generate_scan_report(
+            db=db,
+            scan_id=id,
+            user_id=current_user.id,
+        )
+
+    return APIResponse(
+        success=True,
+        data=ComplianceReportResponse.model_validate(report),
+    )
+
+
 @router.get("/reports/{id}", response_model=APIResponse[ComplianceReportResponse])
 async def get_report_by_id(
     id: str,
@@ -66,14 +94,17 @@ async def download_pdf_report(
     if not report or not report.summary_data:
         raise NotFoundException(f"Compliance report {id} not found")
 
-    storage_service = get_storage_service()
     coordinator = ReportCoordinator()
     pdf_bytes = coordinator.pdf_generator.generate_pdf_bytes(report.summary_data)
 
+    is_actual_pdf = pdf_bytes.startswith(b"%PDF")
+    media_type = "application/pdf" if is_actual_pdf else "text/html; charset=utf-8"
+    filename = f"compliance_report_{report.scan_id}.pdf" if is_actual_pdf else f"compliance_report_{report.scan_id}.html"
+
     return Response(
         content=pdf_bytes,
-        media_type="application/pdf",
-        headers={"Content-Disposition": f'inline; filename="compliance_report_{report.scan_id}.pdf"'},
+        media_type=media_type,
+        headers={"Content-Disposition": f'inline; filename="{filename}"'},
     )
 
 

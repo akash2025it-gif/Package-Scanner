@@ -15,6 +15,7 @@ export const ReportsPage: React.FC = () => {
   const [scans, setScans] = useState<Scan[]>([]);
   const [selectedScan, setSelectedScan] = useState<Scan | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isGeneratingDoc, setIsGeneratingDoc] = useState(false);
 
   useEffect(() => {
     const fetchScans = async () => {
@@ -69,6 +70,19 @@ export const ReportsPage: React.FC = () => {
     window.print();
   };
 
+  const downloadOfficialReport = async (scan: Scan) => {
+    setIsGeneratingDoc(true);
+    try {
+      const rep = await api.getScanReport(scan.id);
+      const pdfUrl = api.getReportPdfUrl(rep.id);
+      window.open(pdfUrl, '_blank');
+    } catch (err: any) {
+      alert('Failed to retrieve statutory report: ' + (err.message || 'Error'));
+    } finally {
+      setIsGeneratingDoc(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -118,18 +132,26 @@ export const ReportsPage: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <button
+                    onClick={() => downloadOfficialReport(selectedScan)}
+                    disabled={isGeneratingDoc}
+                    className="px-3.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors"
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>{isGeneratingDoc ? 'Generating...' : 'Official Certificate'}</span>
+                  </button>
+                  <button
                     onClick={handlePrint}
                     className="px-3.5 py-1.5 rounded-xl border border-gray-300 hover:bg-gray-50 text-xs font-bold text-gray-700 flex items-center gap-1.5 transition-colors"
                   >
                     <Printer className="w-3.5 h-3.5 text-[#0051d5]" />
-                    <span>Print PDF</span>
+                    <span>Print View</span>
                   </button>
                   <button
                     onClick={() => downloadJsonReport(selectedScan)}
                     className="px-3.5 py-1.5 rounded-xl bg-[#0051d5] hover:bg-[#003ea7] text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors"
                   >
                     <Download className="w-3.5 h-3.5" />
-                    <span>Download JSON Dossier</span>
+                    <span>Download JSON</span>
                   </button>
                 </div>
               </div>

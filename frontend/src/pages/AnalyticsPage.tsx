@@ -9,6 +9,8 @@ import {
   AlertTriangle,
   RefreshCw,
   MapPin,
+  PackageCheck,
+  Info,
 } from 'lucide-react';
 
 export const AnalyticsPage: React.FC = () => {
@@ -31,26 +33,32 @@ export const AnalyticsPage: React.FC = () => {
     fetchAnalytics();
   }, []);
 
-  const total = summary?.total_inspections || 54;
-  const compliant = summary?.compliant_count || 48;
-  const violations = summary?.non_compliant_count || 4;
-  const review = summary?.needs_review_count || 2;
-  const complianceRate = total > 0 ? Math.round((compliant / total) * 100) : 89;
+  const total = summary?.total_inspections ?? 0;
+  const compliant = summary?.compliant_count ?? 0;
+  const violations = summary?.non_compliant_count ?? 0;
+  const review = summary?.needs_review_count ?? 0;
+  const complianceRate = total > 0 ? Math.round((compliant / total) * 100) : 0;
 
-  const topViolations = summary?.top_violations || [
-    { field_type: 'mrp', name: 'Missing "Inclusive of all taxes"', count: 18 },
-    { field_type: 'net_quantity', name: 'Illegal non-standard unit (e.g. gms / kgs)', count: 14 },
-    { field_type: 'consumer_care', name: 'Missing telephone/email contact', count: 11 },
-    { field_type: 'mfg_date', name: 'Missing Month/Year of packing', count: 9 },
-    { field_type: 'manufacturer_details', name: 'Incomplete business address or pin code', count: 6 },
-  ];
+  // Use real backend most common findings
+  const topViolations = summary?.most_common_findings && summary.most_common_findings.length > 0
+    ? summary.most_common_findings.map((f) => ({
+        name: f.finding_name,
+        count: f.total_violations || f.affected_inspections,
+        rule: f.rule_reference,
+      }))
+    : (summary?.top_violations || []);
 
-  const regionalBreakdown = [
-    { region: 'Delhi NCR', total: 24, rate: '92%', status: 'Normal' },
-    { region: 'Maharashtra', total: 14, rate: '85%', status: 'Attention Required' },
-    { region: 'Karnataka', total: 10, rate: '90%', status: 'Normal' },
-    { region: 'Tamil Nadu', total: 6, rate: '94%', status: 'Normal' },
-  ];
+  const regionalBreakdown = summary?.regional_overview && summary.regional_overview.length > 0
+    ? summary.regional_overview.map((r) => ({
+        region: r.region,
+        total: r.total_inspections,
+        rate: `${Math.round(100 - (r.violation_rate || 0))}%`,
+        status: (r.violation_rate || 0) > 20 ? 'Attention Required' : 'Normal',
+      }))
+    : [];
+
+  const categoryRisks = summary?.product_risk_overview || [];
+  const dynamicInsights = summary?.dynamic_insights || [];
 
   return (
     <div className="space-y-6">
@@ -71,6 +79,21 @@ export const AnalyticsPage: React.FC = () => {
           <span>Refresh Data</span>
         </button>
       </div>
+
+      {/* Dynamic Statutory Insights */}
+      {dynamicInsights.length > 0 && (
+        <div className="p-4 rounded-2xl bg-blue-50/70 border border-blue-200/80 text-[#00174b] text-xs space-y-1">
+          <div className="flex items-center gap-2 font-bold text-[#0051d5]">
+            <Info className="w-4 h-4 shrink-0" />
+            <span>Active Enforcement Intelligence</span>
+          </div>
+          <ul className="list-disc list-inside space-y-0.5 text-gray-700 pl-1">
+            {dynamicInsights.map((insight, idx) => (
+              <li key={idx}>{insight}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
@@ -113,30 +136,36 @@ export const AnalyticsPage: React.FC = () => {
             <BarChart3 className="w-4 h-4 text-[#0051d5]" />
           </div>
 
-          <div className="space-y-4 text-xs">
-            {topViolations.map((v, i) => {
-              const maxCount = Math.max(...topViolations.map((o) => o.count), 1);
-              const percentage = Math.round((v.count / maxCount) * 100);
+          {topViolations.length === 0 ? (
+            <div className="py-8 text-center text-xs text-gray-400">
+              No statutory violations detected across currently finalized inspection records.
+            </div>
+          ) : (
+            <div className="space-y-4 text-xs">
+              {topViolations.map((v, i) => {
+                const maxCount = Math.max(...topViolations.map((o) => o.count), 1);
+                const percentage = Math.round((v.count / maxCount) * 100);
 
-              return (
-                <div key={i} className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-gray-800">{v.name}</span>
-                    <span className="font-mono text-gray-500 font-bold">{v.count} violations</span>
+                return (
+                  <div key={i} className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-gray-800">{v.name}</span>
+                      <span className="font-mono text-gray-500 font-bold">{v.count} violations</span>
+                    </div>
+                    <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
+                      <div
+                        className="bg-[#0051d5] h-full rounded-full transition-all duration-500"
+                        style={{ width: `${percentage}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
-                    <div
-                      className="bg-[#0051d5] h-full rounded-full transition-all duration-500"
-                      style={{ width: `${percentage}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        {/* Regional Inspection Heatmap & Performance (5 cols) */}
+        {/* Regional Jurisdiction Breakdown (5 cols) */}
         <div className="lg:col-span-5 bg-white rounded-2xl border border-gray-200 shadow-xs p-6 space-y-4">
           <div className="flex items-center justify-between border-b border-gray-100 pb-3">
             <div>
@@ -146,26 +175,80 @@ export const AnalyticsPage: React.FC = () => {
             <MapPin className="w-4 h-4 text-purple-600" />
           </div>
 
-          <div className="divide-y divide-gray-100 text-xs">
-            {regionalBreakdown.map((r, i) => (
-              <div key={i} className="py-3 flex items-center justify-between">
-                <div>
-                  <span className="font-bold text-gray-900 block">{r.region}</span>
-                  <span className="text-[11px] text-gray-400">{r.total} packages inspected</span>
+          {regionalBreakdown.length === 0 ? (
+            <div className="py-8 text-center text-xs text-gray-400">
+              No regional variance recorded yet. All scans recorded under Central Jurisdiction.
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-100 text-xs">
+              {regionalBreakdown.map((r, i) => (
+                <div key={i} className="py-3 flex items-center justify-between">
+                  <div>
+                    <span className="font-bold text-gray-900 block">{r.region}</span>
+                    <span className="text-[11px] text-gray-400">{r.total} packages inspected</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-bold text-emerald-700 block">{r.rate} Compliant</span>
+                    <span className="text-[10px] text-gray-500">{r.status}</span>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <span className="font-bold text-emerald-700 block">{r.rate} Compliant</span>
-                  <span className="text-[10px] text-gray-500">{r.status}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           <div className="p-3 rounded-xl bg-gray-50 text-[10px] text-gray-500 leading-tight">
             * Regional metrics reflect actual verified database records across all authorized inspection devices.
           </div>
         </div>
       </div>
+
+      {/* Commodity Category Risk Heatmap */}
+      {categoryRisks.length > 0 && (
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-xs p-6 space-y-4">
+          <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+            <div>
+              <h2 className="font-display font-bold text-sm text-gray-900">Commodity Category Risk Analysis</h2>
+              <p className="text-[11px] text-gray-500">Observed compliance rate categorized by commodity type</p>
+            </div>
+            <PackageCheck className="w-4 h-4 text-emerald-600" />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+            {categoryRisks.map((cat, idx) => (
+              <div key={idx} className="p-4 rounded-xl border border-gray-200 bg-gray-50/50 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-gray-900">{cat.category}</span>
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                      cat.risk_level === 'HIGH'
+                        ? 'bg-red-100 text-red-700'
+                        : cat.risk_level === 'MEDIUM'
+                        ? 'bg-amber-100 text-amber-700'
+                        : 'bg-emerald-100 text-emerald-700'
+                    }`}
+                  >
+                    {cat.risk_level} RISK
+                  </span>
+                </div>
+                <div className="flex justify-between text-gray-500 text-[11px]">
+                  <span>Total Inspected:</span>
+                  <span className="font-bold text-gray-800">{cat.total_inspections}</span>
+                </div>
+                <div className="flex justify-between text-gray-500 text-[11px]">
+                  <span>Violations Found:</span>
+                  <span className="font-bold text-red-600">{cat.non_compliant_count}</span>
+                </div>
+                <div className="flex justify-between text-gray-500 text-[11px]">
+                  <span>Compliance Rate:</span>
+                  <span className="font-bold text-emerald-700">
+                    {cat.compliance_rate !== undefined && cat.compliance_rate !== null ? `${cat.compliance_rate}%` : 'N/A'}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

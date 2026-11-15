@@ -39,22 +39,33 @@ class Settings(BaseSettings):
     )
 
     APP_NAME: str = "PackCheck API"
-    APP_ENV: str = "development"
-    DEBUG: bool = True
+    APP_ENV: str = "production" if os.environ.get("VERCEL") else "development"
+    DEBUG: bool = False if os.environ.get("VERCEL") else True
     API_V1_PREFIX: str = "/api/v1"
     
     # Secret key for JWT signing
-    SECRET_KEY: str = "packcheck-super-secret-production-key-change-me"
+    SECRET_KEY: str = os.environ.get("SECRET_KEY", "packcheck-super-secret-production-key-change-me")
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 1 day for convenience in testing
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 1 day
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+
+    # Default Seed Passwords (configurable via environment)
+    DEFAULT_ADMIN_PASSWORD: str = os.environ.get("DEFAULT_ADMIN_PASSWORD", "admin123")
+    DEFAULT_INSPECTOR_PASSWORD: str = os.environ.get("DEFAULT_INSPECTOR_PASSWORD", "inspector123")
 
     # Database
     DATABASE_URL: str = DEFAULT_SQLITE_URL
     DB_ECHO: bool = False
 
     # CORS
-    CORS_ORIGINS: Union[str, List[str]] = "http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:5173"
+    CORS_ORIGINS: Union[str, List[str]] = (
+        "https://package-scanner-rust.vercel.app,"
+        "https://package-scanner-8ayk.vercel.app,"
+        "http://localhost:3000,"
+        "http://localhost:5173,"
+        "http://127.0.0.1:3000,"
+        "http://127.0.0.1:5173"
+    )
 
     @property
     def cors_origins_list(self) -> List[str]:
@@ -81,8 +92,10 @@ class Settings(BaseSettings):
     CELERY_TASK_ALWAYS_EAGER: bool = True
 
     # AI / Vision / OCR Providers
-    OCR_PROVIDER: str = "mock"  # "mock", "google_vision", "tesseract"
-    GOOGLE_APPLICATION_CREDENTIALS: Optional[str] = None
+    OCR_PROVIDER: str = "real"  # "real", "google_vision", "tesseract", "windows_media"
+    OCR_SPACE_API_KEY: str = os.environ.get("OCR_SPACE_API_KEY", "helloworld")
+    GEMINI_API_KEY: Optional[str] = os.environ.get("GEMINI_API_KEY")
+    GOOGLE_APPLICATION_CREDENTIALS: Optional[str] = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
 
     REGION_DETECTOR_PROVIDER: str = "heuristic"  # "heuristic", "yolo_service"
     YOLO_SERVICE_URL: str = "http://localhost:8501/v1/models/lmpc-detector:predict"
@@ -94,7 +107,7 @@ class Settings(BaseSettings):
     AUTO_CONFIRM_VIOLATION_THRESHOLD: float = 80.0
 
     # Image Quality / Blur Validation Gate Settings
-    BLUR_THRESHOLD: float = 100.0  # Minimum Laplacian variance for an image to be considered CLEAR
+    BLUR_THRESHOLD: float = 60.0  # Calibrated Laplacian variance threshold (separates blurry from clear images)
     MIN_IMAGE_DIMENSION: int = 100  # Minimum width/height in px for reliable OCR extraction
 
 

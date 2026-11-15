@@ -141,6 +141,37 @@ export interface AnalyticsSummary {
   non_compliant_count: number;
   needs_review_count: number;
   compliance_rate: number;
-  top_violations: { field_type: string; count: number; name: string }[];
-  monthly_trends: { month: string; total: number; compliant: number; non_compliant: number }[];
+  top_violations?: { field_type: string; count: number; name: string }[];
+  most_common_findings?: {
+    finding_name: string;
+    field_type: string;
+    rule_reference: string;
+    affected_inspections: number;
+    total_violations: number;
+    severity: string;
+  }[];
+  regional_overview?: {
+    region: string;
+    total_inspections: number;
+    compliant_count: number;
+    non_compliant_count: number;
+    violation_rate: number;
+    top_violated_rule?: string;
+  }[];
+  product_risk_overview?: {
+    category: string;
+    total_inspections: number;
+    non_compliant_count: number;
+    compliant_count: number;
+    compliance_rate?: number;
+    risk_level: string;
+  }[];
+  dynamic_insights?: string[];
+  frequently_flagged_batches?: {
+    batch_number: string;
+    product_name: string;
+    reason: string;
+    non_compliant_inspections: number;
+  }[];
+  monthly_trends?: { month: string; total: number; compliant: number; non_compliant: number }[];
 }

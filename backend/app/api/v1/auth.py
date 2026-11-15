@@ -27,9 +27,13 @@ async def login(payload: LoginRequest, db: AsyncSession = Depends(get_db)):
         result = await db.execute(select(User).where(User.phone == payload.phone))
         user = result.scalar_one_or_none()
         
-        # Simulated OTP validation (default demo OTP: '123456')
-        if not user or (payload.otp != "123456" and not verify_password(payload.password or "", user.password_hash or "")):
-            raise UnauthorizedException("Invalid phone number or OTP")
+        # In production, fixed demo OTPs are strictly disallowed. Password verification is required unless dynamic OTP gateway is configured.
+        is_dev = settings.APP_ENV != "production" or settings.DEBUG
+        otp_valid = is_dev and (payload.otp == "123456")
+        pwd_valid = bool(user and user.password_hash and verify_password(payload.password or "", user.password_hash))
+        
+        if not user or (not otp_valid and not pwd_valid):
+            raise UnauthorizedException("Invalid phone credentials or expired OTP. Please use email and password.")
     else:
         raise ValidationException("Must provide either email and password or phone and OTP")
 

@@ -48,7 +48,7 @@ export const DashboardPage: React.FC = () => {
   const compliantCount = summary?.compliant_count ?? scans.filter((s) => s.status === 'reviewed' || s.status === 'closed').length;
   const nonCompliantCount = summary?.non_compliant_count ?? scans.filter((s) => s.status === 'failed').length;
   const reviewCount = summary?.needs_review_count ?? scans.filter((s) => s.status === 'needs_review' || s.status === 'processing').length;
-  const complianceRate = total > 0 ? Math.round((compliantCount / total) * 100) : 92;
+  const complianceRate = total > 0 ? Math.round((compliantCount / total) * 100) : 0;
 
   return (
     <div className="space-y-6">
