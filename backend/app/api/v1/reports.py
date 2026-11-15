@@ -46,7 +46,7 @@ async def get_or_create_scan_report(
     result = await db.execute(
         select(ComplianceReport)
         .where(ComplianceReport.scan_id == id)
-        .order_by(ComplianceReport.created_at.desc())
+        .order_by(ComplianceReport.generated_at.desc())
         .limit(1)
     )
     report = result.scalar_one_or_none()

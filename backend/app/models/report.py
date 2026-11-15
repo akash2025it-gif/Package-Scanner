@@ -20,6 +20,10 @@ class ComplianceReport(Base):
     
     generated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), index=True)
 
+    @property
+    def created_at(self) -> datetime:
+        return self.generated_at
+
     # Relationships
     scan = relationship("Scan", back_populates="reports")
     author = relationship("User", back_populates="reports")
