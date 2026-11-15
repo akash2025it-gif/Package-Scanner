@@ -60,6 +60,12 @@ class MRPValidator(BaseRuleValidator):
         # Check numeric price match
         price_match = self.PRICE_PATTERN.search(cleaned_text)
         has_tax_phrase = any(p.search(cleaned_text) for p in self.TAX_INCLUSIVE_PATTERNS)
+        if not has_tax_phrase and metadata:
+            # Check if statutory tax inclusivity is declared elsewhere on the label (e.g. adjacent line or full OCR text)
+            full_ocr = metadata.get("ocr_full_text") or metadata.get("full_text") or metadata.get("label_text") or ""
+            if any(p.search(full_ocr) for p in self.TAX_INCLUSIVE_PATTERNS):
+                has_tax_phrase = True
+                cleaned_text = f"{cleaned_text} (inclusive of all taxes)"
         
         # Check currency symbol presence
         has_currency_symbol = any(sym.lower() in cleaned_text.lower() for sym in (rule.currency_symbols or ["₹", "rs", "inr"]))

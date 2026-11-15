@@ -92,6 +92,41 @@ class HeuristicRegionDetector(RegionDetector):
                             matching_blocks.append(best_candidate)
                             break
 
+            # Vertical proximity check for multi-line fields:
+            # 1. Manufacturer details: If only a header was matched (e.g. "Manufactured & Packed by:"), group subsequent company name & address line
+            if field_type == "manufacturer_details" and matching_blocks:
+                header_text = " ".join(b.text for _, b in matching_blocks).strip()
+                stripped = re.sub(r"^(?:mfg\s+by|manufactured\s+(?:\&?\s*packed\s+)?by|packed\s+by|marketed\s+by|imported\s+by|mfg\s*\&?\s*pkd|regd\.\s*office)[\s\:\.\-]*", "", header_text, flags=re.IGNORECASE).strip()
+                if not stripped or len(stripped.split()) < 2:
+                    last_idx, last_blk = matching_blocks[-1]
+                    lbl_y = last_blk.bounding_box.get("y", 0.0)
+                    lbl_h = last_blk.bounding_box.get("h", 0.0)
+                    for c_idx, candidate in enumerate(ocr_result.blocks):
+                        if c_idx in used_blocks or any(c_idx == m[0] for m in matching_blocks):
+                            continue
+                        c_y = candidate.bounding_box.get("y", 0.0)
+                        if 0.0 <= (c_y - (lbl_y + lbl_h)) <= 80.0:
+                            is_other = any(pat.search(candidate.text) for f_k, pat in self.PATTERNS.items() if f_k not in ("manufacturer_details", "common_name"))
+                            if not is_other:
+                                matching_blocks.append((c_idx, candidate))
+                                break
+
+            # 2. MRP: If tax phrase is on the line immediately below the price, group it
+            if field_type == "mrp" and matching_blocks:
+                mrp_curr = " ".join(b.text for _, b in matching_blocks)
+                tax_pats = [re.compile(r"incl(?:usive)?\.?\s+of\s+all\s+taxes", re.IGNORECASE), re.compile(r"incl(?:usive)?\.?\s+all\s+taxes", re.IGNORECASE), re.compile(r"all\s+taxes\s+incl", re.IGNORECASE)]
+                if not any(p.search(mrp_curr) for p in tax_pats):
+                    last_idx, last_blk = matching_blocks[-1]
+                    lbl_y = last_blk.bounding_box.get("y", 0.0)
+                    lbl_h = last_blk.bounding_box.get("h", 0.0)
+                    for c_idx, candidate in enumerate(ocr_result.blocks):
+                        if c_idx in used_blocks or any(c_idx == m[0] for m in matching_blocks):
+                            continue
+                        c_y = candidate.bounding_box.get("y", 0.0)
+                        if 0.0 <= (c_y - (lbl_y + lbl_h)) <= 80.0 and any(p.search(candidate.text) for p in tax_pats):
+                            matching_blocks.append((c_idx, candidate))
+                            break
+
             if matching_blocks:
                 # Merge bounding box of all matching blocks for this field
                 min_x = min(b.bounding_box.get("x", 0.0) for _, b in matching_blocks)

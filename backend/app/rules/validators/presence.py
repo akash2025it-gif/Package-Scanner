@@ -44,20 +44,43 @@ class PresenceValidator(BaseRuleValidator):
                 evidence_text=f"Detected OCR text: '{cleaned_text}'",
             )
 
-        # For manufacturer address, check if it's too short (e.g. just 1-2 words)
-        if rule.field_type in ("manufacturer_details", "manufacturer") and len(cleaned_text.split()) < 3:
-            return ValidationResult(
-                is_compliant=False,
-                is_present=True,
-                rule_reference=ref,
-                severity="major",
-                notes="Manufacturer declaration is present but appears incomplete (missing complete postal address/location per Rule 6(1)(b)).",
-                suggested_correction="Declare complete name and postal address of manufacturer/packer/importer.",
-                extracted_value=cleaned_text,
-                confidence_score=confidence_score if confidence_score > 0 else 0.90,
-                needs_review=False,
-                evidence_text=f"Label text: '{cleaned_text}'",
-            )
+        # For manufacturer declaration: require actual company/entity name, not just a heading
+        if rule.field_type in ("manufacturer_details", "manufacturer"):
+            import re
+            stripped = re.sub(
+                r"^(?:mfg\s+by|manufactured\s+(?:\&?\s*packed\s+)?by|packed\s+by|marketed\s+by|imported\s+by|mfg\s*\&?\s*pkd|regd\.\s*office|fssai|lic\.?\s*no)[\s\:\.\-]*",
+                "",
+                cleaned_text,
+                flags=re.IGNORECASE,
+            ).strip()
+
+            if not stripped or len(stripped.split()) < 2:
+                return ValidationResult(
+                    is_compliant=False,
+                    is_present=True,
+                    rule_reference=ref,
+                    severity="critical",
+                    notes="Manufacturer declaration contains only a heading or prefix (e.g. 'Manufactured by:') without the actual manufacturer name or address per Rule 6(1)(b).",
+                    suggested_correction="Declare complete name and postal address of the manufacturer, packer, or importer.",
+                    extracted_value=cleaned_text,
+                    confidence_score=confidence_score if confidence_score > 0 else 0.90,
+                    needs_review=False,
+                    evidence_text=f"Label text: '{cleaned_text}'",
+                )
+
+            if len(cleaned_text.split()) < 3:
+                return ValidationResult(
+                    is_compliant=False,
+                    is_present=True,
+                    rule_reference=ref,
+                    severity="major",
+                    notes="Manufacturer declaration is present but appears incomplete (missing complete postal address/location per Rule 6(1)(b)).",
+                    suggested_correction="Declare complete name and postal address of manufacturer/packer/importer.",
+                    extracted_value=cleaned_text,
+                    confidence_score=confidence_score if confidence_score > 0 else 0.90,
+                    needs_review=False,
+                    evidence_text=f"Label text: '{cleaned_text}'",
+                )
 
         return ValidationResult(
             is_compliant=True,
