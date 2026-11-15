@@ -120,6 +120,7 @@ class ApiClient {
   async uploadScanImage(scanId: string, file: File, imageType = 'front'): Promise<ScanImage[]> {
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('files', file);
     formData.append('image_type', imageType);
     const res = await fetch(`${API_BASE_URL}/scans/${scanId}/images`, {
       method: 'POST',

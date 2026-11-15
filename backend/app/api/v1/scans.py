@@ -267,13 +267,22 @@ async def check_image_quality(
 @router.post("/{id}/images", response_model=APIResponse[List[ScanImageResponse]])
 async def upload_scan_images(
     id: str,
-    files: List[UploadFile] = File(...),
+    files: Optional[List[UploadFile]] = File(None),
+    file: Optional[UploadFile] = File(None),
     image_type: ImageTypeEnum = Form(ImageTypeEnum.FRONT),
     threshold: Optional[float] = Form(None),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_can_scan),
 ):
     """Uploads one or more packaging label images for a scan with automatic quality evaluation."""
+    upload_list: List[UploadFile] = []
+    if files:
+        upload_list.extend(files)
+    if file:
+        upload_list.append(file)
+    if not upload_list:
+        raise ValidationException("No image file provided for upload")
+
     result = await db.execute(select(Scan).where(Scan.id == id))
     scan = result.scalar_one_or_none()
     if not scan:
@@ -282,12 +291,12 @@ async def upload_scan_images(
     storage_service = get_storage_service()
     uploaded_images: List[ScanImage] = []
 
-    for file in files:
-        file_bytes = await file.read()
+    for file_item in upload_list:
+        file_bytes = await file_item.read()
         url, storage_key = await storage_service.upload_file(
             file_obj=file_bytes,
-            filename=file.filename or f"label_{uuid.uuid4().hex}.jpg",
-            content_type=file.content_type or "image/jpeg",
+            filename=file_item.filename or f"label_{uuid.uuid4().hex}.jpg",
+            content_type=file_item.content_type or "image/jpeg",
             folder=f"scans/{scan.id}",
         )
 
