@@ -105,6 +105,9 @@ class AIPipeline:
         # 6. Execute LMPC Rule Engine
         combined_meta = dict(meta)
         combined_meta["barcode_info"] = barcode_result
+        combined_meta["ocr_full_text"] = ocr_result.full_text
+        combined_meta["full_text"] = ocr_result.full_text
+        combined_meta["label_text"] = ocr_result.full_text
 
         declarations = self.rule_engine.evaluate_scan(
             extracted_fields=extracted_fields,

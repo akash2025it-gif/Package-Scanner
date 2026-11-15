@@ -101,15 +101,18 @@ class HeuristicRegionDetector(RegionDetector):
                     last_idx, last_blk = matching_blocks[-1]
                     lbl_y = last_blk.bounding_box.get("y", 0.0)
                     lbl_h = last_blk.bounding_box.get("h", 0.0)
+                    max_gap = max(120.0, lbl_h * 3.5)
                     for c_idx, candidate in enumerate(ocr_result.blocks):
                         if c_idx in used_blocks or any(c_idx == m[0] for m in matching_blocks):
                             continue
                         c_y = candidate.bounding_box.get("y", 0.0)
-                        if 0.0 <= (c_y - (lbl_y + lbl_h)) <= 80.0:
+                        if 0.0 <= (c_y - (lbl_y + lbl_h)) <= max_gap:
                             is_other = any(pat.search(candidate.text) for f_k, pat in self.PATTERNS.items() if f_k not in ("manufacturer_details", "common_name"))
-                            if not is_other:
+                            if not is_other and len(candidate.text.strip()) > 2:
                                 matching_blocks.append((c_idx, candidate))
-                                break
+                                stripped_cand = re.sub(r"^(?:mfg\s+by|manufactured\s+(?:\&?\s*packed\s+)?by|packed\s+by|marketed\s+by|imported\s+by)[\s\:\.\-]*", "", candidate.text, flags=re.IGNORECASE).strip()
+                                if len(stripped_cand.split()) >= 2:
+                                    break
 
             # 2. MRP: If tax phrase is on the line immediately below the price, group it
             if field_type == "mrp" and matching_blocks:
@@ -119,11 +122,12 @@ class HeuristicRegionDetector(RegionDetector):
                     last_idx, last_blk = matching_blocks[-1]
                     lbl_y = last_blk.bounding_box.get("y", 0.0)
                     lbl_h = last_blk.bounding_box.get("h", 0.0)
+                    max_gap = max(100.0, lbl_h * 3.0)
                     for c_idx, candidate in enumerate(ocr_result.blocks):
                         if c_idx in used_blocks or any(c_idx == m[0] for m in matching_blocks):
                             continue
                         c_y = candidate.bounding_box.get("y", 0.0)
-                        if 0.0 <= (c_y - (lbl_y + lbl_h)) <= 80.0 and any(p.search(candidate.text) for p in tax_pats):
+                        if 0.0 <= (c_y - (lbl_y + lbl_h)) <= max_gap and any(p.search(candidate.text) for p in tax_pats):
                             matching_blocks.append((c_idx, candidate))
                             break
 
