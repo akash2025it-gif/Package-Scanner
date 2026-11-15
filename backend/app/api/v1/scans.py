@@ -444,9 +444,10 @@ async def trigger_scan_analysis(
 
     job_id = f"job-{uuid.uuid4().hex[:12]}"
 
-    if settings.CELERY_TASK_ALWAYS_EAGER:
-        # Run synchronously / direct background task
-        background_tasks.add_task(run_scan_analysis_pipeline_async, scan.id)
+    if settings.CELERY_TASK_ALWAYS_EAGER or os.environ.get("VERCEL"):
+        # Execute pipeline directly so serverless containers or eager environments don't freeze before completion
+        await run_scan_analysis_pipeline_async(scan.id, db)
+        await db.refresh(scan)
     else:
         # Dispatch to Celery queue
         analyze_scan_task.delay(scan.id)
@@ -463,12 +464,12 @@ async def trigger_scan_analysis(
 
     return APIResponse(
         success=True,
-        message="AI compliance analysis job queued",
+        message="AI compliance analysis completed" if (settings.CELERY_TASK_ALWAYS_EAGER or os.environ.get("VERCEL")) else "AI compliance analysis job queued",
         data=AnalyzeScanResponse(
             job_id=job_id,
             scan_id=scan.id,
-            status="queued",
-            message="Image processing, region detection, OCR, and rule validation underway.",
+            status=scan.status or "completed",
+            message="Image processing, region detection, OCR, and rule validation completed.",
         ),
     )
 

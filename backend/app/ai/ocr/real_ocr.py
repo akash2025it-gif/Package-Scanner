@@ -6,7 +6,10 @@ import os
 from typing import Any, Dict, List, Optional
 import urllib.parse
 import urllib.request
-from PIL import Image
+try:
+    from PIL import Image
+except ImportError:
+    Image = None
 
 from app.ai.ocr.base import OCRProvider, OCRResult, TextBlock
 from app.core.config import settings
