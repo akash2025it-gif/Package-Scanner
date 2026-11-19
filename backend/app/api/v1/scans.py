@@ -265,6 +265,22 @@ async def check_image_quality(
     )
 
 
+@router.get("/sample-image")
+async def get_sample_commodity_image():
+    """Serves the authentic packaged commodity test photograph for demo testing."""
+    backend_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    candidates = [
+        os.path.join(backend_root, "test_packaged_commodity.jpg"),
+        os.path.join(os.getcwd(), "backend", "test_packaged_commodity.jpg"),
+        os.path.join(os.getcwd(), "test_packaged_commodity.jpg"),
+        "/var/task/backend/test_packaged_commodity.jpg",
+    ]
+    for p in candidates:
+        if os.path.exists(p):
+            return FileResponse(p, media_type="image/jpeg", filename="test_packaged_commodity.jpg")
+    raise NotFoundException("Sample packaged commodity photograph not found")
+
+
 @router.post("/{id}/images", response_model=APIResponse[List[ScanImageResponse]])
 async def upload_scan_images(
     id: str,

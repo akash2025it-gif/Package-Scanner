@@ -185,6 +185,10 @@ async def seed_demo_users() -> None:
         if existing_user:
             return
 
+        if not settings.DEFAULT_ADMIN_PASSWORD or not settings.DEFAULT_INSPECTOR_PASSWORD:
+            # In production without explicitly provided initial passwords, do not seed insecure accounts
+            return
+
         session.add_all([
             User(
                 name="Rajesh Kumar Verma",

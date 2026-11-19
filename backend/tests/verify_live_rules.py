@@ -12,7 +12,10 @@ def main():
     print(f"Target: {BASE_URL}")
     print("=" * 70)
 
-    client = httpx.Client(timeout=45.0)
+    client = httpx.Client(
+        transport=httpx.HTTPTransport(retries=3),
+        timeout=httpx.Timeout(60.0, connect=30.0, read=60.0, write=60.0)
+    )
 
     # Step 1: Login as inspector
     print("\n[STEP 1] Inspector Authentication...")

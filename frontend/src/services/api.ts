@@ -211,6 +211,56 @@ class ApiClient {
     return `${API_BASE_URL}/reports/${reportId}/docx`;
   }
 
+  async downloadReportPdf(reportId: string, filename?: string): Promise<void> {
+    const res = await fetch(`${API_BASE_URL}/reports/${reportId}/pdf`, {
+      headers: this.getHeaders(),
+    });
+    if (!res.ok) {
+      let errMsg = `Failed to download PDF report (HTTP ${res.status})`;
+      try {
+        const errJson = await res.json();
+        errMsg = errJson.error?.message || errJson.message || errMsg;
+      } catch {
+        // ignore json parse error
+      }
+      throw new Error(errMsg);
+    }
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename || `PackCheck_Compliance_Report_${reportId.slice(0, 8)}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  }
+
+  async downloadReportDocx(reportId: string, filename?: string): Promise<void> {
+    const res = await fetch(`${API_BASE_URL}/reports/${reportId}/docx`, {
+      headers: this.getHeaders(),
+    });
+    if (!res.ok) {
+      let errMsg = `Failed to download DOCX dossier (HTTP ${res.status})`;
+      try {
+        const errJson = await res.json();
+        errMsg = errJson.error?.message || errJson.message || errMsg;
+      } catch {
+        // ignore json parse error
+      }
+      throw new Error(errMsg);
+    }
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename || `PackCheck_Compliance_Dossier_${reportId.slice(0, 8)}.docx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  }
+
   async getAnalyticsSummary(): Promise<AnalyticsSummary> {
     const res = await fetch(`${API_BASE_URL}/analytics/summary`, {
       headers: this.getHeaders(),

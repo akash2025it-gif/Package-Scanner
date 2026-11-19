@@ -74,10 +74,21 @@ export const ReportsPage: React.FC = () => {
     setIsGeneratingDoc(true);
     try {
       const rep = await api.getScanReport(scan.id);
-      const pdfUrl = api.getReportPdfUrl(rep.id);
-      window.open(pdfUrl, '_blank');
+      await api.downloadReportPdf(rep.id, `compliance_report_${scan.id.slice(0, 8)}.pdf`);
     } catch (err: any) {
       alert('Failed to retrieve statutory report: ' + (err.message || 'Error'));
+    } finally {
+      setIsGeneratingDoc(false);
+    }
+  };
+
+  const downloadDocxReport = async (scan: Scan) => {
+    setIsGeneratingDoc(true);
+    try {
+      const rep = await api.getScanReport(scan.id);
+      await api.downloadReportDocx(rep.id, `compliance_report_${scan.id.slice(0, 8)}.docx`);
+    } catch (err: any) {
+      alert('Failed to retrieve statutory DOCX dossier: ' + (err.message || 'Error'));
     } finally {
       setIsGeneratingDoc(false);
     }
@@ -137,7 +148,15 @@ export const ReportsPage: React.FC = () => {
                     className="px-3.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors"
                   >
                     <FileText className="w-3.5 h-3.5" />
-                    <span>{isGeneratingDoc ? 'Generating...' : 'Official Certificate'}</span>
+                    <span>{isGeneratingDoc ? 'Downloading...' : 'PDF Certificate'}</span>
+                  </button>
+                  <button
+                    onClick={() => downloadDocxReport(selectedScan)}
+                    disabled={isGeneratingDoc}
+                    className="px-3.5 py-1.5 rounded-xl border border-emerald-700 hover:bg-emerald-50 text-emerald-800 text-xs font-bold flex items-center gap-1.5 transition-colors"
+                  >
+                    <FileCode className="w-3.5 h-3.5 text-emerald-700" />
+                    <span>DOCX</span>
                   </button>
                   <button
                     onClick={handlePrint}

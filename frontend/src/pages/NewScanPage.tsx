@@ -37,7 +37,36 @@ export const NewScanPage: React.FC = () => {
   const [batchNumber, setBatchNumber] = useState('');
   const [retailLocation, setRetailLocation] = useState('Govt Quality Inspection Lab, New Delhi');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingSample, setIsLoadingSample] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const loadSamplePackage = async () => {
+    setIsLoadingSample(true);
+    setErrorMessage(null);
+    try {
+      let blob: Blob;
+      const res = await fetch('/sample_packaged_commodity.jpg');
+      if (res.ok) {
+        blob = await res.blob();
+      } else {
+        const apiRes = await fetch('/api/v1/scans/sample-image');
+        if (!apiRes.ok) throw new Error('Could not retrieve sample photograph');
+        blob = await apiRes.blob();
+      }
+
+      const sampleFile = new File([blob], 'himalayan_harvest_mustard_oil.jpg', { type: 'image/jpeg' });
+      setProductName('Himalayan Harvest Pure Cold Pressed Mustard Oil');
+      setBatchNumber('HN-MO-8924');
+      setRetailLocation('State Enforcement Testing Lab - Delhi North');
+
+      setStagedImages([]);
+      await processFile(sampleFile, 'front');
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Failed to load sample package image.');
+    } finally {
+      setIsLoadingSample(false);
+    }
+  };
 
   const processFile = async (file: File, type: 'front' | 'back' | 'side' | 'other' = 'front') => {
     // Validate format
@@ -187,6 +216,33 @@ export const NewScanPage: React.FC = () => {
           <span>{errorMessage}</span>
         </div>
       )}
+
+      {/* Recruiter / Evaluator Sample Ingestion Quick-Action */}
+      <div className="bg-gradient-to-r from-blue-50/80 to-indigo-50/80 border border-blue-200 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+        <div className="flex items-start gap-3">
+          <div className="w-9 h-9 rounded-xl bg-[#0051d5] text-white flex items-center justify-center shrink-0 shadow-xs mt-0.5">
+            <Info className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-xs text-gray-900">Interactive Evaluator Demo: Genuine Packaging Commodity</span>
+              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-blue-100 text-[#0051d5]">Sample Dataset</span>
+            </div>
+            <p className="text-[11px] text-gray-600 mt-0.5 leading-relaxed">
+              1-click prefill with a genuine packaged commodity label (Himalayan Harvest Mustard Oil) to test end-to-end OCR and Rule 6 compliance evaluation.
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={loadSamplePackage}
+          disabled={isLoadingSample}
+          className="shrink-0 px-3.5 py-2 rounded-xl bg-white border border-blue-300 hover:bg-blue-100 text-[#0051d5] text-xs font-bold flex items-center gap-2 shadow-xs transition-colors"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${isLoadingSample ? 'animate-spin' : ''}`} />
+          <span>{isLoadingSample ? 'Loading Sample...' : 'Load Sample Package'}</span>
+        </button>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Commodity Metadata Card */}

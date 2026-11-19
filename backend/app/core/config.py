@@ -39,23 +39,96 @@ class Settings(BaseSettings):
     )
 
     APP_NAME: str = "PackCheck API"
-    APP_ENV: str = "production" if os.environ.get("VERCEL") else "development"
-    DEBUG: bool = False if os.environ.get("VERCEL") else True
+    APP_ENV: str = "production" if os.environ.get("VERCEL") else os.environ.get("APP_ENV", "development")
+    DEBUG: bool = False if (os.environ.get("VERCEL") or os.environ.get("APP_ENV") == "production") else True
     API_V1_PREFIX: str = "/api/v1"
     
     # Secret key for JWT signing
-    SECRET_KEY: str = os.environ.get("SECRET_KEY", "packcheck-super-secret-production-key-change-me")
+    SECRET_KEY: str = os.environ.get("SECRET_KEY", "")
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 1 day
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
-    # Default Seed Passwords (configurable via environment)
-    DEFAULT_ADMIN_PASSWORD: str = os.environ.get("DEFAULT_ADMIN_PASSWORD", "admin123")
-    DEFAULT_INSPECTOR_PASSWORD: str = os.environ.get("DEFAULT_INSPECTOR_PASSWORD", "inspector123")
+    # Initial Seed Passwords (configurable via environment, NO hardcoded production fallbacks)
+    DEFAULT_ADMIN_PASSWORD: Optional[str] = os.environ.get("DEFAULT_ADMIN_PASSWORD") or os.environ.get("ADMIN_INITIAL_PASSWORD")
+    DEFAULT_INSPECTOR_PASSWORD: Optional[str] = os.environ.get("DEFAULT_INSPECTOR_PASSWORD") or os.environ.get("INSPECTOR_INITIAL_PASSWORD")
 
     # Database
-    DATABASE_URL: str = DEFAULT_SQLITE_URL
+    DATABASE_URL: str = os.environ.get("DATABASE_URL", DEFAULT_SQLITE_URL)
     DB_ECHO: bool = False
+
+    @field_validator("SECRET_KEY", mode="before")
+    @classmethod
+    def validate_secret_key(cls, v: Optional[str]) -> str:
+        app_env = (os.environ.get("APP_ENV") or "").lower().strip()
+        is_production = (app_env == "production") or bool(os.environ.get("VERCEL"))
+        val = (v or "").strip()
+        
+        insecure_keys = {
+            "packcheck-super-secret-production-key-change-me",
+            "packcheck-dev-secret-key-super-secure-token-2026",
+            "secret",
+            "changeme",
+            "default",
+            "admin",
+        }
+        
+        if is_production:
+            if not val or val in insecure_keys or len(val) < 32:
+                raise ValueError(
+                    "CRITICAL SECURITY CONFIGURATION: A cryptographically strong SECRET_KEY "
+                    "(minimum 32 characters) must be supplied via environment variables in production."
+                )
+            return val
+            
+        # Development / Testing fallback
+        if not val or val in insecure_keys:
+            return "packcheck-dev-environment-secure-signing-key-32chars-min"
+        return val
+
+    @field_validator("DEFAULT_ADMIN_PASSWORD", mode="before")
+    @classmethod
+    def validate_admin_password(cls, v: Optional[str]) -> Optional[str]:
+        app_env = (os.environ.get("APP_ENV") or "").lower().strip()
+        is_production = (app_env == "production") or bool(os.environ.get("VERCEL"))
+        val = (v or "").strip()
+        if is_production:
+            # Never fallback to hardcoded default password in production
+            return val if val else None
+        return val if val else "admin123"
+
+    @field_validator("DEFAULT_INSPECTOR_PASSWORD", mode="before")
+    @classmethod
+    def validate_inspector_password(cls, v: Optional[str]) -> Optional[str]:
+        app_env = (os.environ.get("APP_ENV") or "").lower().strip()
+        is_production = (app_env == "production") or bool(os.environ.get("VERCEL"))
+        val = (v or "").strip()
+        if is_production:
+            # Never fallback to hardcoded default password in production
+            return val if val else None
+        return val if val else "inspector123"
+
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def validate_database_url(cls, v: Optional[str]) -> str:
+        url = (v or "").strip()
+        if not url:
+            if os.environ.get("VERCEL"):
+                system_tmp = tempfile.gettempdir()
+                tmp_db = os.path.join(system_tmp, "packcheck.db")
+                return f"sqlite+aiosqlite:///{tmp_db.replace(chr(92), '/')}"
+            return DEFAULT_SQLITE_URL
+        
+        # Normalize Postgres dialects for SQLAlchemy asyncpg
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+        elif url.startswith("postgresql://") and not url.startswith("postgresql+"):
+            url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        # Normalize SQLite for aiosqlite
+        elif url.startswith("sqlite://") and not url.startswith("sqlite+"):
+            url = url.replace("sqlite://", "sqlite+aiosqlite://", 1)
+            
+        return url
 
     # CORS
     CORS_ORIGINS: Union[str, List[str]] = (

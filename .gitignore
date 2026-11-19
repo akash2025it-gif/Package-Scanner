@@ -7,12 +7,24 @@ __pycache__/
 htmlcov/
 *.log
 
-# Environments
+# Environments & Secrets
 .env
+.env.*
+.env.local
+.env*.local
+*.pem
+*.key
 .venv
+.venv/
 env/
 venv/
 ENV/
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+test_packcheck.db
 
 # Node
 node_modules/
