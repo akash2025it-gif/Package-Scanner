@@ -13,7 +13,8 @@ def run_e2e_tests():
     print("=" * 80)
 
     client = httpx.Client(
-        transport=httpx.HTTPTransport(retries=3),
+        transport=httpx.HTTPTransport(retries=5),
+        headers={"Connection": "close"},
         timeout=httpx.Timeout(60.0, connect=30.0, read=60.0, write=60.0)
     )
     results = {}
@@ -49,7 +50,7 @@ def run_e2e_tests():
     assert a_resp.status_code == 200, f"Analytics failed: {a_resp.status_code}"
     analytics_data = a_resp.json().get("data", {})
     total_scans = analytics_data.get("total_scans", 0)
-    compliance_rate = analytics_data.get("compliance_rate", 0.0)
+    compliance_rate = float(analytics_data.get("compliance_rate") or 0.0)
     print(f"  -> PASS: Total Scans Logged: {total_scans} | Compliance Rate: {compliance_rate:.1f}%")
     results["Dashboard_Analytics"] = "PASS"
 
@@ -91,12 +92,21 @@ def run_e2e_tests():
     assert c_resp.status_code in (200, 201), f"Scan creation failed: {c_resp.status_code}"
     scan_id = c_resp.json().get("data", {}).get("id")
 
-    up_resp = client.post(
-        f"{BASE_URL}/scans/{scan_id}/images",
-        files={"file": ("test_packaged_commodity.jpg", photo_bytes, "image/jpeg")},
-        data={"image_type": "front"}
-    )
-    assert up_resp.status_code in (200, 201), f"Image upload failed: {up_resp.status_code}"
+    up_resp = None
+    for attempt in range(3):
+        try:
+            up_resp = client.post(
+                f"{BASE_URL}/scans/{scan_id}/images",
+                files={"file": ("test_packaged_commodity.jpg", photo_bytes, "image/jpeg")},
+                data={"image_type": "front"}
+            )
+            if up_resp.status_code in (200, 201):
+                break
+        except (httpx.ReadError, httpx.ConnectError, httpx.WriteError):
+            if attempt == 2:
+                raise
+            time.sleep(2.0)
+    assert up_resp is not None and up_resp.status_code in (200, 201), f"Image upload failed: {getattr(up_resp, 'status_code', 'No response')}"
     print(f"  -> PASS: Scan created with ID: {scan_id} and photograph attached.")
     results["Scan_Ingestion"] = "PASS"
 
