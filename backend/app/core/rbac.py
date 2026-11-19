@@ -25,14 +25,12 @@ VALID_ACTIVE_ROLES = {UserRole.INSPECTOR.value, UserRole.ADMIN.value}
 
 async def get_current_user(
     token: Optional[str] = Depends(oauth2_scheme),
-    token_query: Optional[str] = Query(None, alias="token"),
     db: AsyncSession = Depends(get_db),
 ):
-    active_token = token or token_query
-    if not active_token:
-        raise UnauthorizedException("Authentication token required")
+    if not token:
+        raise UnauthorizedException("Authentication token required in Authorization header")
     
-    payload = decode_token(active_token)
+    payload = decode_token(token)
     if payload.get("type") != "access":
         raise UnauthorizedException("Invalid token type")
         
