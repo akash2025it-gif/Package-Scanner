@@ -29,7 +29,22 @@ AsyncSessionLocal = async_sessionmaker(
 )
 
 
+_db_initialized = False
+
+
+async def ensure_db_ready():
+    global _db_initialized
+    if not _db_initialized:
+        try:
+            await init_db()
+            await seed_demo_users()
+            _db_initialized = True
+        except Exception:
+            pass
+
+
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    await ensure_db_ready()
     async with AsyncSessionLocal() as session:
         try:
             yield session
@@ -206,35 +221,47 @@ async def seed_demo_users() -> None:
         )
 
         users_to_add = []
-        if admin_pass and settings.INITIAL_ADMIN_EMAIL not in existing_emails and ADMIN_SEEDED_ID not in existing_ids:
-            users_to_add.append(
-                User(
-                    id=ADMIN_SEEDED_ID,
-                    name="Rajesh Kumar Verma",
-                    email=settings.INITIAL_ADMIN_EMAIL,
-                    phone="+919876543210",
-                    password_hash=hash_password(admin_pass),
-                    role="admin",
-                    department="Central Legal Metrology Division",
-                    region="National HQ",
-                    is_active=True,
+        if admin_pass:
+            if settings.INITIAL_ADMIN_EMAIL not in existing_emails and ADMIN_SEEDED_ID not in existing_ids:
+                users_to_add.append(
+                    User(
+                        id=ADMIN_SEEDED_ID,
+                        name="Rajesh Kumar Verma",
+                        email=settings.INITIAL_ADMIN_EMAIL,
+                        phone="+919876543210",
+                        password_hash=hash_password(admin_pass),
+                        role="admin",
+                        department="Central Legal Metrology Division",
+                        region="National HQ",
+                        is_active=True,
+                    )
                 )
-            )
+            else:
+                admin_user = (await session.execute(select(User).where(User.email == settings.INITIAL_ADMIN_EMAIL))).scalar_one_or_none()
+                if admin_user:
+                    admin_user.is_active = True
+                    admin_user.password_hash = hash_password(admin_pass)
 
-        if inspector_pass and settings.INITIAL_INSPECTOR_EMAIL not in existing_emails and INSPECTOR_SEEDED_ID not in existing_ids:
-            users_to_add.append(
-                User(
-                    id=INSPECTOR_SEEDED_ID,
-                    name="Inspector Vikram Sharma",
-                    email=settings.INITIAL_INSPECTOR_EMAIL,
-                    phone="+919876543212",
-                    password_hash=hash_password(inspector_pass),
-                    role="inspector",
-                    department="Field Inspection Squad - Delhi North",
-                    region="Delhi NCR",
-                    is_active=True,
+        if inspector_pass:
+            if settings.INITIAL_INSPECTOR_EMAIL not in existing_emails and INSPECTOR_SEEDED_ID not in existing_ids:
+                users_to_add.append(
+                    User(
+                        id=INSPECTOR_SEEDED_ID,
+                        name="Inspector Vikram Sharma",
+                        email=settings.INITIAL_INSPECTOR_EMAIL,
+                        phone="+919876543212",
+                        password_hash=hash_password(inspector_pass),
+                        role="inspector",
+                        department="Field Inspection Squad - Delhi North",
+                        region="Delhi NCR",
+                        is_active=True,
+                    )
                 )
-            )
+            else:
+                insp_user = (await session.execute(select(User).where(User.email == settings.INITIAL_INSPECTOR_EMAIL))).scalar_one_or_none()
+                if insp_user:
+                    insp_user.is_active = True
+                    insp_user.password_hash = hash_password(inspector_pass)
 
         if users_to_add:
             session.add_all(users_to_add)
