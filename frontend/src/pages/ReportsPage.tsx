@@ -21,16 +21,30 @@ export const ReportsPage: React.FC = () => {
   const [scans, setScans] = useState<Scan[]>([]);
   const [selectedScan, setSelectedScan] = useState<Scan | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [isGeneratingDoc, setIsGeneratingDoc] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+
+  const loadScanDetail = async (id: string) => {
+    setIsLoadingDetail(true);
+    try {
+      const fullScan = await api.getScan(id);
+      setSelectedScan(fullScan);
+    } catch (err) {
+      console.error('Failed to load scan detail:', err);
+    } finally {
+      setIsLoadingDetail(false);
+    }
+  };
 
   useEffect(() => {
     const fetchScans = async () => {
       try {
         const res = await api.getScans({ limit: 50 });
-        setScans(res.items || []);
-        if (res.items?.length > 0) {
-          setSelectedScan(res.items[0]);
+        const items = res.items || [];
+        setScans(items);
+        if (items.length > 0) {
+          loadScanDetail(items[0].id);
         }
       } catch (err) {
         console.error('Failed to load reports:', err);
@@ -51,7 +65,7 @@ export const ReportsPage: React.FC = () => {
       product: scan.product || { name: scan.location_name || "Unlabeled Sample" },
       batch_number: scan.batch_number,
       barcode_evidence: scan.metadata_json?.barcode_info || null,
-      declarations: scan.declarations.map((d) => ({
+      declarations: (scan.declarations || []).map((d) => ({
         declaration: d.field_type,
         extracted_text: d.extracted_text,
         is_compliant: d.is_compliant,
@@ -154,7 +168,7 @@ export const ReportsPage: React.FC = () => {
                 return (
                   <button
                     key={s.id}
-                    onClick={() => setSelectedScan(s)}
+                    onClick={() => loadScanDetail(s.id)}
                     className={`w-full p-3.5 text-left text-xs transition-colors block cursor-pointer ${
                       selectedScan?.id === s.id
                         ? 'bg-blue-50/80 border-l-4 border-[#0051d5]'
@@ -279,22 +293,36 @@ export const ReportsPage: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200">
-                      {selectedScan.declarations.map((d) => (
-                        <tr key={d.id}>
-                          <td className="p-2.5 border font-bold capitalize">{d.field_type.replace('_', ' ')}</td>
-                          <td className="p-2.5 border font-mono text-[11px]">{d.extracted_text || '[Not detected]'}</td>
-                          <td className="p-2.5 border text-[10px] text-slate-500">{d.rule_reference}</td>
-                          <td className="p-2.5 border font-bold">
-                            {d.is_compliant ? (
-                              <span className="text-emerald-700">COMPLIANT</span>
-                            ) : d.severity === 'needs_review' ? (
-                              <span className="text-amber-700">NEEDS REVIEW</span>
-                            ) : (
-                              <span className="text-red-700">NON-COMPLIANT</span>
-                            )}
+                      {isLoadingDetail ? (
+                        <tr>
+                          <td colSpan={4} className="p-6 text-center text-slate-400">
+                            Loading official declaration details...
                           </td>
                         </tr>
-                      ))}
+                      ) : (selectedScan.declarations || []).length === 0 ? (
+                        <tr>
+                          <td colSpan={4} className="p-6 text-center text-slate-400 italic">
+                            No declarations detected or scan is awaiting compliance evaluation.
+                          </td>
+                        </tr>
+                      ) : (
+                        (selectedScan.declarations || []).map((d) => (
+                          <tr key={d.id}>
+                            <td className="p-2.5 border font-bold capitalize">{d.field_type.replace('_', ' ')}</td>
+                            <td className="p-2.5 border font-mono text-[11px]">{d.extracted_text || '[Not detected]'}</td>
+                            <td className="p-2.5 border text-[10px] text-slate-500">{d.rule_reference}</td>
+                            <td className="p-2.5 border font-bold">
+                              {d.is_compliant ? (
+                                <span className="text-emerald-700">COMPLIANT</span>
+                              ) : d.severity === 'needs_review' ? (
+                                <span className="text-amber-700">NEEDS REVIEW</span>
+                              ) : (
+                                <span className="text-red-700">NON-COMPLIANT</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>

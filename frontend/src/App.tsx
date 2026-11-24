@@ -13,6 +13,7 @@ import { ReportsPage } from './pages/ReportsPage';
 import { RulesPage } from './pages/RulesPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isLoading } = useAuth();
@@ -43,7 +44,9 @@ export const App: React.FC = () => {
             path="/"
             element={
               <ProtectedRoute>
-                <AppLayout />
+                <ErrorBoundary>
+                  <AppLayout />
+                </ErrorBoundary>
               </ProtectedRoute>
             }
           >
