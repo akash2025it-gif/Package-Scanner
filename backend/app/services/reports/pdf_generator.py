@@ -215,7 +215,24 @@ class PDFReportGenerator:
         commands.append('(PackCheck AI National Packaged Commodity Compliance Infrastructure - Digitally Certified.) Tj')
         commands.append('ET')
         
-        stream_data = '\n'.join(commands).encode('latin1')
+        # Sanitize commands for PDF Latin-1 / WinAnsi stream encoding
+        sanitized_commands = []
+        for cmd in commands:
+            cmd_clean = (
+                cmd.replace('\u20b9', 'Rs. ')
+                   .replace('₹', 'Rs. ')
+                   .replace('\u2013', '-')
+                   .replace('\u2014', '--')
+                   .replace('\u2018', "'")
+                   .replace('\u2019', "'")
+                   .replace('\u201c', '"')
+                   .replace('\u201d', '"')
+                   .replace('\u2022', '*')
+            )
+            # Encode with replace to eliminate any other non-latin1 characters safely
+            sanitized_commands.append(cmd_clean.encode('latin1', 'replace').decode('latin1'))
+
+        stream_data = '\n'.join(sanitized_commands).encode('latin1')
         stream_len = len(stream_data)
         
         objects = [

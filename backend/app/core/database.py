@@ -175,40 +175,67 @@ async def init_db():
             pass
 
 async def seed_demo_users() -> None:
-    """Create the login-page demo accounts when a fresh database is started."""
+    """Create initial authorized accounts with deterministic IDs when configured via environment variables."""
+    import uuid
     from sqlalchemy import select
     from app.core.security import hash_password
     from app.models.user import User
 
+    # RFC 4122 v5 deterministic UUIDs ensure identical user IDs across all serverless instances
+    ADMIN_SEEDED_ID = str(uuid.uuid5(uuid.NAMESPACE_DNS, "packcheck.admin.seeded"))
+    INSPECTOR_SEEDED_ID = str(uuid.uuid5(uuid.NAMESPACE_DNS, "packcheck.inspector.seeded"))
+
     async with AsyncSessionLocal() as session:
-        existing_user = (await session.execute(select(User.id).limit(1))).scalar_one_or_none()
-        if existing_user:
+        admin_pass = settings.INITIAL_ADMIN_PASSWORD
+        inspector_pass = settings.INITIAL_INSPECTOR_PASSWORD
+
+        if not admin_pass and not inspector_pass:
+            # In production without explicitly provided initial passwords, never seed accounts with predictable credentials
             return
 
-        if not settings.DEFAULT_ADMIN_PASSWORD or not settings.DEFAULT_INSPECTOR_PASSWORD:
-            # In production without explicitly provided initial passwords, do not seed insecure accounts
-            return
+        # Check existing accounts by email and ID to prevent duplicates
+        existing_emails = set(
+            (await session.execute(
+                select(User.email).where(User.email.in_([settings.INITIAL_ADMIN_EMAIL, settings.INITIAL_INSPECTOR_EMAIL]))
+            )).scalars().all()
+        )
+        existing_ids = set(
+            (await session.execute(
+                select(User.id).where(User.id.in_([ADMIN_SEEDED_ID, INSPECTOR_SEEDED_ID]))
+            )).scalars().all()
+        )
 
-        session.add_all([
-            User(
-                name="Rajesh Kumar Verma",
-                email="admin@packcheck.gov.in",
-                phone="+919876543210",
-                password_hash=hash_password(settings.DEFAULT_ADMIN_PASSWORD),
-                role="admin",
-                department="Central Legal Metrology Division",
-                region="National HQ",
-                is_active=True,
-            ),
-            User(
-                name="Inspector Vikram Sharma",
-                email="inspector.sharma@packcheck.gov.in",
-                phone="+919876543212",
-                password_hash=hash_password(settings.DEFAULT_INSPECTOR_PASSWORD),
-                role="inspector",
-                department="Field Inspection Squad - Delhi North",
-                region="Delhi NCR",
-                is_active=True,
-            ),
-        ])
-        await session.commit()
+        users_to_add = []
+        if admin_pass and settings.INITIAL_ADMIN_EMAIL not in existing_emails and ADMIN_SEEDED_ID not in existing_ids:
+            users_to_add.append(
+                User(
+                    id=ADMIN_SEEDED_ID,
+                    name="Rajesh Kumar Verma",
+                    email=settings.INITIAL_ADMIN_EMAIL,
+                    phone="+919876543210",
+                    password_hash=hash_password(admin_pass),
+                    role="admin",
+                    department="Central Legal Metrology Division",
+                    region="National HQ",
+                    is_active=True,
+                )
+            )
+
+        if inspector_pass and settings.INITIAL_INSPECTOR_EMAIL not in existing_emails and INSPECTOR_SEEDED_ID not in existing_ids:
+            users_to_add.append(
+                User(
+                    id=INSPECTOR_SEEDED_ID,
+                    name="Inspector Vikram Sharma",
+                    email=settings.INITIAL_INSPECTOR_EMAIL,
+                    phone="+919876543212",
+                    password_hash=hash_password(inspector_pass),
+                    role="inspector",
+                    department="Field Inspection Squad - Delhi North",
+                    region="Delhi NCR",
+                    is_active=True,
+                )
+            )
+
+        if users_to_add:
+            session.add_all(users_to_add)
+            await session.commit()

@@ -14,35 +14,64 @@ from app.services.reports.docx_generator import DocxReportGenerator
 
 
 def test_security_settings_validation():
-    """Verify security validations on SECRET_KEY and default passwords."""
-    # Test 1: Insecure default key rejected
+    """Verify strict production security validations on SECRET_KEY, DATABASE_URL and passwords."""
+    # Ensure clean production environment state
+    for k in ["APP_ENV", "VERCEL", "SECRET_KEY", "DATABASE_URL", "INITIAL_ADMIN_PASSWORD", "INITIAL_INSPECTOR_PASSWORD"]:
+        os.environ.pop(k, None)
+
+    os.environ["APP_ENV"] = "production"
+    os.environ["DATABASE_URL"] = "postgresql://prod_user:prod_pass@db.packcheck.gov.in:5432/packcheck_prod"
+
+    # Test 1: Missing SECRET_KEY in production raises error
+    os.environ["SECRET_KEY"] = ""
+    with pytest.raises(ValueError, match="CRITICAL CONFIGURATION ERROR: SECRET_KEY"):
+        Settings()
+
+    # Test 2: Insecure default key in production raises error
     os.environ["SECRET_KEY"] = "packcheck-super-secret-production-key-change-me"
     with pytest.raises(ValueError, match="CRITICAL SECURITY CONFIGURATION"):
         Settings()
 
-    # Test 2: Short key rejected
+    # Test 3: Short key (< 32 chars) in production raises error
     os.environ["SECRET_KEY"] = "short-key-123"
     with pytest.raises(ValueError, match="CRITICAL SECURITY CONFIGURATION"):
         Settings()
 
-    # Test 3: Strong key accepted
+    # Test 4: Production rejects missing DATABASE_URL
     strong_key = "a-very-strong-production-signing-secret-key-that-is-at-least-32-chars-long"
     os.environ["SECRET_KEY"] = strong_key
+    os.environ["DATABASE_URL"] = ""
+    with pytest.raises(ValueError, match="CRITICAL CONFIGURATION ERROR: DATABASE_URL"):
+        Settings()
+
+    # Test 5: Production strictly rejects ephemeral SQLite
+    os.environ["DATABASE_URL"] = "sqlite:///tmp/packcheck.db"
+    with pytest.raises(ValueError, match="Ephemeral SQLite is strictly prohibited in production"):
+        Settings()
+
+    # Test 6: Valid production configuration with strong SECRET_KEY & PostgreSQL
+    os.environ["DATABASE_URL"] = "postgresql://prod_user:prod_pass@db.packcheck.gov.in:5432/packcheck_prod"
     s = Settings()
     assert s.SECRET_KEY == strong_key
+    assert s.DATABASE_URL.startswith("postgresql+asyncpg://")
+    # In production, initial passwords must be None when unset (NO predictable fallback passwords)
+    assert s.INITIAL_ADMIN_PASSWORD is None
+    assert s.INITIAL_INSPECTOR_PASSWORD is None
 
-    # Test 4: Omitted key securely derives a 256-bit key for resilient deployment
-    os.environ.pop("SECRET_KEY", None)
-    s_derived = Settings()
-    assert len(s_derived.SECRET_KEY) >= 32
+    # Test 7: Production accepts explicitly supplied initial admin & inspector credentials
+    os.environ["INITIAL_ADMIN_PASSWORD"] = "StrongAdmin#Pass2026!"
+    os.environ["INITIAL_INSPECTOR_PASSWORD"] = "StrongInspector#Pass2026!"
+    s_creds = Settings()
+    assert s_creds.INITIAL_ADMIN_PASSWORD == "StrongAdmin#Pass2026!"
+    assert s_creds.INITIAL_INSPECTOR_PASSWORD == "StrongInspector#Pass2026!"
 
-    # Test 5: Default demo passwords are seeded when unset
-    assert s_derived.DEFAULT_ADMIN_PASSWORD == "admin123"
-    assert s_derived.DEFAULT_INSPECTOR_PASSWORD == "inspector123"
+    # Clean up environment
+    for k in ["APP_ENV", "VERCEL", "SECRET_KEY", "DATABASE_URL", "INITIAL_ADMIN_PASSWORD", "INITIAL_INSPECTOR_PASSWORD"]:
+        os.environ.pop(k, None)
 
 
 def test_database_url_normalization():
-    """Verify PostgreSQL and SQLite driver dialect normalization."""
+    """Verify PostgreSQL and SQLite driver dialect normalization across environments."""
     # Postgres dialects normalized to asyncpg
     url1 = Settings.validate_database_url("postgres://user:pass@host:5432/dbname")
     assert url1.startswith("postgresql+asyncpg://")
@@ -53,9 +82,12 @@ def test_database_url_normalization():
     url3 = Settings.validate_database_url("postgresql+asyncpg://user:pass@host:5432/dbname")
     assert url3.startswith("postgresql+asyncpg://")
 
-    # SQLite normalized to aiosqlite
+    # In development, SQLite is permitted and normalized to aiosqlite
+    os.environ["APP_ENV"] = "development"
+    os.environ.pop("VERCEL", None)
     url4 = Settings.validate_database_url("sqlite:///tmp/test.db")
     assert url4.startswith("sqlite+aiosqlite://")
+    os.environ.pop("APP_ENV", None)
 
 
 def test_jwt_auth_and_rbac():

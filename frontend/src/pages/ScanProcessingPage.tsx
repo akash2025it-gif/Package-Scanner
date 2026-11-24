@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { Scan } from '../types';
 import {
-  ShieldAlert,
+  ShieldCheck,
   CheckCircle2,
   Clock,
   AlertTriangle,
@@ -11,6 +11,8 @@ import {
   QrCode,
   ScanText,
   FileCheck2,
+  RefreshCw,
+  Sparkles,
 } from 'lucide-react';
 
 export const ScanProcessingPage: React.FC = () => {
@@ -58,39 +60,39 @@ export const ScanProcessingPage: React.FC = () => {
     { title: 'Label Preprocessing & Deskewing', desc: 'CLAHE contrast enhancement and angle correction', icon: RotateCcw },
     { title: 'OCR & Bounding Box Extraction', desc: 'Extracting words, layout blocks, and confidence', icon: ScanText },
     { title: 'LMPC 2011 Legal Rule Engine', desc: 'Rule 6 mandatory declarations and font slabs', icon: FileCheck2 },
-    { title: 'Threshold Automation & Audit Trail', desc: 'High-confidence confirmation & inspector routing', icon: ShieldAlert },
+    { title: 'Threshold Automation & Audit Trail', desc: 'High-confidence confirmation & inspector routing', icon: ShieldCheck },
   ];
 
   return (
     <div className="max-w-xl mx-auto py-12 px-4 text-center space-y-8">
       <div>
-        <div className="w-14 h-14 rounded-2xl bg-[#0051d5] text-white flex items-center justify-center mx-auto shadow-lg animate-pulse">
-          <ScanText className="w-7 h-7" />
+        <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-[#00174b] to-[#0051d5] text-white flex items-center justify-center mx-auto shadow-xl shadow-blue-900/20 ring-1 ring-white/20 animate-pulse">
+          <ScanText className="w-8 h-8 text-white" />
         </div>
-        <h1 className="mt-4 font-display font-extrabold text-xl text-gray-900 tracking-tight">
+        <h1 className="mt-4 font-display font-black text-2xl text-slate-900 tracking-tight">
           Analyzing Packaging Commodity
         </h1>
-        <p className="text-xs text-gray-500 mt-1 font-mono">
-          Inspection ID: {id}
+        <p className="text-xs text-slate-500 mt-1 font-mono">
+          Inspection Dossier ID: {id}
         </p>
       </div>
 
       {error ? (
-        <div className="p-5 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs space-y-3 text-left">
-          <div className="flex items-center gap-2 font-bold">
-            <AlertTriangle className="w-4 h-4" />
+        <div className="p-6 rounded-3xl bg-red-50 border border-red-200 text-red-700 text-xs space-y-3 text-left shadow-2xs">
+          <div className="flex items-center gap-2 font-bold text-sm text-red-800">
+            <AlertTriangle className="w-5 h-5 text-red-600" />
             <span>Inspection Analysis Halted</span>
           </div>
-          <p>{error}</p>
+          <p className="leading-relaxed">{error}</p>
           <button
             onClick={() => navigate(`/scan/${id}`)}
-            className="px-4 py-2 bg-red-600 text-white rounded-xl text-xs font-semibold"
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
           >
             Inspect Scan Record Anyway
           </button>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-xs text-left space-y-4">
+        <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-2xs text-left space-y-4">
           <div className="space-y-4">
             {steps.map((step, idx) => {
               const stepNum = idx + 1;
@@ -101,25 +103,35 @@ export const ScanProcessingPage: React.FC = () => {
               return (
                 <div key={idx} className="flex items-start gap-3.5">
                   <div
-                    className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 text-xs font-bold transition-all ${
+                    className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors shadow-2xs ${
                       isDone
                         ? 'bg-emerald-100 text-emerald-700'
                         : isCurrent
-                        ? 'bg-blue-100 text-[#0051d5] ring-2 ring-blue-400 ring-offset-1 animate-pulse'
-                        : 'bg-gray-100 text-gray-400'
+                        ? 'bg-[#0051d5] text-white animate-pulse'
+                        : 'bg-slate-100 text-slate-400'
                     }`}
                   >
-                    {isDone ? <CheckCircle2 className="w-4 h-4" /> : <Icon className="w-3.5 h-3.5" />}
+                    {isCurrent ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Icon className="w-4 h-4" />
+                    )}
                   </div>
                   <div>
-                    <div
-                      className={`text-xs font-bold ${
-                        isCurrent ? 'text-gray-900' : isDone ? 'text-gray-700' : 'text-gray-400'
+                    <span
+                      className={`font-bold text-xs block ${
+                        isDone
+                          ? 'text-emerald-900'
+                          : isCurrent
+                          ? 'text-[#0051d5]'
+                          : 'text-slate-400'
                       }`}
                     >
                       {step.title}
-                    </div>
-                    <div className="text-[11px] text-gray-400">{step.desc}</div>
+                    </span>
+                    <span className="text-[11px] text-slate-500 leading-snug block">
+                      {step.desc}
+                    </span>
                   </div>
                 </div>
               );

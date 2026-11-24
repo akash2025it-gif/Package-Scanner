@@ -17,10 +17,35 @@ class ApiClient {
 
   private async handleResponse<T>(res: Response): Promise<T> {
     if (res.status === 401) {
-      localStorage.removeItem('packcheck_token');
-      localStorage.removeItem('packcheck_user');
-      window.dispatchEvent(new Event('auth:unauthorized'));
-      throw new Error('Session expired or unauthorized. Please log in.');
+      let errorMsg = 'Session expired or unauthorized. Please log in.';
+      try {
+        const errJson = await res.json();
+        errorMsg = errJson.error?.message || errJson.message || errorMsg;
+      } catch {
+        // use default error message
+      }
+
+      // If the 401 is from the login endpoint itself, report credential error without destroying session state
+      if (res.url.endsWith('/auth/login')) {
+        throw new Error(errorMsg || 'Invalid email or password');
+      }
+
+      // Authoritative token verification endpoints (/auth/me or /auth/refresh)
+      const isCoreAuthEndpoint = res.url.includes('/auth/me') || res.url.includes('/auth/refresh');
+
+      if (isCoreAuthEndpoint) {
+        // Genuine token expiration or revocation: clean up session once without repeating events
+        if (localStorage.getItem('packcheck_token')) {
+          localStorage.removeItem('packcheck_token');
+          localStorage.removeItem('packcheck_user');
+          window.dispatchEvent(new Event('auth:unauthorized'));
+        }
+      } else {
+        // Auxiliary endpoints: fail the specific call without blowing away the active session
+        console.warn(`[PackCheck API] Auxiliary endpoint returned 401: ${res.url}`);
+      }
+
+      throw new Error(errorMsg);
     }
 
     let body: any;

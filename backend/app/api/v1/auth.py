@@ -43,7 +43,7 @@ async def login(payload: LoginRequest, db: AsyncSession = Depends(get_db)):
     if user.role.lower() not in ["admin", "inspector"]:
         raise UnauthorizedException("Account role is obsolete or unauthorized. Access denied.")
 
-    access_token = create_access_token(subject=user.id, role=user.role)
+    access_token = create_access_token(subject=user.id, role=user.role, extra_claims={"email": user.email})
     refresh_token = create_refresh_token(subject=user.id)
 
     return APIResponse(

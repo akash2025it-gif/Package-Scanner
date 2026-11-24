@@ -1,7 +1,21 @@
-import React from 'react';
-import { BookOpen, ShieldCheck, Scale, Ruler, AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { BookOpen, ShieldCheck, Scale, Ruler, AlertCircle, Calculator, CheckCircle2, Sparkles } from 'lucide-react';
 
 export const RulesPage: React.FC = () => {
+  const [calcQty, setCalcQty] = useState<number>(200);
+  const [calcUnit, setCalcUnit] = useState<'g' | 'ml'>('g');
+  const [isBlown, setIsBlown] = useState<boolean>(false);
+
+  const calculateRequiredFont = (qty: number, blown: boolean) => {
+    if (qty <= 50) return { minMm: blown ? 2.0 : 1.0, slab: 'Up to 50 g / 50 ml' };
+    if (qty <= 100) return { minMm: blown ? 3.0 : 1.5, slab: 'Above 50 up to 100 g / ml' };
+    if (qty <= 200) return { minMm: blown ? 4.0 : 2.0, slab: 'Above 100 up to 200 g / ml' };
+    if (qty <= 500) return { minMm: blown ? 8.0 : 4.0, slab: 'Above 200 up to 500 g / ml' };
+    return { minMm: blown ? 12.0 : 6.0, slab: 'Above 500 g / 500 ml' };
+  };
+
+  const fontResult = calculateRequiredFont(calcQty, isBlown);
+
   const rules = [
     {
       id: 'Rule 6(1)(a)',
@@ -79,23 +93,92 @@ export const RulesPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Page Header */}
       <div>
-        <h1 className="font-display font-extrabold text-xl sm:text-2xl text-gray-900 tracking-tight">
+        <div className="flex items-center gap-2">
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-blue-50 text-[#0051d5] border border-blue-200">
+            Statutory Codex
+          </span>
+        </div>
+        <h1 className="font-display font-black text-2xl sm:text-3xl text-slate-900 tracking-tight mt-1">
           Legal Metrology Rules & Standards
         </h1>
-        <p className="text-xs text-gray-500 mt-1">
-          Official statutory guidelines under Legal Metrology (Packaged Commodities) Rules, 2011 and official amendments.
+        <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
+          Official statutory guidelines under Legal Metrology (Packaged Commodities) Rules, 2011, Second Schedule font height slabs, and SI unit standards.
         </p>
+      </div>
+
+      {/* Interactive Minimum Font Size Calculator Widget */}
+      <div className="bg-gradient-to-r from-blue-50/90 via-indigo-50/70 to-blue-50 rounded-3xl border border-blue-200/80 p-6 shadow-2xs space-y-4">
+        <div className="flex items-center gap-2.5 border-b border-blue-200/60 pb-3">
+          <div className="w-8 h-8 rounded-xl bg-[#0051d5] text-white flex items-center justify-center shadow-xs">
+            <Calculator className="w-4 h-4" />
+          </div>
+          <div>
+            <h2 className="font-display font-bold text-sm text-slate-900">
+              Interactive Statutory Font Height Calculator
+            </h2>
+            <p className="text-[11px] text-slate-600">
+              Calculate mandatory numeral height in mm under Rule 7 & Second Schedule based on package net quantity
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs items-end">
+          <div>
+            <label className="block font-semibold text-slate-700 mb-1">Declared Net Quantity</label>
+            <input
+              type="number"
+              min={1}
+              value={calcQty}
+              onChange={(e) => setCalcQty(Math.max(1, Number(e.target.value) || 1))}
+              className="w-full rounded-xl border border-slate-300 p-2.5 text-xs bg-white focus:ring-2 focus:ring-[#0051d5]/20 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block font-semibold text-slate-700 mb-1">Quantity Unit</label>
+            <select
+              value={calcUnit}
+              onChange={(e) => setCalcUnit(e.target.value as any)}
+              className="w-full rounded-xl border border-slate-300 p-2.5 text-xs bg-white focus:ring-2 focus:ring-[#0051d5]/20 focus:outline-none font-bold"
+            >
+              <option value="g">Grams (g)</option>
+              <option value="ml">Millilitres (ml)</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2 p-2.5 bg-white rounded-xl border border-slate-200">
+            <input
+              type="checkbox"
+              id="blownCheck"
+              checked={isBlown}
+              onChange={(e) => setIsBlown(e.target.checked)}
+              className="rounded text-[#0051d5] focus:ring-[#0051d5]"
+            />
+            <label htmlFor="blownCheck" className="text-xs font-semibold text-slate-700 cursor-pointer">
+              Blown / Moulded Surface
+            </label>
+          </div>
+
+          <div className="p-3 bg-white rounded-2xl border border-blue-200 text-center shadow-xs">
+            <span className="text-[10px] text-slate-400 uppercase font-bold block">Mandatory Min Height</span>
+            <span className="font-display font-black text-2xl text-[#0051d5]">
+              {fontResult.minMm} mm
+            </span>
+            <span className="text-[10px] text-slate-500 block truncate">({fontResult.slab})</span>
+          </div>
+        </div>
       </div>
 
       {/* Rules Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {rules.map((rule, idx) => (
-          <div key={idx} className="bg-white rounded-2xl p-5 border border-gray-200 shadow-xs space-y-3">
-            <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+          <div key={idx} className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-2xs space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
               <span className="font-mono text-xs font-bold text-[#0051d5]">{rule.id}</span>
               <span
-                className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
+                className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase ${
                   rule.severity === 'Critical'
                     ? 'bg-red-50 text-red-700 border border-red-200'
                     : 'bg-amber-50 text-amber-700 border border-amber-200'
@@ -105,17 +188,17 @@ export const RulesPage: React.FC = () => {
               </span>
             </div>
 
-            <h3 className="font-display font-bold text-sm text-gray-900">{rule.title}</h3>
-            <p className="text-xs text-gray-600 leading-relaxed">{rule.description}</p>
+            <h3 className="font-display font-bold text-sm text-slate-900">{rule.title}</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">{rule.description}</p>
 
-            <div className="p-3 rounded-xl bg-gray-50 text-[11px] space-y-1">
+            <div className="p-3 rounded-2xl bg-slate-50 text-[11px] space-y-1 border border-slate-200/80">
               <div>
-                <strong className="text-gray-700">Verification Condition:</strong>{' '}
-                <span className="text-gray-600">{rule.conditions}</span>
+                <strong className="text-slate-800">Verification Condition:</strong>{' '}
+                <span className="text-slate-600">{rule.conditions}</span>
               </div>
               <div>
-                <strong className="text-gray-700">Exemption Scope:</strong>{' '}
-                <span className="text-gray-500">{rule.exception}</span>
+                <strong className="text-slate-800">Exemption Scope:</strong>{' '}
+                <span className="text-slate-500">{rule.exception}</span>
               </div>
             </div>
           </div>
@@ -123,41 +206,41 @@ export const RulesPage: React.FC = () => {
       </div>
 
       {/* Second Schedule Minimum Font Size Slabs Table */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-xs p-6 space-y-4">
+      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-2xs p-6 space-y-4">
         <div>
-          <h2 className="font-display font-bold text-sm text-gray-900">
+          <h2 className="font-display font-bold text-sm text-slate-900">
             Second Schedule – Minimum Height of Numerals & Letters (Rule 7 & 9)
           </h2>
-          <p className="text-[11px] text-gray-500">
+          <p className="text-[11px] text-slate-500">
             Statutory minimum font height requirements corresponding to net quantity packaging weight and container type.
           </p>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border border-gray-200">
-            <thead className="bg-gray-100 text-[10px] font-bold uppercase text-gray-600">
+          <table className="w-full text-left text-xs border border-slate-200 rounded-2xl overflow-hidden">
+            <thead className="bg-slate-50 text-[10px] font-bold uppercase text-slate-600">
               <tr>
-                <th className="p-3 border">Net Quantity Category</th>
-                <th className="p-3 border">Normal Containers / Labels (mm)</th>
-                <th className="p-3 border">Blown / Formed / Moulded Containers (mm)</th>
+                <th className="p-3.5 border-b border-r border-slate-200">Net Quantity Category</th>
+                <th className="p-3.5 border-b border-r border-slate-200">Normal Containers / Labels (mm)</th>
+                <th className="p-3.5 border-b border-slate-200">Blown / Formed / Moulded Containers (mm)</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 font-medium text-gray-700">
+            <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
               {fontSlabs.map((slab, i) => (
-                <tr key={i} className="hover:bg-gray-50">
-                  <td className="p-3 border font-semibold text-gray-900">{slab.netQty}</td>
-                  <td className="p-3 border font-mono text-[#0051d5] font-bold">{slab.normalMm}</td>
-                  <td className="p-3 border font-mono text-purple-700 font-bold">{slab.blownMm}</td>
+                <tr key={i} className="hover:bg-slate-50/80 transition-colors">
+                  <td className="p-3.5 border-r border-slate-200 font-semibold text-slate-900">{slab.netQty}</td>
+                  <td className="p-3.5 border-r border-slate-200 font-mono text-[#0051d5] font-bold">{slab.normalMm}</td>
+                  <td className="p-3.5 font-mono text-purple-700 font-bold">{slab.blownMm}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
 
-        <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-200 text-[11px] text-amber-900 leading-relaxed flex items-center gap-2">
+        <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200 text-[11px] text-amber-900 leading-relaxed flex items-center gap-2.5">
           <AlertCircle className="w-4 h-4 text-amber-700 shrink-0" />
           <span>
-            <strong>Scientific Calibration Disclaimer:</strong> Automatic 2D camera pixel measurement of font height is an estimation aid. Official enforcement proceedings require certified physical scale calibration.
+            <strong>Scientific Calibration Notice:</strong> Automated 2D camera pixel measurement provides statutory estimation. Formal legal proceedings require certified physical scale verification by an authorized Legal Metrology Officer.
           </span>
         </div>
       </div>

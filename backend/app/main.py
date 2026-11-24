@@ -117,10 +117,13 @@ async def serve_dashboard():
 
 @app.get("/scan/new", response_class=FileResponse)
 async def serve_scan_new():
+    static_page = os.path.join(STATIC_DIR, "scan_new.html")
+    if os.path.exists(static_page):
+        return FileResponse(static_page)
     spa_index = os.path.join(FRONTEND_DIST, "index.html")
     if os.path.exists(spa_index):
         return FileResponse(spa_index)
-    return FileResponse(os.path.join(STATIC_DIR, "scan_new.html"))
+    return FileResponse(static_page)
 
 
 @app.get("/scan/{id}", response_class=FileResponse)

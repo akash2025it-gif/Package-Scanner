@@ -49,17 +49,34 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 1 day
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
-    # Initial Seed Passwords (configurable via environment, NO hardcoded production fallbacks)
-    DEFAULT_ADMIN_PASSWORD: Optional[str] = os.environ.get("DEFAULT_ADMIN_PASSWORD") or os.environ.get("ADMIN_INITIAL_PASSWORD")
-    DEFAULT_INSPECTOR_PASSWORD: Optional[str] = os.environ.get("DEFAULT_INSPECTOR_PASSWORD") or os.environ.get("INSPECTOR_INITIAL_PASSWORD")
+    # Initial Seed Credentials (must be explicitly provided via environment; NO hardcoded production fallbacks)
+    INITIAL_ADMIN_EMAIL: str = os.environ.get("INITIAL_ADMIN_EMAIL", "admin@packcheck.gov.in")
+    INITIAL_ADMIN_PASSWORD: Optional[str] = (
+        os.environ.get("INITIAL_ADMIN_PASSWORD") or os.environ.get("DEFAULT_ADMIN_PASSWORD") or os.environ.get("ADMIN_PASSWORD")
+    )
+    INITIAL_INSPECTOR_EMAIL: str = os.environ.get("INITIAL_INSPECTOR_EMAIL", "inspector.sharma@packcheck.gov.in")
+    INITIAL_INSPECTOR_PASSWORD: Optional[str] = (
+        os.environ.get("INITIAL_INSPECTOR_PASSWORD") or os.environ.get("DEFAULT_INSPECTOR_PASSWORD") or os.environ.get("INSPECTOR_PASSWORD")
+    )
+
+    # Aliases for backwards compatibility in existing codebase
+    @property
+    def DEFAULT_ADMIN_PASSWORD(self) -> Optional[str]:
+        return self.INITIAL_ADMIN_PASSWORD
+
+    @property
+    def DEFAULT_INSPECTOR_PASSWORD(self) -> Optional[str]:
+        return self.INITIAL_INSPECTOR_PASSWORD
 
     # Database
-    DATABASE_URL: str = os.environ.get("DATABASE_URL", DEFAULT_SQLITE_URL)
+    DATABASE_URL: str = os.environ.get("DATABASE_URL", "")
     DB_ECHO: bool = False
 
     @field_validator("SECRET_KEY", mode="before")
     @classmethod
     def validate_secret_key(cls, v: Optional[str]) -> str:
+        app_env = (os.environ.get("APP_ENV") or "").lower().strip()
+        is_production = (app_env == "production") or bool(os.environ.get("VERCEL"))
         val = (v or "").strip()
         
         insecure_keys = {
@@ -69,53 +86,84 @@ class Settings(BaseSettings):
             "changeme",
             "default",
             "admin",
+            "packcheck-dev-environment-secure-signing-key-32chars-min",
         }
         
-        if val:
-            if val in insecure_keys or len(val) < 32:
+        if is_production:
+            if not val:
+                raise ValueError(
+                    "CRITICAL CONFIGURATION ERROR: SECRET_KEY environment variable is missing. "
+                    "Production deployments require an explicitly configured, cryptographically strong SECRET_KEY "
+                    "of at least 32 characters/bytes (e.g., generated with 'openssl rand -hex 32'). "
+                    "Deterministic derivation and fallback keys are strictly prohibited in production."
+                )
+            if len(val) < 32 or val in insecure_keys:
                 raise ValueError(
                     "CRITICAL SECURITY CONFIGURATION: A cryptographically strong SECRET_KEY "
-                    "(minimum 32 characters) must be supplied and cannot match default keys."
+                    "(minimum 32 characters/bytes) must be supplied in production. "
+                    "Insecure, default, and short keys are rejected."
                 )
             return val
             
-        # When SECRET_KEY is not explicitly provided in environment variables,
-        # derive a deterministic 256-bit key from deployment metadata/host seed
-        # ensuring serverless boot resilience without hardcoding insecure plaintext keys
-        import hashlib
-        seed = os.environ.get("VERCEL_DEPLOYMENT_ID") or os.environ.get("VERCEL_URL") or "packcheck-secure-platform-seed"
-        derived_key = hashlib.sha256(f"packcheck-jwt-signing-key:{seed}".encode()).hexdigest()
-        return derived_key
+        # Development environment fallback only
+        if not val or val in insecure_keys:
+            return "packcheck-dev-environment-secure-signing-key-32chars-min"
+        return val
 
-    @field_validator("DEFAULT_ADMIN_PASSWORD", mode="before")
+    @field_validator("INITIAL_ADMIN_PASSWORD", mode="before")
     @classmethod
     def validate_admin_password(cls, v: Optional[str]) -> Optional[str]:
+        app_env = (os.environ.get("APP_ENV") or "").lower().strip()
+        is_production = (app_env == "production") or bool(os.environ.get("VERCEL"))
         val = (v or "").strip()
+        if is_production:
+            # In production, NO hardcoded fallback password is permitted
+            return val if val else None
+        # Local development fallback only
         return val if val else "admin123"
 
-    @field_validator("DEFAULT_INSPECTOR_PASSWORD", mode="before")
+    @field_validator("INITIAL_INSPECTOR_PASSWORD", mode="before")
     @classmethod
     def validate_inspector_password(cls, v: Optional[str]) -> Optional[str]:
+        app_env = (os.environ.get("APP_ENV") or "").lower().strip()
+        is_production = (app_env == "production") or bool(os.environ.get("VERCEL"))
         val = (v or "").strip()
+        if is_production:
+            # In production, NO hardcoded fallback password is permitted
+            return val if val else None
+        # Local development fallback only
         return val if val else "inspector123"
 
     @field_validator("DATABASE_URL", mode="before")
     @classmethod
     def validate_database_url(cls, v: Optional[str]) -> str:
+        app_env = (os.environ.get("APP_ENV") or "").lower().strip()
+        is_production = (app_env == "production") or bool(os.environ.get("VERCEL"))
         url = (v or "").strip()
-        if not url:
-            if os.environ.get("VERCEL"):
-                system_tmp = tempfile.gettempdir()
-                tmp_db = os.path.join(system_tmp, "packcheck.db")
-                return f"sqlite+aiosqlite:///{tmp_db.replace(chr(92), '/')}"
-            return DEFAULT_SQLITE_URL
+        
+        if is_production:
+            if not url:
+                raise ValueError(
+                    "CRITICAL CONFIGURATION ERROR: DATABASE_URL environment variable is missing. "
+                    "Production deployments (including Vercel) require a persistent PostgreSQL database connection string "
+                    "(e.g., 'postgresql+asyncpg://user:password@host:5432/dbname' or 'postgresql://...'). "
+                    "Silent fallback to ephemeral SQLite is strictly prohibited in production."
+                )
+            if url.startswith("sqlite") or "sqlite" in url:
+                raise ValueError(
+                    "CRITICAL CONFIGURATION ERROR: Ephemeral SQLite is strictly prohibited in production. "
+                    "A persistent external PostgreSQL connection is required via DATABASE_URL."
+                )
+        else:
+            if not url:
+                return DEFAULT_SQLITE_URL
         
         # Normalize Postgres dialects for SQLAlchemy asyncpg
         if url.startswith("postgres://"):
             url = url.replace("postgres://", "postgresql+asyncpg://", 1)
         elif url.startswith("postgresql://") and not url.startswith("postgresql+"):
             url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
-        # Normalize SQLite for aiosqlite
+        # Normalize SQLite for aiosqlite (development only)
         elif url.startswith("sqlite://") and not url.startswith("sqlite+"):
             url = url.replace("sqlite://", "sqlite+aiosqlite://", 1)
             

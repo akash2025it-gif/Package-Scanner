@@ -36,28 +36,60 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
   }, []);
 
+  // Validate and restore initial session on application boot/refresh
   useEffect(() => {
-    const verifyUser = async () => {
-      if (token) {
+    let isMounted = true;
+
+    const restoreSession = async () => {
+      const storedToken = localStorage.getItem('packcheck_token');
+      const storedUser = localStorage.getItem('packcheck_user');
+
+      if (storedToken) {
+        // Synchronously ensure user is restored from local storage if available
+        if (storedUser && isMounted) {
+          try {
+            setUser(JSON.parse(storedUser));
+          } catch {
+            // ignore parse failure
+          }
+        }
+
+        // Validate token with backend /auth/me
         try {
           const freshUser = await api.getCurrentUser();
-          setUser(freshUser);
-          localStorage.setItem('packcheck_user', JSON.stringify(freshUser));
+          if (isMounted) {
+            setUser(freshUser);
+            localStorage.setItem('packcheck_user', JSON.stringify(freshUser));
+          }
         } catch (err) {
-          console.warn('Failed to refresh user profile:', err);
+          console.warn('Session verification notice:', err);
         }
       }
-      setIsLoading(false);
+
+      if (isMounted) {
+        setIsLoading(false);
+      }
     };
-    verifyUser();
-  }, [token]);
+
+    restoreSession();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []); // Run once on initial application mount
 
   const login = async (email: string, password: string) => {
-    const data = await api.login(email, password);
-    setToken(data.access_token);
-    setUser(data.user);
-    localStorage.setItem('packcheck_token', data.access_token);
-    localStorage.setItem('packcheck_user', JSON.stringify(data.user));
+    setIsLoading(true);
+    try {
+      const data = await api.login(email, password);
+      // Synchronously store credentials before state updates to prevent race conditions
+      localStorage.setItem('packcheck_token', data.access_token);
+      localStorage.setItem('packcheck_user', JSON.stringify(data.user));
+      setToken(data.access_token);
+      setUser(data.user);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const logout = () => {

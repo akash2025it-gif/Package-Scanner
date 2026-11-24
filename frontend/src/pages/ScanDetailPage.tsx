@@ -20,6 +20,10 @@ import {
   Check,
   X,
   ExternalLink,
+  ChevronRight,
+  Sparkles,
+  Info,
+  Scale,
 } from 'lucide-react';
 
 export const ScanDetailPage: React.FC = () => {
@@ -37,6 +41,9 @@ export const ScanDetailPage: React.FC = () => {
     try {
       const data = await api.getScan(id);
       setScan(data);
+      if (data?.declarations?.length > 0 && !selectedFindingId) {
+        setSelectedFindingId(data.declarations[0].id);
+      }
       const logs = await api.getAuditTrail(id);
       setAuditLogs(logs || []);
     } catch (err: any) {
@@ -52,16 +59,22 @@ export const ScanDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="py-20 text-center text-xs text-gray-500">
-        Loading commodity inspection records...
+      <div className="py-24 text-center text-xs text-slate-500 space-y-2">
+        <div className="w-8 h-8 rounded-full border-2 border-[#0051d5] border-t-transparent animate-spin mx-auto" />
+        <p className="font-semibold text-slate-600">Retrieving statutory commodity inspection dossier...</p>
       </div>
     );
   }
 
   if (!scan) {
     return (
-      <div className="py-16 text-center text-xs text-red-600 bg-red-50 rounded-2xl p-6 border border-red-200">
-        Scan record not found or inaccessible.
+      <div className="py-16 text-center text-xs text-red-600 bg-red-50 rounded-3xl p-6 border border-red-200 max-w-xl mx-auto">
+        <AlertTriangle className="w-8 h-8 text-red-500 mx-auto mb-2" />
+        <h2 className="font-bold text-sm text-red-800">Inspection Record Not Found</h2>
+        <p className="text-red-600/90 mt-1">The requested scan ID does not exist or has expired.</p>
+        <Link to="/" className="mt-4 inline-block px-4 py-2 bg-[#0051d5] text-white rounded-xl font-bold">
+          Back to Overview
+        </Link>
       </div>
     );
   }
@@ -69,6 +82,7 @@ export const ScanDetailPage: React.FC = () => {
   const primaryImage = scan.images?.[0]?.image_url || '/logo.png';
   const barcodeInfo = scan.metadata_json?.barcode_info;
   const declarations = scan.declarations || [];
+  const selectedFinding = declarations.find((d) => d.id === selectedFindingId) || declarations[0] || null;
 
   const handleQuickReview = async (declId: string, action: 'confirm' | 'reject') => {
     if (!id) return;
@@ -95,7 +109,7 @@ export const ScanDetailPage: React.FC = () => {
 
   const handleFinalize = async () => {
     if (!id) return;
-    const confirm = window.confirm('Finalize inspection and record statutory determination?');
+    const confirm = window.confirm('Finalize inspection and record statutory determination under Legal Metrology Act, 2009?');
     if (!confirm) return;
     try {
       await api.finalizeScan(id);
@@ -111,26 +125,26 @@ export const ScanDetailPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Top Inspection Summary Header */}
-      <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2.5">
-            <h1 className="font-display font-extrabold text-xl text-gray-900 tracking-tight">
+          <div className="flex items-center gap-3">
+            <h1 className="font-display font-black text-xl sm:text-2xl text-slate-900 tracking-tight">
               {scan.product?.name || scan.location_name || 'Packaged Commodity Inspection'}
             </h1>
             <span
-              className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border uppercase ${
+              className={`px-3 py-1 rounded-full text-[10px] font-black border uppercase tracking-wide ${
                 scan.status === 'reviewed' || scan.status === 'closed'
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
                   : scan.status === 'failed'
-                  ? 'bg-red-50 text-red-700 border-red-200'
-                  : 'bg-amber-50 text-amber-700 border-amber-200'
+                  ? 'bg-red-50 text-red-700 border-red-300'
+                  : 'bg-amber-50 text-amber-700 border-amber-300'
               }`}
             >
               {scan.status.replace('_', ' ')}
             </span>
           </div>
-          <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 mt-1">
-            <span className="font-mono text-gray-400">ID: {scan.id}</span>
+          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 mt-1.5 font-medium">
+            <span className="font-mono text-slate-400">ID: {scan.id.slice(0, 16)}...</span>
             <span>•</span>
             <span>Batch: {scan.batch_number || 'N/A'}</span>
             <span>•</span>
@@ -138,18 +152,18 @@ export const ScanDetailPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           <Link
-            to={`/reports`}
-            className="px-3.5 py-2 rounded-xl border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold text-xs flex items-center gap-1.5 transition-colors"
+            to="/reports"
+            className="px-4 py-2.5 rounded-2xl border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs flex items-center gap-2 transition-colors shadow-2xs"
           >
             <Download className="w-3.5 h-3.5 text-[#0051d5]" />
-            <span>Generate Report</span>
+            <span>Generate Dossier</span>
           </Link>
           {canScan && !isFinalized && (
             <button
               onClick={handleFinalize}
-              className="px-4 py-2 rounded-xl bg-[#0051d5] hover:bg-[#003ea7] text-white font-bold text-xs shadow-sm transition-all"
+              className="px-5 py-2.5 rounded-2xl bg-[#0051d5] hover:bg-[#003ea7] text-white font-bold text-xs shadow-md transition-all cursor-pointer"
             >
               Finalize Inspection
             </button>
@@ -158,16 +172,16 @@ export const ScanDetailPage: React.FC = () => {
       </div>
 
       {actionMessage && (
-        <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs flex items-center gap-2">
+        <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-xs flex items-center gap-2.5 shadow-2xs">
           <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span>{actionMessage}</span>
+          <span className="font-semibold">{actionMessage}</span>
         </div>
       )}
 
       {/* Two-Column Inspection Interface */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column (7 cols): Interactive Photographic Canvas */}
-        <div className="lg:col-span-7 h-[580px]">
+        <div className="lg:col-span-7 h-[580px] bg-slate-900 rounded-3xl overflow-hidden shadow-md">
           <ImageCanvas
             imageUrl={primaryImage}
             declarations={declarations}
@@ -180,42 +194,47 @@ export const ScanDetailPage: React.FC = () => {
         {/* Right Column (5 cols): Product Details & QR/Barcode Decoded Info */}
         <div className="lg:col-span-5 space-y-4">
           {/* Commodity Details Card */}
-          <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-xs space-y-3">
-            <h2 className="font-display font-bold text-sm text-gray-900 border-b border-gray-100 pb-2">
-              Packaged Commodity Profile
-            </h2>
+          <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-2xs space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <h2 className="font-display font-bold text-sm text-slate-900">
+                Packaged Commodity Profile
+              </h2>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-[#0051d5]">
+                Verified Metadata
+              </span>
+            </div>
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div>
-                <span className="text-gray-400 block text-[11px]">Commodity / Brand</span>
-                <span className="font-bold text-gray-800">{scan.product?.name || 'Unlabeled Sample'}</span>
+                <span className="text-slate-400 block text-[10px] font-semibold">Commodity / Brand</span>
+                <span className="font-bold text-slate-800">{scan.product?.name || 'Unlabeled Sample'}</span>
               </div>
               <div>
-                <span className="text-gray-400 block text-[11px]">Category</span>
-                <span className="font-bold text-gray-800">{scan.product?.category || 'Pre-packaged Food / Goods'}</span>
+                <span className="text-slate-400 block text-[10px] font-semibold">Category</span>
+                <span className="font-bold text-slate-800">{scan.product?.category || 'Pre-packaged Food / Goods'}</span>
               </div>
               <div>
-                <span className="text-gray-400 block text-[11px]">Declared MRP</span>
-                <span className="font-bold text-gray-800">
+                <span className="text-slate-400 block text-[10px] font-semibold">Declared MRP</span>
+                <span className="font-bold text-slate-800">
                   {scan.product?.mrp ? `₹ ${scan.product.mrp}` : '—'}
                 </span>
               </div>
               <div>
-                <span className="text-gray-400 block text-[11px]">Net Quantity</span>
-                <span className="font-bold text-gray-800">{scan.product?.net_quantity || '—'}</span>
+                <span className="text-slate-400 block text-[10px] font-semibold">Net Quantity</span>
+                <span className="font-bold text-slate-800">{scan.product?.net_quantity || '—'}</span>
               </div>
               <div className="col-span-2">
-                <span className="text-gray-400 block text-[11px]">Manufacturer / Packer</span>
-                <span className="font-bold text-gray-800">{scan.product?.manufacturer_name || '—'}</span>
+                <span className="text-slate-400 block text-[10px] font-semibold">Manufacturer / Packer</span>
+                <span className="font-bold text-slate-800">{scan.product?.manufacturer_name || '—'}</span>
               </div>
             </div>
           </div>
 
           {/* QR & Barcode Detection Card */}
-          <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-xs space-y-3">
-            <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+          <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-2xs space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
               <div className="flex items-center gap-2">
                 <QrCode className="w-4 h-4 text-purple-700" />
-                <h2 className="font-display font-bold text-sm text-gray-900">QR & Barcode Evidence</h2>
+                <h2 className="font-display font-bold text-sm text-slate-900">QR & Barcode Evidence</h2>
               </div>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
                 {barcodeInfo?.total_detected ? `${barcodeInfo.total_detected} Detected` : 'None Detected'}
@@ -225,12 +244,12 @@ export const ScanDetailPage: React.FC = () => {
             {barcodeInfo?.items && barcodeInfo.items.length > 0 ? (
               <div className="space-y-2 text-xs">
                 {barcodeInfo.items.map((item, idx) => (
-                  <div key={idx} className="p-3 bg-purple-50/40 rounded-xl border border-purple-100 space-y-1">
+                  <div key={idx} className="p-3 bg-purple-50/40 rounded-2xl border border-purple-100 space-y-1">
                     <div className="flex items-center justify-between font-bold text-purple-950">
                       <span>{item.type} ({item.format})</span>
                       <span className="text-[10px] text-purple-700 font-mono">Conf: {(item.confidence * 100).toFixed(0)}%</span>
                     </div>
-                    <div className="font-mono text-[11px] text-gray-700 break-all select-all">
+                    <div className="font-mono text-[11px] text-slate-700 break-all select-all">
                       {item.raw_content}
                     </div>
                     {item.is_url && item.url_safety && (
@@ -254,47 +273,110 @@ export const ScanDetailPage: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-gray-400 py-2">
+              <p className="text-xs text-slate-400 py-2">
                 No 2D QR codes or 1D retail barcodes were recognized on the photographed packaging surface.
               </p>
             )}
 
-            <div className="p-2.5 rounded-xl bg-gray-50 text-[10px] text-gray-500 leading-tight">
+            <div className="p-2.5 rounded-2xl bg-slate-50 text-[10px] text-slate-500 leading-tight">
               <strong>Notice:</strong> QR codes and barcodes serve as supplementary cross-checks. Decoded data does not replace required on-pack text declarations under Rule 6.
             </div>
           </div>
         </div>
       </div>
 
-      {/* Detailed Compliance Findings Table (Below Panels) */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden">
-        <div className="p-5 border-b border-gray-200 flex items-center justify-between">
+      {/* Selected Declaration Inspector Detail Card */}
+      {selectedFinding && (
+        <div className="bg-gradient-to-r from-blue-50/90 via-indigo-50/60 to-white rounded-3xl border border-blue-200/80 p-6 shadow-2xs space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-blue-200/60 pb-3">
+            <div className="flex items-center gap-2.5">
+              <Scale className="w-5 h-5 text-[#0051d5]" />
+              <div>
+                <span className="text-[10px] uppercase font-mono font-bold text-[#0051d5]">Selected Finding Focus</span>
+                <h3 className="font-display font-black text-base text-slate-900 capitalize">
+                  {selectedFinding.field_type.replace('_', ' ')}
+                </h3>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span
+                className={`px-3 py-1 rounded-full text-[10px] font-black border uppercase ${
+                  selectedFinding.is_compliant
+                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                    : selectedFinding.severity === 'needs_review'
+                    ? 'bg-amber-100 text-amber-800 border-amber-300'
+                    : 'bg-red-100 text-red-800 border-red-300'
+                }`}
+              >
+                {selectedFinding.is_compliant ? 'COMPLIANT' : selectedFinding.severity === 'needs_review' ? 'NEEDS REVIEW' : 'NON-COMPLIANT'}
+              </span>
+              <button
+                type="button"
+                onClick={() => setEditingFinding(selectedFinding)}
+                className="px-3 py-1 bg-white border border-blue-300 rounded-xl text-xs font-bold text-[#0051d5] hover:bg-blue-50 transition-colors flex items-center gap-1 shadow-2xs cursor-pointer"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                <span>Override Finding</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs pt-1">
+            <div className="space-y-1">
+              <span className="font-bold text-slate-600 text-[11px] block">Extracted Package Value:</span>
+              <div className="p-2.5 rounded-xl bg-white border border-slate-200 font-mono text-[11px] text-slate-800 break-words">
+                {selectedFinding.extracted_text || <span className="text-slate-400 italic font-sans">[Not detected on package]</span>}
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <span className="font-bold text-slate-600 text-[11px] block">Statutory Reference:</span>
+              <div className="p-2.5 rounded-xl bg-white border border-slate-200 text-[11px] text-slate-800 font-medium">
+                {selectedFinding.rule_reference}
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <span className="font-bold text-slate-600 text-[11px] block">OCR Confidence & Severity:</span>
+              <div className="p-2.5 rounded-xl bg-white border border-slate-200 text-[11px] text-slate-800 flex items-center justify-between">
+                <span>Confidence: <strong>{(selectedFinding.confidence_score * 100).toFixed(0)}%</strong></span>
+                <span className="capitalize font-bold text-slate-600">Level: {selectedFinding.severity}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Detailed Compliance Findings Table */}
+      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-2xs overflow-hidden">
+        <div className="p-5 border-b border-slate-200 flex items-center justify-between">
           <div>
-            <h2 className="font-display font-bold text-sm text-gray-900">
+            <h2 className="font-display font-bold text-sm text-slate-900">
               Statutory Declarations Audit & Rule Findings
             </h2>
-            <p className="text-[11px] text-gray-500">
-              Deterministic verification against Legal Metrology (Packaged Commodities) Rules, 2011
+            <p className="text-[11px] text-slate-500">
+              Deterministic verification against Legal Metrology (Packaged Commodities) Rules, 2011 (Click any row to inspect in detail)
             </p>
           </div>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] font-bold tracking-wider border-b border-gray-200">
+            <thead className="bg-slate-50/80 text-slate-500 uppercase text-[10px] font-bold tracking-wider border-b border-slate-200">
               <tr>
-                <th className="py-3 px-4">Mandatory Declaration</th>
-                <th className="py-3 px-4">Extracted Value / Evidence</th>
-                <th className="py-3 px-4">Statutory Reference</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4">Confidence</th>
-                <th className="py-3 px-4 text-right">Officer Actions</th>
+                <th className="py-3.5 px-5">Mandatory Declaration</th>
+                <th className="py-3.5 px-4">Extracted Text</th>
+                <th className="py-3.5 px-4">Statutory Reference</th>
+                <th className="py-3.5 px-4">Status</th>
+                <th className="py-3.5 px-4">Confidence</th>
+                <th className="py-3.5 px-5 text-right">Officer Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 font-medium text-gray-700">
+            <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
               {declarations.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-gray-400 text-xs">
+                  <td colSpan={6} className="py-8 text-center text-slate-400 text-xs">
                     No declaration findings available for this scan.
                   </td>
                 </tr>
@@ -329,29 +411,29 @@ export const ScanDetailPage: React.FC = () => {
                       key={decl.id}
                       onClick={() => setSelectedFindingId(decl.id)}
                       className={`cursor-pointer transition-colors ${
-                        isSelected ? 'bg-blue-50/70' : 'hover:bg-gray-50/80'
+                        isSelected ? 'bg-blue-50/70 font-semibold' : 'hover:bg-slate-50/80'
                       }`}
                     >
-                      <td className="py-3 px-4 font-bold text-gray-900 capitalize">
+                      <td className="py-3.5 px-5 font-bold text-slate-900 capitalize">
                         {decl.field_type.replace('_', ' ')}
                       </td>
-                      <td className="py-3 px-4 font-mono text-[11px] text-gray-800 max-w-[240px] truncate">
-                        {decl.extracted_text || <span className="text-gray-400 italic font-sans">[Not detected on package]</span>}
+                      <td className="py-3.5 px-4 font-mono text-[11px] text-slate-800 max-w-[240px] truncate">
+                        {decl.extracted_text || <span className="text-slate-400 italic font-sans">[Not detected on package]</span>}
                       </td>
-                      <td className="py-3 px-4 text-gray-500 text-[11px] max-w-[200px] truncate">
+                      <td className="py-3.5 px-4 text-slate-500 text-[11px] max-w-[200px] truncate">
                         {decl.rule_reference}
                       </td>
-                      <td className="py-3 px-4">{badge}</td>
-                      <td className="py-3 px-4 font-mono text-gray-500">
+                      <td className="py-3.5 px-4">{badge}</td>
+                      <td className="py-3.5 px-4 font-mono text-slate-500">
                         {(decl.confidence_score * 100).toFixed(0)}%
                       </td>
-                      <td className="py-3 px-4 text-right">
+                      <td className="py-3.5 px-5 text-right">
                         <div className="inline-flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                           <button
                             type="button"
                             onClick={() => handleQuickReview(decl.id, 'confirm')}
                             title="Confirm finding"
-                            className="p-1 rounded-md text-emerald-600 hover:bg-emerald-50 border border-emerald-200"
+                            className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 border border-emerald-200 transition-colors"
                           >
                             <Check className="w-3.5 h-3.5" />
                           </button>
@@ -359,7 +441,7 @@ export const ScanDetailPage: React.FC = () => {
                             type="button"
                             onClick={() => handleQuickReview(decl.id, 'reject')}
                             title="Reject finding"
-                            className="p-1 rounded-md text-red-600 hover:bg-red-50 border border-red-200"
+                            className="p-1.5 rounded-lg text-red-600 hover:bg-red-50 border border-red-200 transition-colors"
                           >
                             <X className="w-3.5 h-3.5" />
                           </button>
@@ -367,7 +449,7 @@ export const ScanDetailPage: React.FC = () => {
                             type="button"
                             onClick={() => setEditingFinding(decl)}
                             title="Manual correction"
-                            className="p-1 rounded-md text-[#0051d5] hover:bg-blue-50 border border-blue-200"
+                            className="p-1.5 rounded-lg text-[#0051d5] hover:bg-blue-50 border border-blue-200 transition-colors"
                           >
                             <Edit3 className="w-3.5 h-3.5" />
                           </button>
@@ -383,24 +465,24 @@ export const ScanDetailPage: React.FC = () => {
       </div>
 
       {/* Immutable Audit Trail Section */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-xs p-5 space-y-3">
-        <div className="flex items-center gap-2 border-b border-gray-100 pb-2">
-          <History className="w-4 h-4 text-gray-500" />
-          <h2 className="font-display font-bold text-sm text-gray-900">Inspection Audit Trail</h2>
+      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-2xs p-5 space-y-3">
+        <div className="flex items-center gap-2 border-b border-slate-100 pb-2.5">
+          <History className="w-4 h-4 text-slate-500" />
+          <h2 className="font-display font-bold text-sm text-slate-900">Inspection Audit Trail</h2>
         </div>
         <div className="space-y-2 text-xs">
           {auditLogs.length === 0 ? (
-            <p className="text-gray-400 py-2">No audit records logged yet.</p>
+            <p className="text-slate-400 py-2">No audit records logged yet.</p>
           ) : (
             auditLogs.map((log) => (
-              <div key={log.id} className="p-2.5 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-between">
+              <div key={log.id} className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between">
                 <div>
-                  <span className="font-bold text-gray-900">{log.action}</span>
-                  <span className="text-gray-500 ml-2 font-mono text-[11px]">
+                  <span className="font-bold text-slate-900">{log.action}</span>
+                  <span className="text-slate-500 ml-2 font-mono text-[11px]">
                     {log.metadata ? JSON.stringify(log.metadata) : ''}
                   </span>
                 </div>
-                <span className="text-[10px] text-gray-400 whitespace-nowrap">
+                <span className="text-[10px] text-slate-400 whitespace-nowrap">
                   {new Date(log.created_at).toLocaleString('en-IN')}
                 </span>
               </div>

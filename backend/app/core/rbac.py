@@ -48,6 +48,11 @@ async def get_current_user(
     
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
+
+    # Fallback to verified signed email if user was migrated or re-seeded
+    if not user and payload.get("email"):
+        result = await db.execute(select(User).where(User.email == payload.get("email")))
+        user = result.scalar_one_or_none()
     
     if not user:
         raise UnauthorizedException("User not found or deactivated")
